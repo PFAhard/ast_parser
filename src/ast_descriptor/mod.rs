@@ -1,12 +1,12 @@
 use super::ast_specs::directives::{FunctionDefinition, VariableDeclaration};
 use std::fmt::Write;
 
-pub(crate) trait AstDescriptor {
+pub trait AstDescriptor {
     fn describe(&self, desc: DescType) -> String;
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum DescType {
+pub enum DescType {
     Action,
     Entity,
 }
@@ -77,20 +77,5 @@ impl<T: AstDescriptor> AstDescriptor for &[T] {
 impl<T: AstDescriptor> AstDescriptor for &T {
     fn describe(&self, desc: DescType) -> String {
         (*self).describe(desc)
-    }
-}
-
-pub mod tests {
-    use crate::ast_parser::{
-        ast_descriptor::{AstDescriptor, DescType},
-        ast_specs::directives::FunctionDefinition,
-    };
-
-    const TEST_TEXT: &str = include_str!("..\\..\\..\\data\\tests\\function_definition.json");
-
-    #[test]
-    fn test_descriptor() {
-        let ast_fun_def = serde_json::from_str::<FunctionDefinition>(TEST_TEXT).unwrap();
-        println!("{}", ast_fun_def.describe(DescType::Entity));
     }
 }

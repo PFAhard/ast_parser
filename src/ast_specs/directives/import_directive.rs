@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ImportDirective {
+pub struct ImportDirective {
     #[serde(rename = "absolutePath")]
     absolute_path: String,
     file: String,
@@ -20,11 +20,11 @@ pub(crate) struct ImportDirective {
 }
 
 impl ImportDirective {
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn symbol_aliases(&self) -> &serde_json::Value {
+    pub fn symbol_aliases(&self) -> &serde_json::Value {
         #[cfg(debug_assertions)]
         eprintln!("[DEBUG] Symbol aliases are not yet supported");
         &self.symbol_aliases

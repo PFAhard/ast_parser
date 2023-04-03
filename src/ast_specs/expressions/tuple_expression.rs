@@ -1,12 +1,12 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::TypeDescriptions;
+use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct TupleExpression {
+pub struct TupleExpression {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     components: Vec<Expression>,
@@ -27,15 +27,15 @@ pub(crate) struct TupleExpression {
 }
 
 impl TupleExpression {
-    pub(crate) fn components(&self) -> &[Expression] {
+    pub fn components(&self) -> &[Expression] {
         self.components.as_ref()
     }
 
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

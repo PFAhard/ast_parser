@@ -1,11 +1,11 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::Expression;
+use crate::ast_specs::Expression;
 
 use super::{Body, ExpressionStatement, VariableDeclarationStatement};
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ForStatement {
+pub struct ForStatement {
     body: Box<Body>,
     condition: Option<Expression>,
     documentation: Option<String>,
@@ -18,30 +18,30 @@ pub(crate) struct ForStatement {
 }
 
 impl ForStatement {
-    pub(crate) fn body(&self) -> &Body {
+    pub fn body(&self) -> &Body {
         self.body.as_ref()
     }
 
-    pub(crate) fn condition(&self) -> Option<&Expression> {
+    pub fn condition(&self) -> Option<&Expression> {
         self.condition.as_ref()
     }
 
-    pub(crate) fn initialization_expression(&self) -> Option<&InitializationExpression> {
+    pub fn initialization_expression(&self) -> Option<&InitializationExpression> {
         self.initialization_expression.as_ref()
     }
 
-    pub(crate) fn loop_expression(&self) -> Option<&ExpressionStatement> {
+    pub fn loop_expression(&self) -> Option<&ExpressionStatement> {
         self.loop_expression.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum InitializationExpression {
+pub enum InitializationExpression {
     ExpressionStatement(ExpressionStatement),
     VariableDeclarationStatement(VariableDeclarationStatement),
 }

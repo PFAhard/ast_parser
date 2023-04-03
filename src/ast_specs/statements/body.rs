@@ -1,12 +1,16 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::Block;
+use crate::ast_specs::common::Block;
 
-use super::{Statement, Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement, IfStatement, PlaceholderStatement, Return, RevertStatement, TryStatement, UncheckedBlock, VariableDeclarationStatement, WhileStatement};
+use super::{
+    Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement,
+    IfStatement, PlaceholderStatement, Return, RevertStatement, TryStatement, UncheckedBlock,
+    VariableDeclarationStatement, WhileStatement,
+};
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum Body {
+pub enum Body {
     Block(Block),
     Break(Break),
     Continue(Continue),

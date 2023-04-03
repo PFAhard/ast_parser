@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::{directives::VariableDeclaration, Expression};
+use crate::ast_specs::{directives::VariableDeclaration, Expression};
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct VariableDeclarationStatement {
+pub struct VariableDeclarationStatement {
     assignments: Vec<Option<isize>>,
     declarations: Vec<Option<VariableDeclaration>>,
     documentation: Option<String>,
@@ -14,15 +14,15 @@ pub(crate) struct VariableDeclarationStatement {
 }
 
 impl VariableDeclarationStatement {
-    pub(crate) fn initial_value(&self) -> Option<&Expression> {
+    pub fn initial_value(&self) -> Option<&Expression> {
         self.initial_value.as_ref()
     }
 
-    pub(crate) fn declarations(&self) -> &[Option<VariableDeclaration>] {
+    pub fn declarations(&self) -> &[Option<VariableDeclaration>] {
         self.declarations.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

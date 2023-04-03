@@ -1,12 +1,12 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::Expression;
+use crate::ast_specs::Expression;
 
 use super::FalseBody;
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct IfStatement {
+pub struct IfStatement {
     condition: Expression,
     documentation: Option<String>,
     #[serde(rename = "falseBody")]
@@ -18,19 +18,19 @@ pub(crate) struct IfStatement {
 }
 
 impl IfStatement {
-    pub(crate) fn condition(&self) -> &Expression {
+    pub fn condition(&self) -> &Expression {
         &self.condition
     }
 
-    pub(crate) fn false_body(&self) -> Option<&FalseBody> {
+    pub fn false_body(&self) -> Option<&FalseBody> {
         self.false_body.as_deref()
     }
 
-    pub(crate) fn true_body(&self) -> &FalseBody {
+    pub fn true_body(&self) -> &FalseBody {
         self.true_body.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

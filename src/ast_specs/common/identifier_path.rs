@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct IdentifierPath {
+pub struct IdentifierPath {
     id: isize,
     name: String,
     #[serde(rename = "nameLocations")]
@@ -12,11 +12,11 @@ pub(crate) struct IdentifierPath {
 }
 
 impl IdentifierPath {
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn referenced_declaration(&self) -> isize {
+    pub fn referenced_declaration(&self) -> isize {
         self.referenced_declaration
     }
 }

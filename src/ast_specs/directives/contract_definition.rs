@@ -1,12 +1,12 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::{
+use crate::ast_specs::{
     common::{InheritanceSpecifier, StructuredDocumentation},
     BaseNode,
 };
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ContractDefinition {
+pub struct ContractDefinition {
     #[serde(rename = "abstract")]
     _abstract: bool,
     #[serde(rename = "baseContracts")]
@@ -34,33 +34,33 @@ pub(crate) struct ContractDefinition {
 }
 
 impl ContractDefinition {
-    pub(crate) fn nodes(&self) -> &[BaseNode] {
+    pub fn nodes(&self) -> &[BaseNode] {
         self.nodes.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn is_in_used_errors(&self, id: isize) -> bool {
+    pub fn is_in_used_errors(&self, id: isize) -> bool {
         self.used_errors.iter().any(|ex_id| ex_id == &id)
     }
 
-    pub(crate) fn used_errors(&self) -> &[isize] {
+    pub fn used_errors(&self) -> &[isize] {
         self.used_errors.as_ref()
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         self.name.as_ref()
     }
 
-    pub(crate) fn contract_kind(&self) -> &ContractKind {
+    pub fn contract_kind(&self) -> &ContractKind {
         &self.contract_kind
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum ContractKind {
+pub enum ContractKind {
     #[serde(rename = "contract")]
     Contract,
     #[serde(rename = "interface")]

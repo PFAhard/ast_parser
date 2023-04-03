@@ -1,11 +1,11 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::TypeDescriptions;
+use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct IndexAccess {
+pub struct IndexAccess {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     #[serde(rename = "baseExpression")]
@@ -27,15 +27,15 @@ pub(crate) struct IndexAccess {
 }
 
 impl IndexAccess {
-    pub(crate) fn base_expression(&self) -> &Expression {
+    pub fn base_expression(&self) -> &Expression {
         self.base_expression.as_ref()
     }
 
-    pub(crate) fn index_expression(&self) -> Option<&Expression> {
+    pub fn index_expression(&self) -> Option<&Expression> {
         self.index_expression.as_deref()
     }
 
-    pub(crate) fn as_name(&self) -> String {
+    pub fn as_name(&self) -> String {
         let name = self.base_expression.extract_name();
         let index = match self.index_expression() {
             Some(index) => index.extract_name(),
@@ -45,11 +45,11 @@ impl IndexAccess {
         format!("{name}[{index}]")
     }
 
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

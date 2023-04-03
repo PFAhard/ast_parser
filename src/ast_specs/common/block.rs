@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::Statement;
+use crate::ast_specs::Statement;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct Block {
+pub struct Block {
     documentation: Option<String>,
     id: isize,
     src: String,
@@ -11,15 +11,15 @@ pub(crate) struct Block {
 }
 
 impl Block {
-    pub(crate) fn statements(&self) -> Option<&[Statement]> {
+    pub fn statements(&self) -> Option<&[Statement]> {
         self.statements.as_deref()
     }
 
-    pub(crate) fn src(&self) -> &str {
+    pub fn src(&self) -> &str {
         self.src.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

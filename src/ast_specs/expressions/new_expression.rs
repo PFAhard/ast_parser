@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{TypeDescriptions, TypeName};
+use crate::ast_specs::common::{TypeDescriptions, TypeName};
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct NewExpression {
+pub struct NewExpression {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     id: isize,
@@ -23,19 +23,19 @@ pub(crate) struct NewExpression {
 }
 
 impl NewExpression {
-    pub(crate) fn name(&self) -> String {
+    pub fn name(&self) -> String {
         format!("new {}", self.type_name().name())
     }
 
-    pub(crate) fn type_name(&self) -> &TypeName {
+    pub fn type_name(&self) -> &TypeName {
         &self.type_name
     }
 
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

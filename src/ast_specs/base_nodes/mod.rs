@@ -4,11 +4,11 @@ mod prelude;
 
 use serde::Deserialize;
 
-pub(crate) use prelude::*;
+pub use prelude::*;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum BaseNode {
+pub enum BaseNode {
     EnumDefinition(EnumDefinition),
     ErrorDefinition(ErrorDefinition),
     FunctionDefinition(FunctionDefinition),

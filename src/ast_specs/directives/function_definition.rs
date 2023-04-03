@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{
+use crate::ast_specs::common::{
     Block, ModifierInvocation, OverrideSpecifier, ParameterList, StateMutability,
     StructuredDocumentation, Visibility,
 };
@@ -8,7 +8,7 @@ use crate::ast_parser::ast_specs::common::{
 use super::prelude::VariableDeclaration;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct FunctionDefinition {
+pub struct FunctionDefinition {
     #[serde(rename = "baseFunctions")]
     base_functions: Option<Vec<isize>>,
     body: Option<Block>,
@@ -36,49 +36,49 @@ pub(crate) struct FunctionDefinition {
 }
 
 impl FunctionDefinition {
-    pub(crate) fn body(&self) -> Option<&Block> {
+    pub fn body(&self) -> Option<&Block> {
         self.body.as_ref()
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         self.name.as_ref()
     }
 
-    pub(crate) fn src(&self) -> &str {
+    pub fn src(&self) -> &str {
         self.src.as_ref()
     }
 
-    pub(crate) fn parameters(&self) -> Option<&[VariableDeclaration]> {
+    pub fn parameters(&self) -> Option<&[VariableDeclaration]> {
         self.parameters.as_ref().map(|p| p.parameters())
     }
 
-    pub(crate) fn return_parameters(&self) -> Option<&[VariableDeclaration]> {
+    pub fn return_parameters(&self) -> Option<&[VariableDeclaration]> {
         self.return_parameters.as_ref().map(|r| r.parameters())
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn is_id(&self, id: isize) -> bool {
+    pub fn is_id(&self, id: isize) -> bool {
         self.id == id
     }
 
-    pub(crate) fn modifiers(&self) -> &[ModifierInvocation] {
+    pub fn modifiers(&self) -> &[ModifierInvocation] {
         self.modifiers.as_ref()
     }
 
-    pub(crate) fn overrides(&self) -> Option<&OverrideSpecifier> {
+    pub fn overrides(&self) -> Option<&OverrideSpecifier> {
         self.overrides.as_ref()
     }
 
-    pub(crate) fn scope(&self) -> isize {
+    pub fn scope(&self) -> isize {
         self.scope
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum FunctionKind {
+pub enum FunctionKind {
     #[serde(rename = "function")]
     Function,
     #[serde(rename = "receive")]

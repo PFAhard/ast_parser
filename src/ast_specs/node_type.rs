@@ -29,16 +29,16 @@ macro_rules! cast_node_type {
     ($target: expr, $pat: path) => {{
         if let $pat(a) = $target {
             // #1
-            Ok(a)
+            /* Ok( */a/* ) */
         } else {
-            Err(crate::SuasError::node_type_internal_cast())
-            // panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
+            // Err(crate::SuasError::node_type_internal_cast())
+            panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
         }
     }};
 }
 
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum NodeType {
+pub enum NodeType {
     ArrayTypeName,
     Assignment,
     BinaryOperation,
@@ -176,7 +176,7 @@ impl From<&str> for NodeType {
 }
 
 #[derive(Debug)]
-pub(crate) enum NodeTypeInternal {
+pub enum NodeTypeInternal {
     ArrayTypeName(ArrayTypeName),
     Assignment(Assignment),
     BinaryOperation(BinaryOperation),
@@ -236,35 +236,35 @@ pub(crate) enum NodeTypeInternal {
 }
 
 impl NodeTypeInternal {
-    pub(crate) fn import_directive(self) -> crate::Result<ImportDirective> {
+    pub fn import_directive(self) -> /* crate::Result< */ImportDirective/* > */ {
         cast_node_type!(self, NodeTypeInternal::ImportDirective)
     }
 
-    pub(crate) fn variable_declaration(self) -> crate::Result<VariableDeclaration> {
+    pub fn variable_declaration(self) -> /* crate::Result< */VariableDeclaration/* > */ {
         cast_node_type!(self, NodeTypeInternal::VariableDeclaration)
     }
 
-    pub(crate) fn identifier(self) -> crate::Result<Identifier> {
+    pub fn identifier(self) -> /* crate::Result< */Identifier/* > */ {
         cast_node_type!(self, NodeTypeInternal::Identifier)
     }
 
-    pub(crate) fn block(self) -> crate::Result<Block> {
+    pub fn block(self) -> /* crate::Result< */Block/* > */ {
         cast_node_type!(self, NodeTypeInternal::Block)
     }
 
-    pub(crate) fn modifier_definition(self) -> crate::Result<ModifierDefinition> {
+    pub fn modifier_definition(self) -> /* crate::Result< */ModifierDefinition/* > */ {
         cast_node_type!(self, NodeTypeInternal::ModifierDefinition)
     }
 
-    pub(crate) fn contract_definition(self) -> crate::Result<ContractDefinition> {
+    pub fn contract_definition(self) -> /* crate::Result< */ContractDefinition/* > */ {
         cast_node_type!(self, NodeTypeInternal::ContractDefinition)
     }
 
-    pub(crate) fn function_call(self) -> crate::Result<FunctionCall> {
+    pub fn function_call(self) -> /* crate::Result< */FunctionCall/* > */ {
         cast_node_type!(self, NodeTypeInternal::FunctionCall)
     }
 
-    pub(crate) fn function_definition(self) -> crate::Result<FunctionDefinition> {
+    pub fn function_definition(self) -> /* crate::Result< */FunctionDefinition/* > */ {
         cast_node_type!(self, NodeTypeInternal::FunctionDefinition)
     }
 }

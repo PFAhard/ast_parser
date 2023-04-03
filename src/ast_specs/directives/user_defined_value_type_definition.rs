@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::TypeName;
+use crate::ast_specs::common::TypeName;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct UserDefinedValueTypeDefinition {
+pub struct UserDefinedValueTypeDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,
     id: isize,
@@ -16,11 +16,11 @@ pub(crate) struct UserDefinedValueTypeDefinition {
 }
 
 impl UserDefinedValueTypeDefinition {
-    pub(crate) fn underlying_type(&self) -> &TypeName {
+    pub fn underlying_type(&self) -> &TypeName {
         &self.underlying_type
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

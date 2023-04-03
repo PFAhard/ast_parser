@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct EnumDefinition {
+pub struct EnumDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,
     id: isize,
@@ -13,17 +13,17 @@ pub(crate) struct EnumDefinition {
 }
 
 impl EnumDefinition {
-    pub(crate) fn members(&self) -> &[EnumValue] {
+    pub fn members(&self) -> &[EnumValue] {
         self.members.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct EnumValue {
+pub struct EnumValue {
     id: isize,
     name: String,
     #[serde(rename = "nameLocation")]
@@ -32,7 +32,7 @@ pub(crate) struct EnumValue {
 }
 
 impl EnumValue {
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

@@ -1,10 +1,10 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{TypeDescriptions, LiteralKind};
+use crate::ast_specs::common::{TypeDescriptions, LiteralKind};
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct Literal {
+pub struct Literal {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     #[serde(rename = "hexValue")]
@@ -28,19 +28,19 @@ pub(crate) struct Literal {
 }
 
 impl Literal {
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn value(&self) -> Option<&String> {
+    pub fn value(&self) -> Option<&String> {
         self.value.as_ref()
     }
 
-    pub(crate) fn as_name(&self) -> &str {
+    pub fn as_name(&self) -> &str {
         match &self.value {
             Some(value) => value,
             None => todo!(),

@@ -1,15 +1,15 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::SourceUnit;
+use crate::ast_specs::SourceUnit;
 
 
 #[derive(Deserialize, Debug)]
-pub(crate) struct FoundryOutput {
+pub struct FoundryOutput {
     ast: SourceUnit,
 }
 
 impl FoundryOutput {
-    pub(crate) fn ast(&self) -> &SourceUnit {
+    pub fn ast(&self) -> &SourceUnit {
         &self.ast
     }
 }

@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::{
+use crate::ast_specs::{
     common::{
         Mutability, OverrideSpecifier, StorageLocation, StructuredDocumentation, TypeDescriptions,
         TypeName, Visibility,
@@ -9,7 +9,7 @@ use crate::ast_parser::ast_specs::{
 };
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct VariableDeclaration {
+pub struct VariableDeclaration {
     #[serde(rename = "baseFunctions")]
     base_functions: Option<Vec<isize>>,
     constant: bool,
@@ -38,27 +38,27 @@ pub(crate) struct VariableDeclaration {
 }
 
 impl VariableDeclaration {
-    pub(crate) fn value(&self) -> Option<&Expression> {
+    pub fn value(&self) -> Option<&Expression> {
         self.value.as_ref()
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         self.name.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn overrides(&self) -> Option<&OverrideSpecifier> {
+    pub fn overrides(&self) -> Option<&OverrideSpecifier> {
         self.overrides.as_ref()
     }
 
-    pub(crate) fn type_name(&self) -> Option<&TypeName> {
+    pub fn type_name(&self) -> Option<&TypeName> {
         self.type_name.as_ref()
     }
 
-    pub(crate) fn scope(&self) -> isize {
+    pub fn scope(&self) -> isize {
         self.scope
     }
 }

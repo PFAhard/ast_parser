@@ -1,11 +1,11 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{TypeDescriptions, ElementaryTypeName};
+use crate::ast_specs::common::{TypeDescriptions, ElementaryTypeName};
 
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ElementaryTypeNameExpression {
+pub struct ElementaryTypeNameExpression {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     id: isize,
@@ -25,19 +25,19 @@ pub(crate) struct ElementaryTypeNameExpression {
 }
 
 impl ElementaryTypeNameExpression {
-    pub(crate) fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         self.type_name().name()
     }
 
-    pub(crate) fn type_name(&self) -> &ElementaryTypeName {
+    pub fn type_name(&self) -> &ElementaryTypeName {
         &self.type_name
     }
 
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

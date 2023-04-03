@@ -16,12 +16,12 @@ mod unary_operation;
 
 use serde::Deserialize;
 
-pub(crate) use prelude::*;
+pub use prelude::*;
 
 // @note
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum Expression {
+pub enum Expression {
     Assignment(Assignment),
     BinaryOperation(BinaryOperation),
     Conditional(Conditional),
@@ -39,7 +39,7 @@ pub(crate) enum Expression {
 }
 
 impl Expression {
-    pub(crate) fn extract_name(&self) -> String {
+    pub fn extract_name(&self) -> String {
         match self {
             Expression::Identifier(identifier) => identifier.name().to_owned(),
             Expression::NewExpression(new_expression) => new_expression.name(),
@@ -58,7 +58,7 @@ impl Expression {
         }
     }
 
-    pub(crate) fn extract_definition(&self) -> Option<isize> {
+    pub fn extract_definition(&self) -> Option<isize> {
         match self {
             Expression::Identifier(identifier) => identifier.referenced_declaration(),
             Expression::NewExpression(_) => None,

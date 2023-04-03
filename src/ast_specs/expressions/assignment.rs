@@ -1,12 +1,12 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::TypeDescriptions;
+use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct Assignment {
+pub struct Assignment {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     id: isize,
@@ -29,19 +29,19 @@ pub(crate) struct Assignment {
 }
 
 impl Assignment {
-    pub(crate) fn left_hand_side(&self) -> &Expression {
+    pub fn left_hand_side(&self) -> &Expression {
         self.left_hand_side.as_ref()
     }
 
-    pub(crate) fn right_hand_side(&self) -> &Expression {
+    pub fn right_hand_side(&self) -> &Expression {
         self.right_hand_side.as_ref()
     }
 
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

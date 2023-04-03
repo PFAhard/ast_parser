@@ -1,5 +1,5 @@
 mod foundry;
 mod solc;
 
-pub(crate) use foundry::FoundryOutput;
-pub(crate) use solc::SolcOutput;
+pub use foundry::FoundryOutput;
+pub use solc::SolcOutput;

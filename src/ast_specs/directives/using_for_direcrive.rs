@@ -1,10 +1,10 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{LibraryName, TypeName};
+use crate::ast_specs::common::{LibraryName, TypeName};
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct UsingForDirective {
+pub struct UsingForDirective {
     #[serde(rename = "functionList")]
     function_list: Option<serde_json::Value>,
     global: Option<bool>,
@@ -17,19 +17,19 @@ pub(crate) struct UsingForDirective {
 }
 
 impl UsingForDirective {
-    pub(crate) fn function_list(&self) -> Option<&serde_json::Value> {
+    pub fn function_list(&self) -> Option<&serde_json::Value> {
         self.function_list.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn library_name(&self) -> Option<&LibraryName> {
+    pub fn library_name(&self) -> Option<&LibraryName> {
         self.library_name.as_ref()
     }
 
-    pub(crate) fn type_name(&self) -> Option<&TypeName> {
+    pub fn type_name(&self) -> Option<&TypeName> {
         self.type_name.as_ref()
     }
 }

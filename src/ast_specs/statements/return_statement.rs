@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::Expression;
+use crate::ast_specs::Expression;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct Return {
+pub struct Return {
     documentation: Option<String>,
     expression: Option<Expression>,
     #[serde(rename = "functionReturnParameters")]
@@ -13,11 +13,11 @@ pub(crate) struct Return {
 }
 
 impl Return {
-    pub(crate) fn expression(&self) -> Option<&Expression> {
+    pub fn expression(&self) -> Option<&Expression> {
         self.expression.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

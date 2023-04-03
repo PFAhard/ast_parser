@@ -1,11 +1,11 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::TypeDescriptions;
+use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct FunctionCallOptions {
+pub struct FunctionCallOptions {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
     expression: Box<Expression>,
@@ -26,23 +26,23 @@ pub(crate) struct FunctionCallOptions {
 }
 
 impl FunctionCallOptions {
-    pub(crate) fn expression(&self) -> &Expression {
+    pub fn expression(&self) -> &Expression {
         self.expression.as_ref()
     }
 
-    pub(crate) fn options(&self) -> &[Expression] {
+    pub fn options(&self) -> &[Expression] {
         self.options.as_ref()
     }
 
-    pub(crate) fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
+    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
         self.argument_types.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn full_name(&self) -> String {
+    pub fn full_name(&self) -> String {
         let name = self.expression().extract_name();
         let args: Vec<String> = self
             .options()

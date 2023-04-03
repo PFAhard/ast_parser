@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{StructuredDocumentation, ParameterList};
+use crate::ast_specs::common::{StructuredDocumentation, ParameterList};
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct EventDefinition {
+pub struct EventDefinition {
     anonymous: bool,
     documentation: Option<StructuredDocumentation>,
     #[serde(rename = "eventSelector")]
@@ -17,11 +17,11 @@ pub(crate) struct EventDefinition {
 }
 
 impl EventDefinition {
-    pub(crate) fn parameters(&self) -> &ParameterList {
+    pub fn parameters(&self) -> &ParameterList {
         &self.parameters
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

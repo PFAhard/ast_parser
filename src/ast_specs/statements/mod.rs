@@ -18,13 +18,13 @@ mod prelude;
 
 use serde::Deserialize;
 
-pub(crate) use prelude::*;
+pub use prelude::*;
 
 use super::common::Block;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum Statement {
+pub enum Statement {
     Block(Block),
     Break(Break),
     Continue(Continue),

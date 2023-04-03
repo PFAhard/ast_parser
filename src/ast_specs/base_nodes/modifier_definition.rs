@@ -1,11 +1,11 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::{
+use crate::ast_specs::common::{
     OverrideSpecifier, ParameterList, StructuredDocumentation, Visibility, Block,
 };
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ModifierDefinition {
+pub struct ModifierDefinition {
     #[serde(rename = "baseModifiers")]
     base_modifiers: Option<Vec<isize>>,
     body: Block,
@@ -23,19 +23,19 @@ pub(crate) struct ModifierDefinition {
 }
 
 impl ModifierDefinition {
-    pub(crate) fn body(&self) -> &Block {
+    pub fn body(&self) -> &Block {
         &self.body
     }
 
-    pub(crate) fn overrides(&self) -> Option<&OverrideSpecifier> {
+    pub fn overrides(&self) -> Option<&OverrideSpecifier> {
         self.overrides.as_ref()
     }
 
-    pub(crate) fn parameters(&self) -> &ParameterList {
+    pub fn parameters(&self) -> &ParameterList {
         &self.parameters
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

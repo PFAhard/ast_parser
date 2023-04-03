@@ -24,7 +24,7 @@ use super::ast_specs::{
     Directive, Expression, SourceUnit, Statement, base_nodes::{ModifierDefinition, EventDefinition}, BaseNode,
 };
 
-pub(crate) trait AstVisitor {
+pub trait AstVisitor {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal>;
 
     fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal>;

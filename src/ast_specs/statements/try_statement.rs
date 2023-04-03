@@ -1,9 +1,9 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::{expressions::FunctionCall, common::{Block, ParameterList}};
+use crate::ast_specs::{expressions::FunctionCall, common::{Block, ParameterList}};
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct TryStatement {
+pub struct TryStatement {
     clauses: Vec<TryCatchClause>,
     documentation: Option<String>,
     #[serde(rename = "externalCall")]
@@ -13,21 +13,21 @@ pub(crate) struct TryStatement {
 }
 
 impl TryStatement {
-    pub(crate) fn clauses(&self) -> &[TryCatchClause] {
+    pub fn clauses(&self) -> &[TryCatchClause] {
         self.clauses.as_ref()
     }
 
-    pub(crate) fn external_call(&self) -> &FunctionCall {
+    pub fn external_call(&self) -> &FunctionCall {
         &self.external_call
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct TryCatchClause {
+pub struct TryCatchClause {
     block: Block,
     #[serde(rename = "errorName")]
     error_name: String,
@@ -37,15 +37,15 @@ pub(crate) struct TryCatchClause {
 }
 
 impl TryCatchClause {
-    pub(crate) fn block(&self) -> &Block {
+    pub fn block(&self) -> &Block {
         &self.block
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn parameters(&self) -> Option<&ParameterList> {
+    pub fn parameters(&self) -> Option<&ParameterList> {
         self.parameters.as_ref()
     }
 }

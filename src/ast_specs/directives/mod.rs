@@ -11,14 +11,14 @@ mod using_for_direcrive;
 mod variable_declaration;
 
 use serde::Deserialize;
-pub(crate) use prelude::*;
+pub use prelude::*;
 
 
-pub(crate) type Directives = Vec<Directive>;
+pub type Directives = Vec<Directive>;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum Directive {
+pub enum Directive {
     ContractDefinition(ContractDefinition),
     EnumDefinition(EnumDefinition),
     ErrorDefinition(ErrorDefinition),

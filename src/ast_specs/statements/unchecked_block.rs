@@ -4,7 +4,7 @@ use super::Statement;
 
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct UncheckedBlock {
+pub struct UncheckedBlock {
     documentation: Option<String>,
     id: isize,
     src: String,
@@ -12,11 +12,11 @@ pub(crate) struct UncheckedBlock {
 }
 
 impl UncheckedBlock {
-    pub(crate) fn statements(&self) -> &[Statement] {
+    pub fn statements(&self) -> &[Statement] {
         self.statements.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

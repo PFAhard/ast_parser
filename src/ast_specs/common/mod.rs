@@ -11,24 +11,24 @@ mod structured_documentation;
 mod type_descriptions;
 mod type_name;
 
-pub(crate) use prelude::*;
+pub use prelude::*;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum BaseName {
+pub enum BaseName {
     UserDefinedTypeName(UserDefinedTypeName),
     IdentifierPath(IdentifierPath),
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum LibraryName {
+pub enum LibraryName {
     UserDefinedTypeName(UserDefinedTypeName),
     IdentifierPath(IdentifierPath),
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum Mutability {
+pub enum Mutability {
     #[serde(rename = "mutable")]
     Mutable,
     #[serde(rename = "immutable")]
@@ -38,7 +38,7 @@ pub(crate) enum Mutability {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum StorageLocation {
+pub enum StorageLocation {
     #[serde(rename = "calldata")]
     Calldata,
     #[serde(rename = "default")]
@@ -50,12 +50,12 @@ pub(crate) enum StorageLocation {
 }
 
 // #[derive(Deserialize, Debug, Clone)] TODO:
-// pub(crate) enum FunctionList {
+// pub enum FunctionList {
 //     function {}
 // }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum FunctionCallKind {
+pub enum FunctionCallKind {
     #[serde(rename = "functionCall")]
     FunctionCall,
     #[serde(rename = "typeConversion")]
@@ -65,7 +65,7 @@ pub(crate) enum FunctionCallKind {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum LiteralKind {
+pub enum LiteralKind {
     #[serde(rename = "bool")]
     Bool,
     #[serde(rename = "number")]
@@ -79,7 +79,7 @@ pub(crate) enum LiteralKind {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum StateMutability {
+pub enum StateMutability {
     #[serde(rename = "payable")]
     Payable,
     #[serde(rename = "pure")]
@@ -91,7 +91,7 @@ pub(crate) enum StateMutability {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) enum Visibility {
+pub enum Visibility {
     #[serde(rename = "external")]
     External,
     #[serde(rename = "public")]

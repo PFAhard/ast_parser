@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::Expression;
+use crate::ast_specs::Expression;
 
 use super::{
     identifier_path::IdentifierPath, parameter_list::ParameterList,
@@ -9,7 +9,7 @@ use super::{
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum TypeName {
+pub enum TypeName {
     ArrayTypeName(ArrayTypeName),
     ElementaryTypeName(ElementaryTypeName),
     FunctionTypeName(FunctionTypeName),
@@ -18,7 +18,7 @@ pub(crate) enum TypeName {
 }
 
 impl TypeName {
-    pub(crate) fn name(&self) -> String {
+    pub fn name(&self) -> String {
         match self {
             TypeName::ArrayTypeName(array_type_name) => array_type_name.name(),
             TypeName::ElementaryTypeName(elementary_type_name) => {
@@ -30,7 +30,7 @@ impl TypeName {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ArrayTypeName {
+pub struct ArrayTypeName {
     #[serde(rename = "baseType")]
     base_type: Box<TypeName>,
     id: isize,
@@ -41,25 +41,25 @@ pub(crate) struct ArrayTypeName {
 }
 
 impl ArrayTypeName {
-    pub(crate) fn name(&self) -> String {
+    pub fn name(&self) -> String {
         format!("{}[]", self.base_type().name())
     }
 
-    pub(crate) fn base_type(&self) -> &TypeName {
+    pub fn base_type(&self) -> &TypeName {
         self.base_type.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn length(&self) -> Option<&Expression> {
+    pub fn length(&self) -> Option<&Expression> {
         self.length.as_deref()
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct FunctionTypeName {
+pub struct FunctionTypeName {
     id: isize,
     #[serde(rename = "parameterTypes")]
     parameter_types: ParameterList,
@@ -74,21 +74,21 @@ pub(crate) struct FunctionTypeName {
 }
 
 impl FunctionTypeName {
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn parameter_types(&self) -> &ParameterList {
+    pub fn parameter_types(&self) -> &ParameterList {
         &self.parameter_types
     }
 
-    pub(crate) fn return_parameter_types(&self) -> &ParameterList {
+    pub fn return_parameter_types(&self) -> &ParameterList {
         &self.return_parameter_types
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct Mapping {
+pub struct Mapping {
     id: isize,
     #[serde(rename = "keyName")]
     key_name: Option<String>,
@@ -108,21 +108,21 @@ pub(crate) struct Mapping {
 }
 
 impl Mapping {
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn key_type(&self) -> &TypeName {
+    pub fn key_type(&self) -> &TypeName {
         self.key_type.as_ref()
     }
 
-    pub(crate) fn value_type(&self) -> &TypeName {
+    pub fn value_type(&self) -> &TypeName {
         self.value_type.as_ref()
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct UserDefinedTypeName {
+pub struct UserDefinedTypeName {
     // #[serde(skip)]
     // #[serde(rename = "contractScope")]
     // contract_scope: (), // @note never seen
@@ -138,21 +138,21 @@ pub(crate) struct UserDefinedTypeName {
 }
 
 impl UserDefinedTypeName {
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 
-    pub(crate) fn path_node(&self) -> Option<&IdentifierPath> {
+    pub fn path_node(&self) -> Option<&IdentifierPath> {
         self.path_node.as_ref()
     }
 
-    pub(crate) fn referenced_declaration(&self) -> isize {
+    pub fn referenced_declaration(&self) -> isize {
         self.referenced_declaration
     }
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub(crate) struct ElementaryTypeName {
+pub struct ElementaryTypeName {
     id: isize,
     name: String,
     src: String,
@@ -163,11 +163,11 @@ pub(crate) struct ElementaryTypeName {
 }
 
 impl ElementaryTypeName {
-    pub(crate) fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         self.name.as_ref()
     }
 
-    pub(crate) fn id(&self) -> isize {
+    pub fn id(&self) -> isize {
         self.id
     }
 }

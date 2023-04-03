@@ -1,12 +1,12 @@
 use serde::Deserialize;
 
-use crate::ast_parser::ast_specs::common::Block;
+use crate::ast_specs::common::Block;
 
 use super::prelude::*;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
-pub(crate) enum FalseBody {
+pub enum FalseBody {
     Block(Block),
     Break(Break),
     Continue(Continue),
