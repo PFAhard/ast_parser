@@ -68,4 +68,23 @@ impl Expression {
             _ => unimplemented!("{:?}", self),
         }
     }
+
+    pub fn src(&self) -> &str {
+        match self {
+            Expression::Assignment(_) => todo!(),
+            Expression::BinaryOperation(_) => todo!(),
+            Expression::Conditional(_) => todo!(),
+            Expression::ElementaryTypeNameExpression(_) => todo!(),
+            Expression::FunctionCall(_) => todo!(),
+            Expression::FunctionCallOptions(_) => todo!(),
+            Expression::Identifier(ident) => ident.src(),
+            Expression::IndexAccess(_) => todo!(),
+            Expression::IndexRangeAccess(_) => todo!(),
+            Expression::Literal(_) => todo!(),
+            Expression::MemberAccess(_) => todo!(),
+            Expression::NewExpression(_) => todo!(),
+            Expression::TupleExpression(_) => todo!(),
+            Expression::UnaryOperation(_) => todo!(),
+        }
+    }
 }
