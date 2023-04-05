@@ -52,6 +52,10 @@ impl FunctionDefinition {
         self.parameters.as_ref().map(|p| p.parameters())
     }
 
+    pub fn parameter_list(&self) -> Option<&ParameterList> {
+        self.parameters.as_ref()
+    }
+
     pub fn return_parameters(&self) -> Option<&[VariableDeclaration]> {
         self.return_parameters.as_ref().map(|r| r.parameters())
     }
