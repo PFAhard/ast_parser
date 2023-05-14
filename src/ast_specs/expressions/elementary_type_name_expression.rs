@@ -25,7 +25,7 @@ pub struct ElementaryTypeNameExpression {
 }
 
 impl ElementaryTypeNameExpression {
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> String {
         self.type_name().name()
     }
 

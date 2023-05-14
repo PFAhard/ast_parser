@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
@@ -36,5 +38,11 @@ impl Identifier {
 
     pub fn id(&self) -> isize {
         self.id
+    }
+}
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name())
     }
 }

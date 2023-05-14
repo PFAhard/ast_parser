@@ -20,4 +20,8 @@ impl Return {
     pub fn id(&self) -> isize {
         self.id
     }
+
+    pub fn function_return_parameters(&self) -> isize {
+        self.function_return_parameters
+    }
 }

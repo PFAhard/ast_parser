@@ -1,9 +1,8 @@
 use serde::Deserialize;
 
-use crate::ast_specs::common::{TypeDescriptions, FunctionCallKind};
+use crate::ast_specs::common::{FunctionCallKind, TypeDescriptions};
 
 use super::Expression;
-
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct FunctionCall {
@@ -74,5 +73,31 @@ impl FunctionCall {
 
     pub fn id(&self) -> isize {
         self.id
+    }
+
+    pub fn kind(&self) -> &FunctionCallKind {
+        &self.kind
+    }
+
+    pub fn builtin(&self) -> Option<BuiltinFunction> {
+        BuiltinFunction::try_from(self.expression().extract_definition().unwrap_or(0)).ok()
+    }
+}
+
+#[repr(usize)]
+#[derive(Debug, Clone)]
+pub enum BuiltinFunction {
+    Require = 18,
+}
+
+impl TryFrom<isize> for BuiltinFunction {
+    type Error = ();
+
+    fn try_from(value: isize) -> Result<Self, Self::Error> {
+        if value < 0 {
+            return Ok(unsafe { std::mem::transmute::<isize, BuiltinFunction>(-value) });
+        } else {
+            Err(())
+        }
     }
 }

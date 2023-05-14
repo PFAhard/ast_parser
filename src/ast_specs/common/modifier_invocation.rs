@@ -1,6 +1,8 @@
+use std::fmt::Display;
+
 use serde::Deserialize;
 
-use crate::ast_specs::{Expression, expressions::Identifier};
+use crate::ast_specs::{expressions::Identifier, Expression};
 
 use super::identifier_path::IdentifierPath;
 
@@ -52,4 +54,13 @@ pub enum ModifierKind {
 pub enum ModifierName {
     Identifier(Identifier),
     IdentifierPath(IdentifierPath),
+}
+
+impl Display for ModifierName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ModifierName::Identifier(id) => write!(f, "{}", id),
+            ModifierName::IdentifierPath(ip) => write!(f, "{}", ip),
+        }
+    }
 }

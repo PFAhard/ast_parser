@@ -25,4 +25,8 @@ impl VariableDeclarationStatement {
     pub fn id(&self) -> isize {
         self.id
     }
+
+    pub fn assignments(&self) -> &[Option<isize>] {
+        self.assignments.as_ref()
+    }
 }

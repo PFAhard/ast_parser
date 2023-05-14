@@ -20,11 +20,11 @@ pub enum TypeName {
 impl TypeName {
     pub fn name(&self) -> String {
         match self {
-            TypeName::ArrayTypeName(array_type_name) => array_type_name.name(),
-            TypeName::ElementaryTypeName(elementary_type_name) => {
-                elementary_type_name.name().to_owned()
-            }
-            _ => unimplemented!("{:?}", self),
+            TypeName::ArrayTypeName(at_name) => at_name.name(),
+            TypeName::ElementaryTypeName(elt_name) => elt_name.name(),
+            TypeName::FunctionTypeName(ft_name) => ft_name.name(),
+            TypeName::Mapping(mapping) => mapping.name(),
+            TypeName::UserDefinedTypeName(udt_name) => udt_name.name(),
         }
     }
 }
@@ -42,6 +42,9 @@ pub struct ArrayTypeName {
 
 impl ArrayTypeName {
     pub fn name(&self) -> String {
+        if let Some(_) = self.length() {
+            todo!();
+        }
         format!("{}[]", self.base_type().name())
     }
 
@@ -85,6 +88,38 @@ impl FunctionTypeName {
     pub fn return_parameter_types(&self) -> &ParameterList {
         &self.return_parameter_types
     }
+
+    pub fn name(&self) -> String {
+        let mut name = "function".to_owned();
+
+        let params: Vec<String> = self
+            .parameter_types()
+            .parameters()
+            .iter()
+            .map(|x| format!("{}", x.type_name().unwrap().name()))
+            .collect();
+
+        let mut params = format!("{:?}", params);
+        params.replace_range(0..1, "(");
+        params.replace_range(params.len() - 1..params.len(), ")");
+        name.push_str(params.as_str());
+
+        let returns: Vec<String> = self
+            .return_parameter_types()
+            .parameters()
+            .iter()
+            .map(|x| format!("{}", x.type_name().unwrap().name()))
+            .collect();
+        if returns.len() > 0 {
+            let mut returns = format!("{:?}", returns);
+            returns.replace_range(0..1, "(");
+            returns.replace_range(returns.len() - 1..returns.len(), ")");
+            name.push_str("returns");
+            name.push_str(returns.as_str());
+        }
+
+        name
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -119,6 +154,14 @@ impl Mapping {
     pub fn value_type(&self) -> &TypeName {
         self.value_type.as_ref()
     }
+
+    pub fn name(&self) -> String {
+        format!(
+            "mapping({} => {})",
+            self.key_type().name(),
+            self.value_type().name()
+        )
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -149,6 +192,14 @@ impl UserDefinedTypeName {
     pub fn referenced_declaration(&self) -> isize {
         self.referenced_declaration
     }
+
+    pub fn name(&self) -> String {
+        if let Some(name) = self.path_node() {
+            name.name().to_owned()
+        } else {
+            unimplemented!()
+        }
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -163,8 +214,8 @@ pub struct ElementaryTypeName {
 }
 
 impl ElementaryTypeName {
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 
     pub fn id(&self) -> isize {

@@ -79,6 +79,46 @@ impl FunctionDefinition {
     pub fn scope(&self) -> isize {
         self.scope
     }
+
+    pub fn visibility(&self) -> &Visibility {
+        &self.visibility
+    }
+
+    pub fn state_mutability(&self) -> &StateMutability {
+        &self.state_mutability
+    }
+
+    pub fn full_name(&self) -> String {
+        let mut name = self.name().to_owned();
+        if let Some(params) = self.parameter_list() {
+            let params: Vec<String> = params
+                .parameters()
+                .iter()
+                .map(|x| format!("{} {}", x.type_name().unwrap().name(), x.name()))
+                .collect();
+
+            let mut params = format!("{:?}", params);
+            params.replace_range(0..1, "(");
+            params.replace_range(params.len() - 1..params.len(), ")");
+            name.push_str(params.as_str());
+        }
+
+        if let Some(returns) = self.return_parameters() {
+            let returns: Vec<String> = returns
+                .iter()
+                .map(|x| format!("{} {}", x.type_name().unwrap().name(), x.name()))
+                .collect();
+            if returns.len() > 0 {
+                let mut returns = format!("{:?}", returns);
+                returns.replace_range(0..1, "(");
+                returns.replace_range(returns.len() - 1..returns.len(), ")");
+                name.push_str("returns");
+                name.push_str(returns.as_str());
+            }
+        }
+
+        name
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
