@@ -57,6 +57,10 @@ impl ContractDefinition {
     pub fn contract_kind(&self) -> &ContractKind {
         &self.contract_kind
     }
+
+    pub fn linearized_base_contracts(&self) -> &[isize] {
+        self.linearized_base_contracts.as_ref()
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
