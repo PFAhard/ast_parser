@@ -87,4 +87,23 @@ impl Expression {
             Expression::UnaryOperation(_) => todo!(),
         }
     }
+
+    pub fn is_builtin(&self) -> bool {
+        match self {
+            Expression::Assignment(_) => todo!(),
+            Expression::BinaryOperation(_) => todo!(),
+            Expression::Conditional(_) => todo!(),
+            Expression::ElementaryTypeNameExpression(_) => todo!(),
+            Expression::FunctionCall(_) => todo!(),
+            Expression::FunctionCallOptions(_) => todo!(),
+            Expression::Identifier(ident) => ident.is_builtin(),
+            Expression::IndexAccess(_) => todo!(),
+            Expression::IndexRangeAccess(_) => todo!(),
+            Expression::Literal(_) => todo!(),
+            Expression::MemberAccess(m_acc) => m_acc.is_builtin(),
+            Expression::NewExpression(_) => todo!(),
+            Expression::TupleExpression(_) => todo!(),
+            Expression::UnaryOperation(_) => todo!(),
+        }
+    }
 }
