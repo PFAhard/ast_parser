@@ -44,4 +44,8 @@ impl Assignment {
     pub fn id(&self) -> isize {
         self.id
     }
+
+    pub fn operator(&self) -> &str {
+        self.operator.as_ref()
+    }
 }
