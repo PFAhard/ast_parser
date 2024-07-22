@@ -78,6 +78,7 @@ impl AstVisitor for Directive {
             Directive::UserDefinedValueTypeDefinition(i) => i.filter_by_node_type(node_type),
             Directive::UsingForDirective(i) => i.filter_by_node_type(node_type),
             Directive::VariableDeclaration(i) => i.filter_by_node_type(node_type),
+            Directive::EventDefinition(i) => i.filter_by_node_type(node_type),
         }
     }
 
@@ -93,6 +94,7 @@ impl AstVisitor for Directive {
             Directive::UserDefinedValueTypeDefinition(i) => i.filter_by_reference_id(id),
             Directive::UsingForDirective(i) => i.filter_by_reference_id(id),
             Directive::VariableDeclaration(i) => i.filter_by_reference_id(id),
+            Directive::EventDefinition(i) => i.filter_by_reference_id(id),
         }
     }
 
@@ -108,6 +110,7 @@ impl AstVisitor for Directive {
             Directive::UserDefinedValueTypeDefinition(i) => i.filter_by_id(id),
             Directive::UsingForDirective(i) => i.filter_by_id(id),
             Directive::VariableDeclaration(i) => i.filter_by_id(id),
+            Directive::EventDefinition(i) => i.filter_by_id(id)
         }
     }
 
@@ -123,6 +126,7 @@ impl AstVisitor for Directive {
             Directive::UserDefinedValueTypeDefinition(i) => i.childrens_id(),
             Directive::UsingForDirective(i) => i.childrens_id(),
             Directive::VariableDeclaration(i) => i.childrens_id(),
+            Directive::EventDefinition(i) => i.childrens_id(),
         }
     }
 }

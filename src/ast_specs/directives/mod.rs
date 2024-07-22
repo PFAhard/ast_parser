@@ -13,12 +13,15 @@ mod variable_declaration;
 use serde::Deserialize;
 pub use prelude::*;
 
+use super::EventDefinition;
+
 
 pub type Directives = Vec<Directive>;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
 pub enum Directive {
+    EventDefinition(EventDefinition),
     ContractDefinition(ContractDefinition),
     EnumDefinition(EnumDefinition),
     ErrorDefinition(ErrorDefinition),

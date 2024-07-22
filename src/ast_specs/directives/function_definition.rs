@@ -108,7 +108,7 @@ impl FunctionDefinition {
                 .iter()
                 .map(|x| format!("{} {}", x.type_name().unwrap().name(), x.name()))
                 .collect();
-            if returns.len() > 0 {
+            if !returns.is_empty() {
                 let mut returns = format!("{:?}", returns);
                 returns.replace_range(0..1, "(");
                 returns.replace_range(returns.len() - 1..returns.len(), ")");

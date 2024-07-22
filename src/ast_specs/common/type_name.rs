@@ -42,7 +42,7 @@ pub struct ArrayTypeName {
 
 impl ArrayTypeName {
     pub fn name(&self) -> String {
-        if let Some(_) = self.length() {
+        if self.length().is_some() {
             todo!();
         }
         format!("{}[]", self.base_type().name())
@@ -96,7 +96,7 @@ impl FunctionTypeName {
             .parameter_types()
             .parameters()
             .iter()
-            .map(|x| format!("{}", x.type_name().unwrap().name()))
+            .map(|x| x.type_name().unwrap().name().to_string())
             .collect();
 
         let mut params = format!("{:?}", params);
@@ -108,9 +108,9 @@ impl FunctionTypeName {
             .return_parameter_types()
             .parameters()
             .iter()
-            .map(|x| format!("{}", x.type_name().unwrap().name()))
+            .map(|x| x.type_name().unwrap().name().to_string())
             .collect();
-        if returns.len() > 0 {
+        if !returns.is_empty() {
             let mut returns = format!("{:?}", returns);
             returns.replace_range(0..1, "(");
             returns.replace_range(returns.len() - 1..returns.len(), ")");

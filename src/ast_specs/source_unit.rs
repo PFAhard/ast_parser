@@ -35,11 +35,7 @@ impl SourceUnit {
     pub fn get_contract(&self, target_name: &str) -> &ContractDefinition {
         self.nodes()
             .iter()
-            .filter(|node| matches!(node, Directive::ContractDefinition(_)))
-            .map(|node| match node {
-                Directive::ContractDefinition(cd) => cd,
-                _ => unreachable!(),
-            })
+            .filter_map(|node| match node { Directive::ContractDefinition(cd) => Some(cd), _ => None })
             .find(|cd| cd.name() == target_name)
             .unwrap()
     }

@@ -95,7 +95,7 @@ impl TryFrom<isize> for BuiltinFunction {
 
     fn try_from(value: isize) -> Result<Self, Self::Error> {
         if value < 0 {
-            return Ok(unsafe { std::mem::transmute::<isize, BuiltinFunction>(-value) });
+            Ok(unsafe { std::mem::transmute::<isize, BuiltinFunction>(-value) })
         } else {
             Err(())
         }
