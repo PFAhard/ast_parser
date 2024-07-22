@@ -29,4 +29,8 @@ impl ImportDirective {
         eprintln!("[DEBUG] Symbol aliases are not yet supported");
         &self.symbol_aliases
     }
+
+    pub fn source_unit(&self) -> isize {
+        self.source_unit
+    }
 }
