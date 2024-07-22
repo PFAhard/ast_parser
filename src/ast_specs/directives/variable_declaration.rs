@@ -5,7 +5,7 @@ use crate::ast_specs::{
         Mutability, OverrideSpecifier, StorageLocation, StructuredDocumentation, TypeDescriptions,
         TypeName, Visibility,
     },
-    Expression,
+    Option<Expression>,
 };
 
 #[derive(Deserialize, Debug, Clone)]

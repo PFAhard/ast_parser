@@ -5,7 +5,7 @@ use crate::ast_specs::Expression;
 #[derive(Deserialize, Debug, Clone)]
 pub struct ExpressionStatement {
     documentation: Option<String>,
-    expression: Expression,
+    expression: Option<Expression>,
     id: isize,
     src: String,
 }

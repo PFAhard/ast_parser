@@ -7,7 +7,7 @@ use super::FalseBody;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct IfStatement {
-    condition: Expression,
+    condition: Option<Expression>,
     documentation: Option<String>,
     #[serde(rename = "falseBody")]
     false_body: Option<Box<FalseBody>>,

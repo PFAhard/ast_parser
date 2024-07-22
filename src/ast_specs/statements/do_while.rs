@@ -7,7 +7,7 @@ use super::Body;
 #[derive(Deserialize, Debug, Clone)]
 pub struct DoWhileStatement {
     body: Box<Body>,
-    condition: Expression,
+    condition: Option<Expression>,
     documentation: Option<String>,
     id: isize,
     src: String,
