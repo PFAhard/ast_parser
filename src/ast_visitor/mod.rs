@@ -21,7 +21,7 @@ use super::ast_specs::{
         ForStatement, IfStatement, PlaceholderStatement, Return, RevertStatement, TryStatement,
         UncheckedBlock, VariableDeclarationStatement, WhileStatement, TryCatchClause, InitializationExpression,
     },
-    Directive, Option<Expression>, SourceUnit, Statement, base_nodes::{ModifierDefinition, EventDefinition}, BaseNode,
+    Directive, Expression, SourceUnit, Statement, base_nodes::{ModifierDefinition, EventDefinition}, BaseNode,
 };
 
 pub trait AstVisitor {

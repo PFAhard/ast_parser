@@ -18,7 +18,7 @@ impl WhileStatement {
         self.body.as_ref()
     }
 
-    pub fn condition(&self) -> &Expression {
+    pub fn condition(&self) -> &Option<Expression> {
         &self.condition
     }
 

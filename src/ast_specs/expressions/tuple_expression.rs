@@ -9,7 +9,7 @@ use super::Expression;
 pub struct TupleExpression {
     #[serde(rename = "argumentTypes")]
     argument_types: Option<Vec<TypeDescriptions>>,
-    components: Vec<Expression>,
+    components: Vec<Option<Expression>>,
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -27,7 +27,7 @@ pub struct TupleExpression {
 }
 
 impl TupleExpression {
-    pub fn components(&self) -> &[Expression] {
+    pub fn components(&self) -> &[Option<Expression>] {
         self.components.as_ref()
     }
 

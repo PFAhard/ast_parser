@@ -18,7 +18,7 @@ pub struct IfStatement {
 }
 
 impl IfStatement {
-    pub fn condition(&self) -> &Expression {
+    pub fn condition(&self) -> &Option<Expression>   {
         &self.condition
     }
 

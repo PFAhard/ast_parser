@@ -11,7 +11,7 @@ pub struct ExpressionStatement {
 }
 
 impl ExpressionStatement {
-    pub fn expression(&self) -> &Expression {
+    pub fn expression(&self) -> &Option<Expression> {
         &self.expression
     }
 
