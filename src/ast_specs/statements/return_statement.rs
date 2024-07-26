@@ -7,7 +7,7 @@ pub struct Return {
     documentation: Option<String>,
     expression: Option<Expression>,
     #[serde(rename = "functionReturnParameters")]
-    function_return_parameters: isize,
+    function_return_parameters: Option<isize>,
     id: isize,
     src: String,
 }
@@ -21,7 +21,7 @@ impl Return {
         self.id
     }
 
-    pub fn function_return_parameters(&self) -> isize {
-        self.function_return_parameters
+    pub fn function_return_parameters(&self) -> &Option<isize> {
+        &self.function_return_parameters
     }
 }

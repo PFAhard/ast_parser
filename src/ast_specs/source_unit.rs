@@ -39,4 +39,8 @@ impl SourceUnit {
             .find(|cd| cd.name() == target_name)
             .unwrap()
     }
+    
+    pub fn absolute_path(&self) -> &str {
+        &self.absolute_path
+    }
 }

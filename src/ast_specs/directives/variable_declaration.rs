@@ -61,4 +61,8 @@ impl VariableDeclaration {
     pub fn scope(&self) -> isize {
         self.scope
     }
+    
+    pub fn state_variable(&self) -> bool {
+        self.state_variable
+    }
 }
