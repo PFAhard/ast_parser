@@ -63,7 +63,7 @@ impl ContractDefinition {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum ContractKind {
     #[serde(rename = "contract")]
     Contract,

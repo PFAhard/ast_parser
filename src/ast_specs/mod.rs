@@ -7,5 +7,6 @@ pub mod base_nodes;
 pub mod expressions;
 pub mod statements;
 mod prelude;
+pub mod inline_assembly;
 
 pub use prelude::*;

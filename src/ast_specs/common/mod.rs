@@ -78,7 +78,7 @@ pub enum LiteralKind {
     UnicodeString,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum StateMutability {
     #[serde(rename = "payable")]
     Payable,
@@ -90,7 +90,7 @@ pub enum StateMutability {
     View,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Visibility {
     #[serde(rename = "external")]
     External,

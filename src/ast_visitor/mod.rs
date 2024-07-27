@@ -1,14 +1,15 @@
 #![warn(clippy::all)]
 use super::ast_specs::{
+    base_nodes::{EventDefinition, ModifierDefinition},
     common::{
-        ArrayTypeName, FunctionTypeName, IdentifierPath, LibraryName, Mapping, ModifierInvocation,
-        ModifierName, OverrideSpecifier, Overrides, ParameterList, TypeDescriptions, TypeName,
-        UserDefinedTypeName, ElementaryTypeName, Block,
+        ArrayTypeName, Block, ElementaryTypeName, FunctionTypeName, IdentifierPath, LibraryName,
+        Mapping, ModifierInvocation, ModifierName, OverrideSpecifier, Overrides, ParameterList,
+        TypeDescriptions, TypeName, UserDefinedTypeName,
     },
     directives::{
-        ContractDefinition, EnumDefinition, ErrorDefinition, FunctionDefinition, ImportDirective,
-        PragmaDirective, StructDefinition, UserDefinedValueTypeDefinition, UsingForDirective,
-        VariableDeclaration, EnumValue,
+        ContractDefinition, EnumDefinition, EnumValue, ErrorDefinition, FunctionDefinition,
+        ImportDirective, PragmaDirective, StructDefinition, UserDefinedValueTypeDefinition,
+        UsingForDirective, VariableDeclaration,
     },
     expressions::{
         Assignment, BinaryOperation, Conditional, ElementaryTypeNameExpression, FunctionCall,
@@ -18,10 +19,11 @@ use super::ast_specs::{
     node_type::{NodeType, NodeTypeInternal},
     statements::{
         Body, Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, FalseBody,
-        ForStatement, IfStatement, PlaceholderStatement, Return, RevertStatement, TryStatement,
-        UncheckedBlock, VariableDeclarationStatement, WhileStatement, TryCatchClause, InitializationExpression,
+        ForStatement, IfStatement, InitializationExpression, PlaceholderStatement, Return,
+        RevertStatement, TryCatchClause, TryStatement, UncheckedBlock,
+        VariableDeclarationStatement, WhileStatement,
     },
-    Directive, Expression, SourceUnit, Statement, base_nodes::{ModifierDefinition, EventDefinition}, BaseNode,
+    BaseNode, Directive, Expression, SourceUnit, Statement,
 };
 
 pub trait AstVisitor {
@@ -32,6 +34,8 @@ pub trait AstVisitor {
     fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal>;
 
     fn childrens_id(&self) -> Vec<isize>;
+
+    fn references(&self) -> Vec<isize>;
 }
 
 impl AstVisitor for SourceUnit {
@@ -60,6 +64,10 @@ impl AstVisitor for SourceUnit {
         let mut result = self.nodes().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.nodes().references()
     }
 }
 
@@ -110,7 +118,7 @@ impl AstVisitor for Directive {
             Directive::UserDefinedValueTypeDefinition(i) => i.filter_by_id(id),
             Directive::UsingForDirective(i) => i.filter_by_id(id),
             Directive::VariableDeclaration(i) => i.filter_by_id(id),
-            Directive::EventDefinition(i) => i.filter_by_id(id)
+            Directive::EventDefinition(i) => i.filter_by_id(id),
         }
     }
 
@@ -127,6 +135,22 @@ impl AstVisitor for Directive {
             Directive::UsingForDirective(i) => i.childrens_id(),
             Directive::VariableDeclaration(i) => i.childrens_id(),
             Directive::EventDefinition(i) => i.childrens_id(),
+        }
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            Directive::EventDefinition(i) => i.references(),
+            Directive::ContractDefinition(i) => i.references(),
+            Directive::EnumDefinition(i) => i.references(),
+            Directive::ErrorDefinition(i) => i.references(),
+            Directive::FunctionDefinition(i) => i.references(),
+            Directive::ImportDirective(i) => i.references(),
+            Directive::PragmaDirective(i) => i.references(),
+            Directive::StructDefinition(i) => i.references(),
+            Directive::UserDefinedValueTypeDefinition(i) => i.references(),
+            Directive::UsingForDirective(i) => i.references(),
+            Directive::VariableDeclaration(i) => i.references(),
         }
     }
 }
@@ -159,6 +183,10 @@ impl AstVisitor for ContractDefinition {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.nodes().references()
+    }
 }
 
 impl AstVisitor for EnumDefinition {
@@ -189,6 +217,10 @@ impl AstVisitor for EnumDefinition {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.members().references()
+    }
 }
 
 impl AstVisitor for ErrorDefinition {
@@ -218,6 +250,10 @@ impl AstVisitor for ErrorDefinition {
         let mut result = self.parameters().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.parameters().references()
     }
 }
 
@@ -266,6 +302,15 @@ impl AstVisitor for FunctionDefinition {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.body().references();
+        result.append(&mut self.modifiers().references());
+        result.append(&mut self.overrides().references());
+        result.append(&mut self.parameters().references());
+        result.append(&mut self.return_parameters().references());
+        result
+    }
 }
 
 impl AstVisitor for ImportDirective {
@@ -296,6 +341,10 @@ impl AstVisitor for ImportDirective {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.symbol_aliases().references()
+    }
 }
 
 impl AstVisitor for PragmaDirective {
@@ -323,6 +372,10 @@ impl AstVisitor for PragmaDirective {
 
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
     }
 }
 
@@ -353,6 +406,10 @@ impl AstVisitor for StructDefinition {
         let mut result = self.members().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.members().references()
     }
 }
 
@@ -387,6 +444,10 @@ impl AstVisitor for UserDefinedValueTypeDefinition {
         let mut result = self.underlying_type().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.underlying_type().references()
     }
 }
 
@@ -427,6 +488,13 @@ impl AstVisitor for UsingForDirective {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.function_list().references();
+        result.append(&mut self.library_name().references());
+        result.append(&mut self.type_name().references());
+        result
+    }
 }
 
 impl AstVisitor for VariableDeclaration {
@@ -464,6 +532,13 @@ impl AstVisitor for VariableDeclaration {
         result.append(&mut self.overrides().childrens_id());
         result.append(&mut self.type_name().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.value().references();
+        result.append(&mut self.overrides().references());
+        result.append(&mut self.type_name().references());
         result
     }
 }
@@ -526,6 +601,20 @@ impl AstVisitor for BaseNode {
             BaseNode::ModifierDefinition(i) => i.childrens_id(),
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            BaseNode::EnumDefinition(i) => i.references(),
+            BaseNode::ErrorDefinition(i) => i.references(),
+            BaseNode::FunctionDefinition(i) => i.references(),
+            BaseNode::StructDefinition(i) => i.references(),
+            BaseNode::UserDefinedValueTypeDefinition(i) => i.references(),
+            BaseNode::UsingForDirective(i) => i.references(),
+            BaseNode::VariableDeclaration(i) => i.references(),
+            BaseNode::EventDefinition(i) => i.references(),
+            BaseNode::ModifierDefinition(i) => i.references(),
+        }
+    }
 }
 
 impl AstVisitor for EventDefinition {
@@ -561,6 +650,10 @@ impl AstVisitor for EventDefinition {
         result.append(&mut self.parameters().childrens_id());
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.parameters().references()
     }
 }
 
@@ -601,6 +694,13 @@ impl AstVisitor for ModifierDefinition {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.body().references();
+        result.append(&mut self.overrides().references());
+        result.append(&mut self.parameters().references());
+        result
+    }
 }
 
 impl AstVisitor for EnumValue {
@@ -628,6 +728,10 @@ impl AstVisitor for EnumValue {
 
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
     }
 }
 
@@ -659,6 +763,10 @@ impl AstVisitor for ParameterList {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.parameters().references()
+    }
 }
 
 impl AstVisitor for Block {
@@ -688,6 +796,10 @@ impl AstVisitor for Block {
         let mut result = self.statements().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.statements().references()
     }
 }
 
@@ -777,6 +889,27 @@ impl AstVisitor for Statement {
             Statement::InlineAssembly(_) => vec![],
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            Statement::Block(i) => i.references(),
+            Statement::Break(i) => i.references(),
+            Statement::Continue(i) => i.references(),
+            Statement::DoWhileStatement(i) => i.references(),
+            Statement::EmitStatement(i) => i.references(),
+            Statement::ExpressionStatement(i) => i.references(),
+            Statement::ForStatement(i) => i.references(),
+            Statement::IfStatement(i) => i.references(),
+            Statement::InlineAssembly(i) => i.references(),
+            Statement::PlaceholderStatement(i) => i.references(),
+            Statement::Return(i) => i.references(),
+            Statement::RevertStatement(i) => i.references(),
+            Statement::TryStatement(i) => i.references(),
+            Statement::UncheckedBlock(i) => i.references(),
+            Statement::VariableDeclarationStatement(i) => i.references(),
+            Statement::WhileStatement(i) => i.references(),
+        }
+    }
 }
 
 impl AstVisitor for Break {
@@ -805,6 +938,10 @@ impl AstVisitor for Break {
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
     }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
 }
 
 impl AstVisitor for Continue {
@@ -832,6 +969,10 @@ impl AstVisitor for Continue {
 
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
     }
 }
 
@@ -868,6 +1009,12 @@ impl AstVisitor for DoWhileStatement {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.body().references();
+        result.append(&mut self.condition().references());
+        result
+    }
 }
 
 impl AstVisitor for EmitStatement {
@@ -898,6 +1045,10 @@ impl AstVisitor for EmitStatement {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.event_call().references()
+    }
 }
 
 impl AstVisitor for ExpressionStatement {
@@ -927,6 +1078,10 @@ impl AstVisitor for ExpressionStatement {
         let mut result = self.expression().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.expression().references()
     }
 }
 
@@ -975,6 +1130,14 @@ impl AstVisitor for ForStatement {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.body().references();
+        result.append(&mut self.condition().references());
+        result.append(&mut self.initialization_expression().references());
+        result.append(&mut self.loop_expression().references());
+        result
+    }
 }
 
 impl AstVisitor for IfStatement {
@@ -1016,6 +1179,13 @@ impl AstVisitor for IfStatement {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.condition().references();
+        result.append(&mut self.false_body().references());
+        result.append(&mut self.true_body().references());
+        result
+    }
 }
 
 impl AstVisitor for PlaceholderStatement {
@@ -1043,6 +1213,10 @@ impl AstVisitor for PlaceholderStatement {
 
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
     }
 }
 
@@ -1074,6 +1248,10 @@ impl AstVisitor for Return {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.expression().references()
+    }
 }
 
 impl AstVisitor for RevertStatement {
@@ -1103,6 +1281,10 @@ impl AstVisitor for RevertStatement {
         let mut result = self.error_call().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.error_call().references()
     }
 }
 
@@ -1139,6 +1321,12 @@ impl AstVisitor for TryStatement {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.clauses().references();
+        result.append(&mut self.external_call().references());
+        result
+    }
 }
 
 impl AstVisitor for UncheckedBlock {
@@ -1168,6 +1356,10 @@ impl AstVisitor for UncheckedBlock {
         let mut result = self.statements().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.statements().references()
     }
 }
 
@@ -1202,6 +1394,12 @@ impl AstVisitor for VariableDeclarationStatement {
         let mut result = self.initial_value().childrens_id();
         result.append(&mut self.declarations().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.initial_value().references();
+        result.append(&mut self.declarations().references());
         result
     }
 }
@@ -1239,6 +1437,12 @@ impl AstVisitor for WhileStatement {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.body().references();
+        result.append(&mut self.condition().references());
+        result
+    }
 }
 
 impl AstVisitor for ModifierInvocation {
@@ -1274,6 +1478,12 @@ impl AstVisitor for ModifierInvocation {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.arguments().references();
+        result.append(&mut self.modifier_name().references());
+        result
+    }
 }
 
 impl AstVisitor for ModifierName {
@@ -1306,6 +1516,13 @@ impl AstVisitor for ModifierName {
             ModifierName::IdentifierPath(i) => i.childrens_id(),
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            ModifierName::Identifier(i) => i.references(),
+            ModifierName::IdentifierPath(i) => i.references(),
+        }
+    }
 }
 
 impl AstVisitor for OverrideSpecifier {
@@ -1335,6 +1552,10 @@ impl AstVisitor for OverrideSpecifier {
         let mut result = self.overrides().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.overrides().references()
     }
 }
 
@@ -1366,6 +1587,13 @@ impl AstVisitor for Overrides {
         match self {
             Overrides::UserDefinedTypeName(i) => i.childrens_id(),
             Overrides::IdentifierPath(i) => i.childrens_id(),
+        }
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            Overrides::UserDefinedTypeName(i) => i.references(),
+            Overrides::IdentifierPath(i) => i.references(),
         }
     }
 }
@@ -1412,6 +1640,16 @@ impl AstVisitor for TypeName {
             TypeName::UserDefinedTypeName(i) => i.childrens_id(),
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            TypeName::ArrayTypeName(i) => i.references(),
+            TypeName::ElementaryTypeName(i) => i.references(),
+            TypeName::FunctionTypeName(i) => i.references(),
+            TypeName::Mapping(i) => i.references(),
+            TypeName::UserDefinedTypeName(i) => i.references(),
+        }
+    }
 }
 
 impl AstVisitor for ArrayTypeName {
@@ -1447,6 +1685,12 @@ impl AstVisitor for ArrayTypeName {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.base_type().references();
+        result.append(&mut self.length().references());
+        result
+    }
 }
 
 impl AstVisitor for ElementaryTypeName {
@@ -1474,6 +1718,10 @@ impl AstVisitor for ElementaryTypeName {
 
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
     }
 }
 
@@ -1508,6 +1756,12 @@ impl AstVisitor for FunctionTypeName {
         let mut result = self.return_parameter_types().childrens_id();
         result.append(&mut self.parameter_types().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.return_parameter_types().references();
+        result.append(&mut self.parameter_types().references());
         result
     }
 }
@@ -1545,6 +1799,12 @@ impl AstVisitor for Mapping {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.key_type().references();
+        result.append(&mut self.value_type().references());
+        result
+    }
 }
 
 // @note Has a referenced_declaration
@@ -1578,6 +1838,12 @@ impl AstVisitor for UserDefinedTypeName {
     fn childrens_id(&self) -> Vec<isize> {
         let mut result = self.path_node().childrens_id();
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.path_node().references();
+        result.push(self.referenced_declaration());
         result
     }
 }
@@ -1615,6 +1881,14 @@ impl AstVisitor for Identifier {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        if let Some(id) = self.referenced_declaration() {
+            result.push(id);
+        }
+        result
+    }
 }
 
 impl AstVisitor for TypeDescriptions {
@@ -1637,6 +1911,10 @@ impl AstVisitor for TypeDescriptions {
     }
 
     fn childrens_id(&self) -> Vec<isize> {
+        vec![]
+    }
+
+    fn references(&self) -> Vec<isize> {
         vec![]
     }
 }
@@ -1671,6 +1949,13 @@ impl AstVisitor for LibraryName {
             LibraryName::IdentifierPath(i) => i.childrens_id(),
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            LibraryName::UserDefinedTypeName(i) => i.references(),
+            LibraryName::IdentifierPath(i) => i.references(),
+        }
+    }
 }
 
 // @note Has referenced declarations
@@ -1703,6 +1988,10 @@ impl AstVisitor for IdentifierPath {
 
     fn childrens_id(&self) -> Vec<isize> {
         vec![self.id()]
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![self.referenced_declaration()]
     }
 }
 
@@ -1784,6 +2073,25 @@ impl AstVisitor for Expression {
             Expression::UnaryOperation(i) => i.childrens_id(),
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            Expression::Assignment(i) => i.references(),
+            Expression::BinaryOperation(i) => i.references(),
+            Expression::Conditional(i) => i.references(),
+            Expression::ElementaryTypeNameExpression(i) => i.references(),
+            Expression::FunctionCall(i) => i.references(),
+            Expression::FunctionCallOptions(i) => i.references(),
+            Expression::Identifier(i) => i.references(),
+            Expression::IndexAccess(i) => i.references(),
+            Expression::IndexRangeAccess(i) => i.references(),
+            Expression::Literal(i) => i.references(),
+            Expression::MemberAccess(i) => i.references(),
+            Expression::NewExpression(i) => i.references(),
+            Expression::TupleExpression(i) => i.references(),
+            Expression::UnaryOperation(i) => i.references(),
+        }
+    }
 }
 
 impl AstVisitor for Body {
@@ -1807,7 +2115,6 @@ impl AstVisitor for Body {
             Body::UncheckedBlock(i) => i.filter_by_node_type(node_type),
             Body::VariableDeclarationStatement(i) => i.filter_by_node_type(node_type),
             Body::WhileStatement(i) => i.filter_by_node_type(node_type),
-            
         }
     }
 
@@ -1829,7 +2136,6 @@ impl AstVisitor for Body {
             Body::UncheckedBlock(i) => i.filter_by_reference_id(id),
             Body::VariableDeclarationStatement(i) => i.filter_by_reference_id(id),
             Body::WhileStatement(i) => i.filter_by_reference_id(id),
-           
         }
     }
 
@@ -1851,7 +2157,6 @@ impl AstVisitor for Body {
             Body::UncheckedBlock(i) => i.filter_by_id(id),
             Body::VariableDeclarationStatement(i) => i.filter_by_id(id),
             Body::WhileStatement(i) => i.filter_by_id(id),
-           
         }
     }
 
@@ -1873,7 +2178,27 @@ impl AstVisitor for Body {
             Body::UncheckedBlock(i) => i.childrens_id(),
             Body::VariableDeclarationStatement(i) => i.childrens_id(),
             Body::WhileStatement(i) => i.childrens_id(),
-          
+        }
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            Body::Block(i) => i.references(),
+            Body::Break(i) => i.references(),
+            Body::Continue(i) => i.references(),
+            Body::DoWhileStatement(i) => i.references(),
+            Body::EmitStatement(i) => i.references(),
+            Body::ExpressionStatement(i) => i.references(),
+            Body::ForStatement(i) => i.references(),
+            Body::IfStatement(i) => i.references(),
+            Body::InlineAssembly(i) => i.references(),
+            Body::PlaceholderStatement(i) => i.references(),
+            Body::Return(i) => i.references(),
+            Body::RevertStatement(i) => i.references(),
+            Body::TryStatement(i) => i.references(),
+            Body::UncheckedBlock(i) => i.references(),
+            Body::VariableDeclarationStatement(i) => i.references(),
+            Body::WhileStatement(i) => i.references(),
         }
     }
 }
@@ -1917,6 +2242,13 @@ impl AstVisitor for Assignment {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.left_hand_side().references();
+        result.append(&mut self.right_hand_side().references());
+        result.append(&mut self.argument_types().references());
+        result
+    }
 }
 
 impl AstVisitor for BinaryOperation {
@@ -1956,6 +2288,13 @@ impl AstVisitor for BinaryOperation {
         result.append(&mut self.right_expression().childrens_id());
         result.append(&mut self.argument_types().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.left_expression().references();
+        result.append(&mut self.right_expression().references());
+        result.append(&mut self.argument_types().references());
         result
     }
 }
@@ -2003,6 +2342,14 @@ impl AstVisitor for Conditional {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        result.append(&mut self.condition().references());
+        result.append(&mut self.true_expression().references());
+        result.append(&mut self.false_expression().references());
+        result
+    }
 }
 
 impl AstVisitor for ElementaryTypeNameExpression {
@@ -2036,6 +2383,12 @@ impl AstVisitor for ElementaryTypeNameExpression {
         let mut result = self.argument_types().childrens_id();
         result.append(&mut self.type_name().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        result.append(&mut self.type_name().references());
         result
     }
 }
@@ -2079,6 +2432,13 @@ impl AstVisitor for FunctionCall {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.arguments().references();
+        result.append(&mut self.expression().references());
+        result.append(&mut self.argument_types().references());
+        result
+    }
 }
 
 impl AstVisitor for FunctionCallOptions {
@@ -2120,6 +2480,13 @@ impl AstVisitor for FunctionCallOptions {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.options().references();
+        result.append(&mut self.expression().references());
+        result.append(&mut self.argument_types().references());
+        result
+    }
 }
 
 impl AstVisitor for IndexAccess {
@@ -2159,6 +2526,13 @@ impl AstVisitor for IndexAccess {
         result.append(&mut self.index_expression().childrens_id());
         result.append(&mut self.argument_types().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.base_expression().references();
+        result.append(&mut self.index_expression().references());
+        result.append(&mut self.argument_types().references());
         result
     }
 }
@@ -2206,6 +2580,14 @@ impl AstVisitor for IndexRangeAccess {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.base_expression().references();
+        result.append(&mut self.start_expression().references());
+        result.append(&mut self.end_expression().references());
+        result.append(&mut self.argument_types().references());
+        result
+    }
 }
 
 impl AstVisitor for Literal {
@@ -2235,6 +2617,10 @@ impl AstVisitor for Literal {
         let mut result = self.argument_types().childrens_id();
         result.push(self.id());
         result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.argument_types().references()
     }
 }
 
@@ -2269,6 +2655,15 @@ impl AstVisitor for MemberAccess {
         let mut result = self.argument_types().childrens_id();
         result.append(&mut self.expression().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        result.append(&mut self.expression().references());
+        if let Some(id) = self.referenced_declaration() {
+            result.push(id);
+        }
         result
     }
 }
@@ -2306,6 +2701,12 @@ impl AstVisitor for NewExpression {
         result.push(self.id());
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        result.append(&mut self.type_name().references());
+        result
+    }
 }
 
 impl AstVisitor for TupleExpression {
@@ -2339,6 +2740,12 @@ impl AstVisitor for TupleExpression {
         let mut result = self.argument_types().childrens_id();
         result.append(&mut self.components().childrens_id());
         result.push(self.id());
+        result
+    }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        result.append(&mut self.components().references());
         result
     }
 }
@@ -2378,6 +2785,12 @@ impl AstVisitor for UnaryOperation {
 
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.argument_types().references();
+        result.append(&mut self.sub_expression().references());
+        result
+    }
 }
 
 impl AstVisitor for InitializationExpression {
@@ -2412,6 +2825,13 @@ impl AstVisitor for InitializationExpression {
         match self {
             InitializationExpression::ExpressionStatement(i) => i.childrens_id(),
             InitializationExpression::VariableDeclarationStatement(i) => i.childrens_id(),
+        }
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            InitializationExpression::ExpressionStatement(i) => i.references(),
+            InitializationExpression::VariableDeclarationStatement(i) => i.references(),
         }
     }
 }
@@ -2498,6 +2918,26 @@ impl AstVisitor for FalseBody {
             FalseBody::WhileStatement(i) => i.childrens_id(),
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            FalseBody::Block(i) => i.references(),
+            FalseBody::Break(i) => i.references(),
+            FalseBody::Continue(i) => i.references(),
+            FalseBody::DoWhileStatement(i) => i.references(),
+            FalseBody::EmitStatement(i) => i.references(),
+            FalseBody::ExpressionStatement(i) => i.references(),
+            FalseBody::ForStatement(i) => i.references(),
+            FalseBody::IfStatement(i) => i.references(),
+            FalseBody::PlaceholderStatement(i) => i.references(),
+            FalseBody::Return(i) => i.references(),
+            FalseBody::RevertStatement(i) => i.references(),
+            FalseBody::TryStatement(i) => i.references(),
+            FalseBody::UncheckedBlock(i) => i.references(),
+            FalseBody::VariableDeclarationStatement(i) => i.references(),
+            FalseBody::WhileStatement(i) => i.references(),
+        }
+    }
 }
 
 impl AstVisitor for TryCatchClause {
@@ -2535,6 +2975,12 @@ impl AstVisitor for TryCatchClause {
 
         result
     }
+
+    fn references(&self) -> Vec<isize> {
+        let mut result = self.block().references();
+        result.append(&mut self.parameters().references());
+        result
+    }
 }
 
 /**
@@ -2556,6 +3002,10 @@ impl AstVisitor for serde_json::Value {
     }
 
     fn childrens_id(&self) -> Vec<isize> {
+        vec![]
+    }
+
+    fn references(&self) -> Vec<isize> {
         vec![]
     }
 }
@@ -2590,6 +3040,13 @@ impl<T: AstVisitor> AstVisitor for Option<T> {
             None => vec![],
         }
     }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            Some(t) => t.references(),
+            None => vec![],
+        }
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for Vec<T> {
@@ -2613,6 +3070,10 @@ impl<T: AstVisitor> AstVisitor for Vec<T> {
 
     fn childrens_id(&self) -> Vec<isize> {
         self.iter().flat_map(|node| node.childrens_id()).collect()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.iter().flat_map(|node| node.references()).collect()
     }
 }
 
@@ -2638,6 +3099,10 @@ impl<T: AstVisitor> AstVisitor for &[T] {
     fn childrens_id(&self) -> Vec<isize> {
         self.iter().flat_map(|node| node.childrens_id()).collect()
     }
+
+    fn references(&self) -> Vec<isize> {
+        self.iter().flat_map(|node| node.references()).collect()
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for &T {
@@ -2658,6 +3123,10 @@ impl<T: AstVisitor> AstVisitor for &T {
     fn childrens_id(&self) -> Vec<isize> {
         (*self).childrens_id()
     }
+
+    fn references(&self) -> Vec<isize> {
+        (*self).references()
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for Box<T> {
@@ -2677,6 +3146,10 @@ impl<T: AstVisitor> AstVisitor for Box<T> {
 
     fn childrens_id(&self) -> Vec<isize> {
         self.as_ref().childrens_id()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.as_ref().references()
     }
 }
 
