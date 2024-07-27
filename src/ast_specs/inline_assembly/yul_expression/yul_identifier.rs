@@ -1,11 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use super::yul_block::YulBlock;
-
 #[derive(Debug, Serialize, Deserialize)]
-pub struct YulIf {
-    pub body: YulBlock,
-    pub condition: YulExpression,
+pub struct YulIdentifier {
+    pub name: String,
     #[serde(rename = "nativeSrc")]
     pub native_src: Option<String>,
     pub src: String,

@@ -1,14 +1,17 @@
 use serde::{Deserialize, Serialize};
 
+use crate::ast_specs::inline_assembly::yul_expression::YulExpression;
+
 use super::yul_block::YulBlock;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct YulFunctionDefinition {
+pub struct YulForLoop {
     pub body: YulBlock,
-    pub name: String,
+    pub condition: YulExpression,
     #[serde(rename = "nativeSrc")]
     pub native_src: Option<String>,
-    pub parameters: Vec<YulTypedName>,
-    pub return_variables: Vec<YulTypedName>,
+    pub post: YulBlock,
+    pub pre: YulBlock,
     pub src: String,
 }
+    

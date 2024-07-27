@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct YulAssignment {
+pub struct YulTypedName {
+    pub name: String,
     #[serde(rename = "nativeSrc")]
     pub native_src: Option<String>,
     pub src: String,
-    pub value: YulExpression,
-    #[serde(rename = "variableNames")]
-    pub variable_names: Vec<YulIdentifier>,
+    pub r#type: String, // Use `r#type` to avoid conflict with Rust's `type` keyword
 }
