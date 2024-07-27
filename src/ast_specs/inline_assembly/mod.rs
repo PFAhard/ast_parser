@@ -6,7 +6,7 @@ pub mod yul_typed_name;
 use serde::{Deserialize, Serialize};
 use yul_statements::yul_block::YulBlock;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InlineAssembly {
     #[serde(rename = "AST")]
     pub ast: YulBlock,
@@ -20,7 +20,7 @@ pub struct InlineAssembly {
     pub src: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum EvmVersion {
     #[serde(rename = "homestead")]
     Homestead,
@@ -48,7 +48,7 @@ pub enum EvmVersion {
     Cancun,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExternalReference {
     pub declaration: isize,
     #[serde(rename = "isOffset")]
@@ -61,7 +61,7 @@ pub struct ExternalReference {
     pub value_size: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Suffix {
     #[serde(rename = "offset")]
     Offset,

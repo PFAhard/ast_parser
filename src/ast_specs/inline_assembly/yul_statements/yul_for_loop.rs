@@ -4,7 +4,7 @@ use crate::ast_specs::inline_assembly::yul_expression::YulExpression;
 
 use super::yul_block::YulBlock;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YulForLoop {
     pub body: YulBlock,
     pub condition: YulExpression,

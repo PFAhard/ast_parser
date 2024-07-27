@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YulLiteralHexValue {
     #[serde(rename = "hexValue")]
     pub hex_value: String,
@@ -14,7 +14,7 @@ pub struct YulLiteralHexValue {
 }
 
 // Reuse the LiteralKind enum from YulLiteralValue
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum LiteralKind {
     String,

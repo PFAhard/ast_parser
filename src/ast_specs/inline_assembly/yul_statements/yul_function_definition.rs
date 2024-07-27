@@ -4,7 +4,7 @@ use crate::ast_specs::inline_assembly::yul_typed_name::YulTypedName;
 
 use super::yul_block::YulBlock;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YulFunctionDefinition {
     pub body: YulBlock,
     pub name: String,

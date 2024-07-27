@@ -19,7 +19,7 @@ use self::{
     yul_leave::YulLeave, yul_switch::YulSwitch, yul_variable_declaration::YulVariableDeclaration,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "nodeType")]
 pub enum YulStatement {
     YulAssignment(YulAssignment),

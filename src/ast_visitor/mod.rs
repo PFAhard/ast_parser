@@ -1,4 +1,32 @@
 #![warn(clippy::all)]
+use crate::ast_specs::inline_assembly::{
+    yul_expression::{
+        yul_function_call::YulFunctionCall,
+        yul_identifier::YulIdentifier,
+        yul_literal::{
+            yul_literal_hex_value::YulLiteralHexValue, yul_literal_value::YulLiteralValue,
+            YulLiteral,
+        },
+        YulExpression,
+    },
+    yul_statements::{
+        yul_assignment::YulAssignment,
+        yul_block::YulBlock,
+        yul_break::YulBreak,
+        yul_continue::YulContinue,
+        yul_expression_statement::YulExpressionStatement,
+        yul_for_loop::YulForLoop,
+        yul_function_definition::YulFunctionDefinition,
+        yul_if::YulIf,
+        yul_leave::YulLeave,
+        yul_switch::{CaseValue, YulCase, YulSwitch},
+        yul_variable_declaration::YulVariableDeclaration,
+        YulStatement,
+    },
+    yul_typed_name::YulTypedName,
+    ExternalReference, InlineAssembly,
+};
+
 use super::ast_specs::{
     base_nodes::{EventDefinition, ModifierDefinition},
     common::{
@@ -2980,6 +3008,545 @@ impl AstVisitor for TryCatchClause {
         let mut result = self.block().references();
         result.append(&mut self.parameters().references());
         result
+    }
+}
+
+impl AstVisitor for InlineAssembly {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.ast.references(), self.external_references.references()].concat()
+    }
+}
+
+impl AstVisitor for ExternalReference {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![self.declaration]
+    }
+}
+
+impl AstVisitor for YulBlock {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.statements.references()
+    }
+}
+
+impl AstVisitor for YulStatement {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            YulStatement::YulAssignment(i) => i.references(),
+            YulStatement::YulBlock(i) => i.references(),
+            YulStatement::YulBreak(i) => i.references(),
+            YulStatement::YulContinue(i) => i.references(),
+            YulStatement::YulExpressionStatement(i) => i.references(),
+            YulStatement::YulLeave(i) => i.references(),
+            YulStatement::YulForLoop(i) => i.references(),
+            YulStatement::YulFunctionDefinition(i) => i.references(),
+            YulStatement::YulIf(i) => i.references(),
+            YulStatement::YulSwitch(i) => i.references(),
+            YulStatement::YulVariableDeclaration(i) => i.references(),
+        }
+    }
+}
+
+impl AstVisitor for YulVariableDeclaration {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.value.references(), self.variables.references()].concat()
+    }
+}
+
+impl AstVisitor for YulSwitch {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.cases.references(), self.expression.references()].concat()
+    }
+}
+
+impl AstVisitor for YulCase {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.body.references(), self.value.references()].concat()
+    }
+}
+
+impl AstVisitor for CaseValue {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            CaseValue::Default => todo!(),
+            CaseValue::YulLiteral(i) => i.references(),
+        }
+    }
+}
+
+impl AstVisitor for YulIf {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.body.references(), self.condition.references()].concat()
+    }
+}
+
+impl AstVisitor for YulFunctionDefinition {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [
+            self.body.references(),
+            self.parameters.references(),
+            self.return_variables.references(),
+        ]
+        .concat()
+    }
+}
+
+impl AstVisitor for YulForLoop {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![
+            self.body.references(),
+            self.condition.references(),
+            self.post.references(),
+            self.pre.references(),
+        ]
+        .concat()
+    }
+}
+
+impl AstVisitor for YulLeave {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
+}
+
+impl AstVisitor for YulExpressionStatement {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.expression.references()
+    }
+}
+
+impl AstVisitor for YulContinue {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
+}
+
+impl AstVisitor for YulBreak {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
+}
+
+impl AstVisitor for YulAssignment {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.value.references(), self.variable_names.references()].concat()
+    }
+}
+
+impl AstVisitor for YulExpression {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            YulExpression::YulFunctionCall(i) => i.references(),
+            YulExpression::YulIdentifier(i) => i.references(),
+            YulExpression::YulLiteral(i) => i.references(),
+        }
+    }
+}
+
+impl AstVisitor for YulIdentifier {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
+}
+
+impl AstVisitor for YulFunctionCall {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        [self.arguments.references(), self.function_name.references()].concat()
+    }
+}
+
+impl AstVisitor for YulLiteral {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            YulLiteral::YulLiteralValue(i) => i.references(),
+            YulLiteral::YulLiteralHexValue(i) => i.references(),
+        }
+    }
+}
+
+impl AstVisitor for YulLiteralValue {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
+}
+
+impl AstVisitor for YulLiteralHexValue {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
+    }
+}
+
+impl AstVisitor for YulTypedName {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        vec![]
     }
 }
 
