@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables)]
 pub mod ast_specs;
 pub mod ast_visitor;
 pub mod ast_framework;
