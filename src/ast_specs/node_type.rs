@@ -27,7 +27,8 @@ use super::{
 
 use crate::AstParserError;
 
-macro_rules! cast_node_type {
+#[macro_export]
+macro_rules! unwrap_node_type {
     ($target: expr, $pat: path) => {{
         if let $pat(a) = $target {
             // #1
@@ -36,6 +37,16 @@ macro_rules! cast_node_type {
             AstParserError::result_node_type_internal_cast()
             // panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
         }
+    }};
+}
+
+#[macro_export]
+macro_rules! cast_node_type {
+    ($target: expr, $pat: path) => {{
+        $target.filter_by_node_type($pat)
+            .into_iter()
+            .map(|v| unwrap_node_type!(v, $pat))
+            .collect()
     }};
 }
 
@@ -239,34 +250,34 @@ pub enum NodeTypeInternal {
 
 impl NodeTypeInternal {
     pub fn import_directive(self) -> crate::AstParserResult<ImportDirective> {
-        cast_node_type!(self, NodeTypeInternal::ImportDirective)
+        unwrap_node_type!(self, NodeTypeInternal::ImportDirective)
     }
 
     pub fn variable_declaration(self) -> crate::AstParserResult<VariableDeclaration> {
-        cast_node_type!(self, NodeTypeInternal::VariableDeclaration)
+        unwrap_node_type!(self, NodeTypeInternal::VariableDeclaration)
     }
 
     pub fn identifier(self) -> crate::AstParserResult<Identifier> {
-        cast_node_type!(self, NodeTypeInternal::Identifier)
+        unwrap_node_type!(self, NodeTypeInternal::Identifier)
     }
 
     pub fn block(self) -> crate::AstParserResult<Block> {
-        cast_node_type!(self, NodeTypeInternal::Block)
+        unwrap_node_type!(self, NodeTypeInternal::Block)
     }
 
     pub fn modifier_definition(self) -> crate::AstParserResult<ModifierDefinition> {
-        cast_node_type!(self, NodeTypeInternal::ModifierDefinition)
+        unwrap_node_type!(self, NodeTypeInternal::ModifierDefinition)
     }
 
     pub fn contract_definition(self) -> crate::AstParserResult<ContractDefinition> {
-        cast_node_type!(self, NodeTypeInternal::ContractDefinition)
+        unwrap_node_type!(self, NodeTypeInternal::ContractDefinition)
     }
 
     pub fn function_call(self) -> crate::AstParserResult<FunctionCall> {
-        cast_node_type!(self, NodeTypeInternal::FunctionCall)
+        unwrap_node_type!(self, NodeTypeInternal::FunctionCall)
     }
 
     pub fn function_definition(self) -> crate::AstParserResult<FunctionDefinition> {
-        cast_node_type!(self, NodeTypeInternal::FunctionDefinition)
+        unwrap_node_type!(self, NodeTypeInternal::FunctionDefinition)
     }
 }
