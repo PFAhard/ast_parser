@@ -25,30 +25,7 @@ use super::{
     SourceUnit,
 };
 
-use crate::AstParserError;
-
-#[macro_export]
-macro_rules! unwrap_node_type {
-    ($target: expr, $pat: path) => {{
-        if let $pat(a) = $target {
-            // #1
-            Ok(a)
-        } else {
-            AstParserError::result_node_type_internal_cast()
-            // panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
-        }
-    }};
-}
-
-#[macro_export]
-macro_rules! cast_node_type {
-    ($target: expr, $pat: path) => {{
-        $target.filter_by_node_type($pat)
-            .into_iter()
-            .map(|v| unwrap_node_type!(v, $pat))
-            .collect()
-    }};
-}
+use crate::{unwrap_node_type, AstParserError};
 
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NodeType {

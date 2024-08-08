@@ -3269,12 +3269,10 @@ impl AstVisitor for YulForLoop {
     }
 
     fn references(&self) -> Vec<isize> {
-        vec![
-            self.body.references(),
+        [self.body.references(),
             self.condition.references(),
             self.post.references(),
-            self.pre.references(),
-        ]
+            self.pre.references()]
         .concat()
     }
 }
