@@ -1,7 +1,7 @@
 #![allow(dead_code, unused_variables)]
+pub mod ast_framework;
 pub mod ast_specs;
 pub mod ast_visitor;
-pub mod ast_framework;
 pub mod error;
 // pub mod ast_descriptor; TODO:
 
@@ -23,9 +23,18 @@ macro_rules! unwrap_node_type {
 #[macro_export]
 macro_rules! cast_node_type {
     ($target: expr; $pat: path; $int: path) => {{
-        $target.filter_by_node_type($pat)
+        $target
+            .filter_by_node_type($pat)
             .into_iter()
-            .map(|v| $crate::unwrap_node_type!(v, $int))
+            .filter_map(|v| {
+                if let $int(a) = $target {
+                    // #1
+                    Some(a)
+                } else {
+                    $crate::AstParserError::result_node_type_internal_cast().ok()
+                    // panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
+                }
+            })
             .collect()
     }};
 }
