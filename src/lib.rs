@@ -28,11 +28,9 @@ macro_rules! cast_node_type {
             .into_iter()
             .filter_map(|v| {
                 if let $int(a) = $target {
-                    // #1
                     Some(a)
                 } else {
-                    $crate::AstParserError::result_node_type_internal_cast().ok()
-                    // panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
+                    None
                 }
             })
             .collect()
