@@ -6,6 +6,7 @@ pub mod error;
 // pub mod ast_descriptor; TODO:
 
 pub use error::*;
+use paste::paste;
 
 #[macro_export]
 macro_rules! unwrap_node_type {
@@ -22,36 +23,37 @@ macro_rules! unwrap_node_type {
 
 #[macro_export]
 macro_rules! cast_node_type {
-    ($target: expr; $pat: ident) => {{
-        paste! {
+    ($target:expr; $pat:ident) => {{
             $target
-                .filter_by_node_type([<NodeType:: $pat>])
+                .filter_by_node_type(NodeType::$pat)
                 .into_iter()
                 .filter_map(|v| {
-                    if let [<NodeTypeInternal:: $pat (a)>] = v {
+                    if let NodeTypeInternal::$pat(a) = v {
                         Some(a)
                     } else {
                         None
                     }
                 })
                 .collect::<Vec<_>>()
-        }
     }};
-    ($target: expr; $pat: ident; $($func:expr),*) => {{
-        paste! {
+    ($target:expr; $pat:ident; $($func:expr),*) => {{
             $target
-                .filter_by_node_type([<NodeType:: $pat>])
+                .filter_by_node_type(NodeType::$pat)
                 .into_iter()
                 .filter_map(|v| {
-                    if let [<NodeTypeInternal:: $pat (a)>] = v {
+                    if let NodeTypeInternal::$pat(a) = v {
                         Some(
-                            [<a $(.$func() )* >]
+                            a$(.$func())*
                         )
                     } else {
                         None
                     }
                 })
                 .collect::<Vec<_>>()
-        }
     }};
 }
+
+// fn test_cast() {
+//     let x = 0;
+//     let x = cast_node_type!(x; ContractDefinition; name, to_owned);
+// }
