@@ -22,17 +22,30 @@ macro_rules! unwrap_node_type {
 
 #[macro_export]
 macro_rules! cast_node_type {
-    ($target: expr; $pat: path; $int: path) => {{
+    ($target: expr; $pat: ident) => {{
         $target
-            .filter_by_node_type($pat)
+            .filter_by_node_type(NodeType::$pat)
             .into_iter()
             .filter_map(|v| {
-                if let $int(a) = v {
+                if let NodeTypeInternal::$pat(a) = v {
                     Some(a)
                 } else {
                     None
                 }
             })
-            .collect()
+            .collect::<Vec<_>>()
+    }};
+    ($target: expr; $pat: ident; $func:ident) => {{
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    Some(a.$func())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
     }};
 }
