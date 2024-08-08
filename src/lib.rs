@@ -15,7 +15,7 @@ macro_rules! unwrap_node_type {
             // #1
             Ok(a)
         } else {
-            AstParserError::result_node_type_internal_cast()
+            $crate::error::AstParserError::result_node_type_internal_cast()
             // panic!("mismatch variant when cast to {}", stringify!($pat)); // #2
         }
     }};
@@ -23,10 +23,10 @@ macro_rules! unwrap_node_type {
 
 #[macro_export]
 macro_rules! cast_node_type {
-    ($target: expr, $pat: path) => {{
+    ($target: expr, $int: path, $pat: path) => {{
         $target.filter_by_node_type($pat)
             .into_iter()
-            .map(|v| $crate::unwrap_node_type!(v, $pat))
+            .map(|v| $crate::unwrap_node_type!(v, $int))
             .collect()
     }};
 }
