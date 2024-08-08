@@ -54,8 +54,8 @@ impl ContractDefinition {
         self.name.as_ref()
     }
 
-    pub fn contract_kind(&self) -> &ContractKind {
-        &self.contract_kind
+    pub fn contract_kind(&self) -> ContractKind {
+        self.contract_kind
     }
 
     pub fn linearized_base_contracts(&self) -> &[isize] {
@@ -63,7 +63,7 @@ impl ContractDefinition {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ContractKind {
     #[serde(rename = "contract")]
     Contract,
