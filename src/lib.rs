@@ -59,8 +59,28 @@ macro_rules! cast_node_type {
                 })
                 .collect::<Vec<_>>()
     }};
-}
+    ($target:expr; $pat:ident; $([$($func:ident),* ]),*) => {{
+        use ast_parser::ast_specs::NodeType;
+        use ast_parser::ast_specs::NodeTypeInternal;
+        use ast_parser::ast_visitor::AstVisitor;
 
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    Some(
+                        ($(
+                            a$(.$func())*,
+                        )*)
+                    )
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+}};
+}
 
 // fn test_cast() {
 //     let x = 0;
