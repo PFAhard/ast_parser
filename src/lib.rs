@@ -27,7 +27,7 @@ macro_rules! cast_node_type {
             .filter_by_node_type($pat)
             .into_iter()
             .filter_map(|v| {
-                if let $int(a) = $target {
+                if let $int(a) = v {
                     Some(a)
                 } else {
                     None
