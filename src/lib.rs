@@ -26,7 +26,7 @@ macro_rules! cast_node_type {
     ($target: expr, $pat: path) => {{
         $target.filter_by_node_type($pat)
             .into_iter()
-            .map(|v| unwrap_node_type!(v, $pat))
+            .map(|v| $crate::unwrap_node_type!(v, $pat))
             .collect()
     }};
 }
