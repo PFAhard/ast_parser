@@ -36,7 +36,7 @@ macro_rules! cast_node_type {
                 })
                 .collect::<Vec<_>>()
     }};
-    ($target:expr; $pat:ident; $($func:expr),*) => {{
+    ($target:expr; $pat:ident; $($func:ident),*) => {{
             $target
                 .filter_by_node_type(NodeType::$pat)
                 .into_iter()
