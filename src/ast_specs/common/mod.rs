@@ -27,7 +27,7 @@ pub enum LibraryName {
     IdentifierPath(IdentifierPath),
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Copy)]
 pub enum Mutability {
     #[serde(rename = "mutable")]
     Mutable,

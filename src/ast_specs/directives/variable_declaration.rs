@@ -65,4 +65,12 @@ impl VariableDeclaration {
     pub fn state_variable(&self) -> bool {
         self.state_variable
     }
+    
+    pub fn visibility(&self) -> Visibility {
+        self.visibility
+    }
+    
+    pub fn mutability(&self) -> Mutability {
+        self.mutability
+    }
 }
