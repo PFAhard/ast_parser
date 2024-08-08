@@ -80,12 +80,12 @@ impl FunctionDefinition {
         self.scope
     }
 
-    pub fn visibility(&self) -> &Visibility {
-        &self.visibility
+    pub fn visibility(&self) -> Visibility {
+        self.visibility
     }
 
-    pub fn state_mutability(&self) -> &StateMutability {
-        &self.state_mutability
+    pub fn state_mutability(&self) -> StateMutability {
+        self.state_mutability
     }
 
     pub fn full_name(&self) -> String {
@@ -121,7 +121,7 @@ impl FunctionDefinition {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Copy)]
 pub enum FunctionKind {
     #[serde(rename = "function")]
     Function,
