@@ -51,7 +51,7 @@ impl Statement {
             Statement::Continue(i) => i.id(),
             Statement::DoWhileStatement(i) => i.id(),
             Statement::EmitStatement(i) => i.id(),
-            Statement::ExpressionStatement(i) => i.id(),
+            Statement::ExpressionStatement(i) => i.expression().as_ref().unwrap().id(),
             Statement::ForStatement(i) => i.id(),
             Statement::IfStatement(i) => i.id(),
             Statement::InlineAssembly(i) => i.id(),
