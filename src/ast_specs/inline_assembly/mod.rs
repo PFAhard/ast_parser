@@ -20,6 +20,12 @@ pub struct InlineAssembly {
     pub src: String,
 }
 
+impl InlineAssembly {
+    pub fn id(&self) -> isize {
+        self.id
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum EvmVersion {
     #[serde(rename = "homestead")]

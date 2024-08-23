@@ -42,3 +42,26 @@ pub enum Statement {
     VariableDeclarationStatement(VariableDeclarationStatement),
     WhileStatement(WhileStatement),
 }
+
+impl Statement {
+    pub fn id(&self) -> isize {
+        match self {
+            Statement::Block(i) => i.id(),
+            Statement::Break(i) => i.id(),
+            Statement::Continue(i) => i.id(),
+            Statement::DoWhileStatement(i) => i.id(),
+            Statement::EmitStatement(i) => i.id(),
+            Statement::ExpressionStatement(i) => i.id(),
+            Statement::ForStatement(i) => i.id(),
+            Statement::IfStatement(i) => i.id(),
+            Statement::InlineAssembly(i) => i.id(),
+            Statement::PlaceholderStatement(i) => i.id(),
+            Statement::Return(i) => i.id(),
+            Statement::RevertStatement(i) => i.id(),
+            Statement::TryStatement(i) => i.id(),
+            Statement::UncheckedBlock(i) => i.id(),
+            Statement::VariableDeclarationStatement(i) => i.id(),
+            Statement::WhileStatement(i) => i.id(),
+        }
+    }
+}
