@@ -106,4 +106,23 @@ impl Expression {
             Expression::UnaryOperation(_) => todo!(),
         }
     }
+
+    pub fn id(&self) -> isize {
+        match self {
+            Expression::Assignment(_) => todo!(),
+            Expression::BinaryOperation(_) => todo!(),
+            Expression::Conditional(_) => todo!(),
+            Expression::ElementaryTypeNameExpression(_) => todo!(),
+            Expression::FunctionCall(_) => todo!(),
+            Expression::FunctionCallOptions(_) => todo!(),
+            Expression::Identifier(i) => i.id(),
+            Expression::IndexAccess(_) => todo!(),
+            Expression::IndexRangeAccess(_) => todo!(),
+            Expression::Literal(_) => todo!(),
+            Expression::MemberAccess(ma) => ma.id(),
+            Expression::NewExpression(_) => todo!(),
+            Expression::TupleExpression(_) => todo!(),
+            Expression::UnaryOperation(_) => todo!(),
+        }
+    }
 }
