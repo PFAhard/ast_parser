@@ -110,7 +110,7 @@ impl Expression {
     pub fn id(&self) -> isize {
         match self {
             Expression::Assignment(_) => todo!(),
-            Expression::BinaryOperation(_) => todo!(),
+            Expression::BinaryOperation(bin_op) => bin_op.id(),
             Expression::Conditional(_) => todo!(),
             Expression::ElementaryTypeNameExpression(_) => todo!(),
             Expression::FunctionCall(_) => todo!(),
