@@ -109,20 +109,20 @@ impl Expression {
 
     pub fn id(&self) -> isize {
         match self {
-            Expression::Assignment(_) => todo!(),
+            Expression::Assignment(i) => i.id(),
             Expression::BinaryOperation(bin_op) => bin_op.id(),
-            Expression::Conditional(_) => todo!(),
-            Expression::ElementaryTypeNameExpression(_) => todo!(),
-            Expression::FunctionCall(_) => todo!(),
-            Expression::FunctionCallOptions(_) => todo!(),
+            Expression::Conditional(i) => i.id(),
+            Expression::ElementaryTypeNameExpression(i) => i.id(),
+            Expression::FunctionCall(i) => i.id(),
+            Expression::FunctionCallOptions(i) => i.id(),
             Expression::Identifier(i) => i.id(),
-            Expression::IndexAccess(_) => todo!(),
-            Expression::IndexRangeAccess(_) => todo!(),
-            Expression::Literal(_) => todo!(),
+            Expression::IndexAccess(i) => i.id(),
+            Expression::IndexRangeAccess(i) => i.id(),
+            Expression::Literal(i) => i.id(),
             Expression::MemberAccess(ma) => ma.id(),
-            Expression::NewExpression(_) => todo!(),
-            Expression::TupleExpression(_) => todo!(),
-            Expression::UnaryOperation(_) => todo!(),
+            Expression::NewExpression(i) => i.id(),
+            Expression::TupleExpression(i) => i.id(),
+            Expression::UnaryOperation(i) => i.id(),
         }
     }
 }
