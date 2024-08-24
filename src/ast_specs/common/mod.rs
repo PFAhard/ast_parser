@@ -64,7 +64,7 @@ pub enum FunctionCallKind {
     StructConstructorCall,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Copy)]
 pub enum LiteralKind {
     #[serde(rename = "bool")]
     Bool,

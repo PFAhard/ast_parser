@@ -36,8 +36,8 @@ impl Literal {
         self.id
     }
 
-    pub fn value(&self) -> Option<&String> {
-        self.value.as_ref()
+    pub fn value(&self) -> Option<String> {
+        self.value.clone()
     }
 
     pub fn as_name(&self) -> &str {
@@ -45,5 +45,9 @@ impl Literal {
             Some(value) => value,
             None => todo!(),
         }
+    }
+    
+    pub fn kind(&self) -> LiteralKind {
+        self.kind
     }
 }

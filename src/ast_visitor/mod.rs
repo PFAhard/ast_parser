@@ -66,6 +66,7 @@ pub trait AstVisitor {
     fn references(&self) -> Vec<isize>;
 }
 
+
 impl AstVisitor for SourceUnit {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
         let node_type: NodeType = node_type.into();
@@ -3269,10 +3270,12 @@ impl AstVisitor for YulForLoop {
     }
 
     fn references(&self) -> Vec<isize> {
-        [self.body.references(),
+        [
+            self.body.references(),
             self.condition.references(),
             self.post.references(),
-            self.pre.references()]
+            self.pre.references(),
+        ]
         .concat()
     }
 }
