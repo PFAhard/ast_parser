@@ -25,7 +25,7 @@ impl ImportDirective {
     }
 
     pub fn symbol_aliases(&self) -> &serde_json::Value {
-        #[cfg(debug_assertions)]
+        // #[cfg(debug_assertions)]
         // eprintln!("[DEBUG] Symbol aliases are not yet supported");
         &self.symbol_aliases
     }
