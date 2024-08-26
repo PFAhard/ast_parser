@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::Deserialize;
 
 use crate::ast_specs::common::{
@@ -137,4 +139,16 @@ pub enum FunctionKind {
     Fallback,
     #[serde(rename = "freeFunction")]
     FreeFunction,
+}
+
+impl Display for FunctionKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FunctionKind::Function => f.write_str("function"),
+            FunctionKind::Receive => f.write_str("receive"),
+            FunctionKind::Constructor => f.write_str("constructor"),
+            FunctionKind::Fallback => f.write_str("fallback"),
+            FunctionKind::FreeFunction => f.write_str("freeFunction"),
+        } 
+    }
 }
