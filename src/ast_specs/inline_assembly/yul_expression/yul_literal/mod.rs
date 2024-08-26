@@ -6,7 +6,7 @@ use yul_literal_hex_value::YulLiteralHexValue;
 use yul_literal_value::YulLiteralValue;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(untagged)]
+#[serde(tag = "nodeType")]
 pub enum YulLiteral {
     YulLiteralValue(YulLiteralValue),
     YulLiteralHexValue(YulLiteralHexValue),
