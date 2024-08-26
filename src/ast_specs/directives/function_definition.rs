@@ -119,6 +119,10 @@ impl FunctionDefinition {
 
         name
     }
+    
+    pub fn kind(&self) -> FunctionKind {
+        self.kind
+    }
 }
 
 #[derive(Deserialize, Debug, Clone, Copy)]
