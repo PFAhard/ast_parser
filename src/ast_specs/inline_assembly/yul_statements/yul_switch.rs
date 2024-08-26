@@ -24,6 +24,7 @@ pub struct YulCase {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
+#[serde(untagged)]
 pub enum CaseValue {
     Default(String),
     YulLiteral(YulLiteral),
