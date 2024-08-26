@@ -3197,7 +3197,7 @@ impl AstVisitor for CaseValue {
 
     fn references(&self) -> Vec<isize> {
         match self {
-            CaseValue::Default => todo!(),
+            CaseValue::Default(_) => todo!(),
             CaseValue::YulLiteral(i) => i.references(),
         }
     }
