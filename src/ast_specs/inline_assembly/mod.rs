@@ -73,4 +73,6 @@ pub enum Suffix {
     Offset,
     #[serde(rename = "slot")]
     Slot,
+    #[serde(rename = "length")]
+    Length,
 }
