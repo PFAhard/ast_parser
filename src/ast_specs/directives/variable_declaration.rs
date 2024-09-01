@@ -73,4 +73,8 @@ impl VariableDeclaration {
     pub fn mutability(&self) -> Mutability {
         self.mutability
     }
+    
+    pub fn constant(&self) -> bool {
+        self.constant
+    }
 }

@@ -6,7 +6,6 @@ pub mod error;
 // pub mod ast_descriptor; TODO:
 
 pub use error::*;
-use paste::paste;
 
 #[macro_export]
 macro_rules! unwrap_node_type {
