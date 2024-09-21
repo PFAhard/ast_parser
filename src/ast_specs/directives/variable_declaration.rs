@@ -77,4 +77,8 @@ impl VariableDeclaration {
     pub fn constant(&self) -> bool {
         self.constant
     }
+    
+    pub fn type_descriptions(&self) -> &TypeDescriptions {
+        &self.type_descriptions
+    }
 }

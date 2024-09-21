@@ -8,3 +8,9 @@ pub struct TypeDescriptions {
     #[serde(rename = "typeString")]
     type_string: Option<String>,
 }
+
+impl TypeDescriptions {
+    pub fn type_string(&self) -> Option<&String> {
+        self.type_string.as_ref()
+    }
+}
