@@ -1,3 +1,4 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::{
@@ -8,7 +9,7 @@ use crate::ast_specs::{
     Expression,
 };
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct VariableDeclaration {
     #[serde(rename = "baseFunctions")]
     base_functions: Option<Vec<isize>>,
@@ -32,53 +33,15 @@ pub struct VariableDeclaration {
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
     #[serde(rename = "typeName")]
+    #[skip_getter]
     type_name: Option<TypeName>,
     value: Option<Expression>,
     visibility: Visibility,
 }
 
 impl VariableDeclaration {
-    pub fn value(&self) -> Option<&Expression> {
-        self.value.as_ref()
-    }
-
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn overrides(&self) -> Option<&OverrideSpecifier> {
-        self.overrides.as_ref()
-    }
-
     pub fn type_name(&self) -> Option<&TypeName> {
         self.type_name.as_ref()
     }
-
-    pub fn scope(&self) -> isize {
-        self.scope
-    }
-    
-    pub fn state_variable(&self) -> bool {
-        self.state_variable
-    }
-    
-    pub fn visibility(&self) -> Visibility {
-        self.visibility
-    }
-    
-    pub fn mutability(&self) -> Mutability {
-        self.mutability
-    }
-    
-    pub fn constant(&self) -> bool {
-        self.constant
-    }
-    
-    pub fn type_descriptions(&self) -> &TypeDescriptions {
-        &self.type_descriptions
-    }
 }
+
