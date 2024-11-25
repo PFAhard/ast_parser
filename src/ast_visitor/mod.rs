@@ -36,8 +36,8 @@ use super::ast_specs::{
     },
     directives::{
         ContractDefinition, EnumDefinition, EnumValue, ErrorDefinition, FunctionDefinition,
-        ImportDirective, PragmaDirective, StructDefinition, UserDefinedValueTypeDefinition,
-        UsingForDirective, VariableDeclaration,
+        ImportDirective, PragmaDirective, StructDefinition, SymbolAliases,
+        UserDefinedValueTypeDefinition, UsingForDirective, VariableDeclaration,
     },
     expressions::{
         Assignment, BinaryOperation, Conditional, ElementaryTypeNameExpression, FunctionCall,
@@ -65,7 +65,6 @@ pub trait AstVisitor {
 
     fn references(&self) -> Vec<isize>;
 }
-
 
 impl AstVisitor for SourceUnit {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
@@ -359,7 +358,7 @@ impl AstVisitor for ImportDirective {
 
     fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
         let mut result = self.symbol_aliases().filter_by_id(id);
-        if id == self.id() {
+        if id == *self.id() {
             result.push(NodeTypeInternal::ImportDirective(self.clone()));
         }
         result
@@ -367,12 +366,40 @@ impl AstVisitor for ImportDirective {
 
     fn childrens_id(&self) -> Vec<isize> {
         let mut result = self.symbol_aliases().childrens_id();
-        result.push(self.id());
+        result.push(*self.id());
         result
     }
 
     fn references(&self) -> Vec<isize> {
         self.symbol_aliases().references()
+    }
+}
+
+impl AstVisitor for SymbolAliases {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        let node_type: NodeType = node_type.into();
+
+        let mut result = self.foreign().filter_by_node_type(node_type);
+        if node_type == NodeType::SymbolAliases {
+            result.push(NodeTypeInternal::SymbolAliases(self.clone()));
+        }
+        result
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        self.foreign().filter_by_reference_id(id)
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        self.foreign().filter_by_id(id)
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        self.foreign().childrens_id()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.foreign().references()
     }
 }
 

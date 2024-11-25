@@ -8,3 +8,4 @@ pub use super::struct_definition::StructDefinition;
 pub use super::user_defined_value_type_definition::UserDefinedValueTypeDefinition;
 pub use super::using_for_direcrive::UsingForDirective;
 pub use super::variable_declaration::VariableDeclaration;
+pub use super::import_directive::SymbolAliases;

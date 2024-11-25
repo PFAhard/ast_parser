@@ -22,7 +22,7 @@ use super::{
         IfStatement, PlaceholderStatement, Return, RevertStatement, TryCatchClause, TryStatement,
         UncheckedBlock, VariableDeclarationStatement, WhileStatement,
     },
-    SourceUnit,
+    SourceUnit, SymbolAliases,
 };
 
 use crate::{unwrap_node_type, AstParserError};
@@ -86,6 +86,7 @@ pub enum NodeType {
     VariableDeclaration,
     VariableDeclarationStatement,
     WhileStatement,
+    SymbolAliases,
 }
 
 impl From<&NodeType> for NodeType {
@@ -193,6 +194,7 @@ pub enum NodeTypeInternal {
     IdentifierPath(IdentifierPath),
     IfStatement(IfStatement),
     ImportDirective(ImportDirective),
+    SymbolAliases(SymbolAliases),
     IndexAccess(IndexAccess),
     IndexRangeAccess(IndexRangeAccess),
     InheritanceSpecifier(InheritanceSpecifier),
