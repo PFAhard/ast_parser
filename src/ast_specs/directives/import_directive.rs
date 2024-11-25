@@ -1,7 +1,9 @@
+use getters::Getters;
 use serde::Deserialize;
 
+use crate::ast_specs::Identifier;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ImportDirective {
     #[serde(rename = "absolutePath")]
     absolute_path: String,
@@ -14,23 +16,15 @@ pub struct ImportDirective {
     source_unit: isize,
     src: String,
     #[serde(rename = "symbolAliases")]
-    symbol_aliases: serde_json::Value, // TODO: specify
+    symbol_aliases: Vec<SymbolAliases>,
     #[serde(rename = "unitAlias")]
     unit_alias: String,
 }
 
-impl ImportDirective {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn symbol_aliases(&self) -> &serde_json::Value {
-        // #[cfg(debug_assertions)]
-        // eprintln!("[DEBUG] Symbol aliases are not yet supported");
-        &self.symbol_aliases
-    }
-
-    pub fn source_unit(&self) -> isize {
-        self.source_unit
-    }
+#[derive(Deserialize, Debug, Clone, Getters)]
+pub struct SymbolAliases {
+    foreign: Identifier,
+    local: Option<String>,
+    #[serde(rename = "nameLocation")]
+    name_location: Option<String>,
 }
