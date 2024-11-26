@@ -1,8 +1,10 @@
 #![allow(dead_code, unused_variables)]
+#![allow(clippy::too_many_arguments)]
 pub mod ast_framework;
 pub mod ast_specs;
 pub mod ast_visitor;
 pub mod error;
+pub mod ast_serialize;
 // pub mod ast_descriptor; TODO:
 
 pub use error::*;
