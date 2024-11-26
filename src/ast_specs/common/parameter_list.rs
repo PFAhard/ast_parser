@@ -1,21 +1,14 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::directives::VariableDeclaration;
 
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ParameterList {
+    #[copy]
     id: isize,
+    #[return_type = "&[VariableDeclaration]"]
     parameters: Vec<VariableDeclaration>,
     src: String,
-}
-
-impl ParameterList {
-    pub fn parameters(&self) -> &[VariableDeclaration] {
-        self.parameters.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

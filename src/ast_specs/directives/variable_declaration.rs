@@ -27,21 +27,14 @@ pub struct VariableDeclaration {
     scope: isize,
     src: String,
     #[serde(rename = "stateVariable")]
+    #[copy]
     state_variable: bool,
     #[serde(rename = "storageLocation")]
     storage_location: StorageLocation,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
     #[serde(rename = "typeName")]
-    #[skip_getter]
     type_name: Option<TypeName>,
     value: Option<Expression>,
     visibility: Visibility,
 }
-
-impl VariableDeclaration {
-    pub fn type_name(&self) -> Option<&TypeName> {
-        self.type_name.as_ref()
-    }
-}
-

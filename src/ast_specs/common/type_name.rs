@@ -1,3 +1,4 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::Expression;
@@ -20,7 +21,12 @@ pub enum TypeName {
 impl TypeName {
     pub fn name(&self) -> String {
         match self {
-            TypeName::ArrayTypeName(at_name) => at_name.name(),
+            TypeName::ArrayTypeName(at_name) => {
+                if at_name.length().is_some() {
+                    todo!();
+                }
+                format!("{}[]", at_name.base_type().name())
+            }
             TypeName::ElementaryTypeName(elt_name) => elt_name.name(),
             TypeName::FunctionTypeName(ft_name) => ft_name.name(),
             TypeName::Mapping(mapping) => mapping.name(),
@@ -29,11 +35,15 @@ impl TypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ArrayTypeName {
     #[serde(rename = "baseType")]
+    #[use_as_ref]
+    #[return_type = "&TypeName"]
     base_type: Box<TypeName>,
+    #[copy]
     id: isize,
+    #[skip_getter]
     length: Option<Box<Expression>>,
     src: String,
     #[serde(rename = "typeDescriptions")]
@@ -41,21 +51,6 @@ pub struct ArrayTypeName {
 }
 
 impl ArrayTypeName {
-    pub fn name(&self) -> String {
-        if self.length().is_some() {
-            todo!();
-        }
-        format!("{}[]", self.base_type().name())
-    }
-
-    pub fn base_type(&self) -> &TypeName {
-        self.base_type.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
     pub fn length(&self) -> Option<&Expression> {
         self.length.as_deref()
     }
@@ -96,7 +91,7 @@ impl FunctionTypeName {
             .parameter_types()
             .parameters()
             .iter()
-            .map(|x| x.type_name().unwrap().name().to_string())
+            .map(|x| x.type_name().as_ref().unwrap().name().to_string())
             .collect();
 
         let mut params = format!("{:?}", params);
@@ -108,7 +103,7 @@ impl FunctionTypeName {
             .return_parameter_types()
             .parameters()
             .iter()
-            .map(|x| x.type_name().unwrap().name().to_string())
+            .map(|x| x.type_name().as_ref().unwrap().name().to_string())
             .collect();
         if !returns.is_empty() {
             let mut returns = format!("{:?}", returns);

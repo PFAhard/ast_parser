@@ -96,7 +96,7 @@ impl FunctionDefinition {
             let params: Vec<String> = params
                 .parameters()
                 .iter()
-                .map(|x| format!("{} {}", x.type_name().unwrap().name(), x.name()))
+                .map(|x| format!("{} {}", x.type_name().as_ref().unwrap().name(), x.name()))
                 .collect();
 
             let mut params = format!("{:?}", params);
@@ -108,7 +108,7 @@ impl FunctionDefinition {
         if let Some(returns) = self.return_parameters() {
             let returns: Vec<String> = returns
                 .iter()
-                .map(|x| format!("{} {}", x.type_name().unwrap().name(), x.name()))
+                .map(|x| format!("{} {}", x.type_name().as_ref().unwrap().name(), x.name()))
                 .collect();
             if !returns.is_empty() {
                 let mut returns = format!("{:?}", returns);
