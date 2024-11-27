@@ -185,7 +185,7 @@ pub const MODIFIER_VISIBILITY_KEY: &str = "<VISIBILITY>";
 pub const MODIFIER_OVERRIDE_KEY: &str = "<OVERRIDE>";
 pub const MODIFIER_BODY_KEY: &str = "<BODY>";
 
-pub const IMPORT_DIRECTIVE: &str = "import <ALIASES> from \"<PATH>\"";
+pub const IMPORT_DIRECTIVE: &str = "import {<ALIASES>} from \"<PATH>\";\n";
 pub const IMPORT_DIRECTIVE_ALIASES_KEY: &str = "<ALIASES>";
 pub const IMPORT_DIRECTIVE_PATH_KEY: &str = "<PATH>";
 
@@ -194,7 +194,7 @@ pub const SYMBOL_ALIASES_AS_KEY: &str = "<AS>";
 pub const SYMBOL_ALIASES_FOREIGN_KEY: &str = "<FOREIGN>";
 pub const SYMBOL_ALIASES_LOCAL_KEY: &str = "<LOCAL>";
 
-pub const PRAGMA: &str = "pragma <LITERALS>;";
+pub const PRAGMA: &str = "pragma <LITERALS>;\n\n";
 pub const PRAGMA_LITERALS_KEY: &str = "<LITERALS>";
 
 pub trait AstSerializer {
