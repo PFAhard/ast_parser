@@ -222,10 +222,7 @@ impl AstSerializer for SourceUnit {
         );
 
         out.extend_from_slice(license.as_bytes());
-        out.extend(
-            self.nodes()
-                .to_sol_vec_with_delimiter(Delimiter::NewLine),
-        );
+        out.extend(self.nodes().to_sol_vec_with_delimiter(Delimiter::NewLine));
 
         out
     }
@@ -255,14 +252,15 @@ impl AstSerializer for Directive {
 
 impl AstSerializer for EventDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        let mut event = EVENT.replace(
-            EVENT_DOCUMENTATION_KEY,
-            &to_string(self.documentation().to_sol_vec()),
-        );
-        event = event.replace(EVENT_NAME_KEY, self.name());
-        event = event.replace(EVENT_ARGS_KEY, &to_string(self.parameters().to_sol_vec()));
-
-        event.as_bytes().to_vec()
+        EVENT
+            .replace(
+                EVENT_DOCUMENTATION_KEY,
+                &to_string(self.documentation().to_sol_vec()),
+            )
+            .replace(EVENT_NAME_KEY, self.name())
+            .replace(EVENT_ARGS_KEY, &to_string(self.parameters().to_sol_vec()))
+            .as_bytes()
+            .to_vec()
     }
 }
 
@@ -274,7 +272,8 @@ impl AstSerializer for StructuredDocumentation {
 
 impl AstSerializer for ParameterList {
     fn to_sol_vec(&self) -> Vec<u8> {
-        self.parameters().to_sol_vec()
+        self.parameters()
+            .to_sol_vec_with_delimiter(Delimiter::Comma)
     }
 }
 
