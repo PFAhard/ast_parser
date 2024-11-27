@@ -1208,17 +1208,19 @@ impl AstSerializer for PragmaDirective {
 //
 impl<T: AstSerializer> AstSerializer for Vec<T> {
     fn to_sol_vec(&self) -> Vec<u8> {
-        self.iter().fold(Vec::new(), |mut acc, t| {
-            acc.extend(t.to_sol_vec());
-            acc
-        })
+        self.as_slice().to_sol_vec()
     }
 }
 
 impl<T: AstSerializer> AstSerializer for &[T] {
     fn to_sol_vec(&self) -> Vec<u8> {
-        self.iter().fold(Vec::new(), |mut acc, t| {
+        let limit = self.len();
+        self.iter().enumerate().fold(Vec::new(), |mut acc, (i, t)| {
             acc.extend(t.to_sol_vec());
+            if i != limit - 1 {
+                acc.push(b',');
+            }
+
             acc
         })
     }
