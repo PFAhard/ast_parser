@@ -205,7 +205,7 @@ pub trait AstSerializer {
     }
 }
 
-pub trait AstSerializerDelimited<D: Into<u8> + Copy> {
+pub trait AstSerializerDelimited<'a, D: Into<&'a [u8]> + Copy> {
     fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8>;
 
     fn to_sol_string_with_delimiter(&self, d: D) -> String {
@@ -222,7 +222,10 @@ impl AstSerializer for SourceUnit {
         );
 
         out.extend_from_slice(license.as_bytes());
-        out.extend(self.nodes().to_sol_vec());
+        out.extend(
+            self.nodes()
+                .to_sol_vec_with_delimiter(Delimiter::DoubleLine),
+        );
 
         out
     }
@@ -1235,28 +1238,30 @@ impl<T: AstSerializer> AstSerializer for &[T] {
 #[derive(Debug, Clone, Copy)]
 pub enum Delimiter {
     Comma,
+    DoubleLine,
 }
 
-impl From<Delimiter> for u8 {
+impl From<Delimiter> for &[u8] {
     fn from(value: Delimiter) -> Self {
         match value {
-            Delimiter::Comma => b',',
+            Delimiter::Comma => b", ",
+            Delimiter::DoubleLine => b"\n\n",
         }
     }
 }
 
-impl<T: AstSerializer, D: Into<u8> + Copy> AstSerializerDelimited<D> for Vec<T> {
+impl<T: AstSerializer, D: for<'a> Into<&'a [u8]> + Copy> AstSerializerDelimited<'_, D> for Vec<T> {
     fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8> {
         self.as_slice().to_sol_vec_with_delimiter(d)
     }
 }
-impl<T: AstSerializer, D: Into<u8> + Copy> AstSerializerDelimited<D> for &[T] {
+impl<T: AstSerializer, D: for<'a> Into<&'a [u8]> + Copy> AstSerializerDelimited<'_, D> for &[T] {
     fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8> {
         let limit = self.len();
         self.iter().enumerate().fold(Vec::new(), |mut acc, (i, t)| {
             acc.extend(t.to_sol_vec());
             if i != limit - 1 {
-                acc.push(d.into());
+                acc.extend_from_slice(d.into());
             }
 
             acc
