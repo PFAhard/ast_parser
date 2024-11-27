@@ -15,7 +15,7 @@ use crate::ast_specs::{
     WhileStatement,
 };
 
-pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>";
+pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>\n";
 pub const LICENSE_KEY: &str = "<LICENSE>";
 
 pub const EVENT: &str = "<DOCUMENTATION>event <EVENT_NAME>(<EVENT_ARGS>);";
