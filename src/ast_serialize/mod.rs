@@ -194,7 +194,7 @@ pub const SYMBOL_ALIASES_AS_KEY: &str = "<AS>";
 pub const SYMBOL_ALIASES_FOREIGN_KEY: &str = "<FOREIGN>";
 pub const SYMBOL_ALIASES_LOCAL_KEY: &str = "<LOCAL>";
 
-pub const PRAGMA: &str = "pragma <LITERALS>";
+pub const PRAGMA: &str = "pragma <LITERALS>;";
 pub const PRAGMA_LITERALS_KEY: &str = "<LITERALS>";
 
 pub trait AstSerializer {
@@ -213,8 +213,9 @@ impl AstSerializer for SourceUnit {
             self.license().as_deref().unwrap_or("UNLICENSED"),
         );
 
-        out.extend(self.nodes().to_sol_vec());
         out.extend_from_slice(license.as_bytes());
+        out.extend(self.nodes().to_sol_vec());
+
         out
     }
 }
@@ -1183,8 +1184,20 @@ impl AstSerializer for SymbolAliases {
 
 impl AstSerializer for PragmaDirective {
     fn to_sol_vec(&self) -> Vec<u8> {
+        let pragma_lits = self
+            .literals()
+            .iter()
+            .map(|lit| {
+                if lit.as_str() == "solidity" {
+                    [lit, " "].concat()
+                } else {
+                    lit.to_string()
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("");
         PRAGMA
-            .replace(PRAGMA_LITERALS_KEY, &self.literals().join(""))
+            .replace(PRAGMA_LITERALS_KEY, &pragma_lits)
             .as_bytes()
             .to_vec()
     }
