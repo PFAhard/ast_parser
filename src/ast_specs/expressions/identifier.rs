@@ -1,45 +1,32 @@
 use std::fmt::Display;
 
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Identifier {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[copy]
     id: isize,
+    #[return_type = "&str"]
     name: String,
     #[serde(rename = "overloadedDeclarations")]
     overloaded_declarations: Vec<isize>,
     #[serde(rename = "referencedDeclaration")]
+    #[copy]
     referenced_declaration: Option<isize>,
+    #[return_type = "&str"]
     src: String,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
 }
 
 impl Identifier {
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
-    }
-
-    pub fn referenced_declaration(&self) -> Option<isize> {
-        self.referenced_declaration
-    }
-
-    pub fn src(&self) -> &str {
-        self.src.as_ref()
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
     pub fn is_builtin(&self) -> bool {
         matches!(self.referenced_declaration(), Some(x) if x < 0)
     }

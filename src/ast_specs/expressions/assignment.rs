@@ -1,14 +1,16 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Assignment {
     #[serde(rename = "argumentTypes")]
+    #[skip_getter]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -19,33 +21,14 @@ pub struct Assignment {
     #[serde(rename = "lValueRequested")]
     l_value_requested: bool,
     #[serde(rename = "leftHandSide")]
+    #[return_type = "&Expression"]
     left_hand_side: Box<Expression>,
+    #[return_type = "&str"]
     operator: String,
     #[serde(rename = "rightHandSide")]
+    #[return_type = "&Expression"]
     right_hand_side: Box<Expression>,
     src: String,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
-}
-
-impl Assignment {
-    pub fn left_hand_side(&self) -> &Expression {
-        self.left_hand_side.as_ref()
-    }
-
-    pub fn right_hand_side(&self) -> &Expression {
-        self.right_hand_side.as_ref()
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn operator(&self) -> &str {
-        self.operator.as_ref()
-    }
 }

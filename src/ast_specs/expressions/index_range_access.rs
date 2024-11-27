@@ -1,18 +1,24 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct IndexRangeAccess {
     #[serde(rename = "argumentTypes")]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
+    #[use_as_ref]
     argument_types: Option<Vec<TypeDescriptions>>,
     #[serde(rename = "baseExpression")]
+    #[return_type = "&Expression"]
     base_expression: Box<Expression>,
     #[serde(rename = "endExpression")]
+    #[return_type = "Option<&Expression>"]
+    #[use_as_deref]
     end_expression: Option<Box<Expression>>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -24,29 +30,9 @@ pub struct IndexRangeAccess {
     l_value_requested: bool,
     src: String,
     #[serde(rename = "startExpression")]
+    #[return_type = "Option<&Expression>"]
+    #[use_as_deref]
     start_expression: Option<Box<Expression>>,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
-}
-
-impl IndexRangeAccess {
-    pub fn base_expression(&self) -> &Expression {
-        self.base_expression.as_ref()
-    }
-
-    pub fn end_expression(&self) -> Option<&Expression> {
-        self.end_expression.as_deref()
-    }
-
-    pub fn start_expression(&self) -> Option<&Expression> {
-        self.start_expression.as_deref()
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

@@ -197,9 +197,11 @@ impl UserDefinedTypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ElementaryTypeName {
+    #[copy]
     id: isize,
+    #[return_type = "&str"]
     name: String,
     src: String,
     #[serde(rename = "stateMutability")]
@@ -208,12 +210,3 @@ pub struct ElementaryTypeName {
     type_descriptions: TypeDescriptions,
 }
 
-impl ElementaryTypeName {
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-}

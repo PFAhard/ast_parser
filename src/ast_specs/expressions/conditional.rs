@@ -1,16 +1,22 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Conditional {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[return_type = "&Expression"]
     condition: Box<Expression>,
     #[serde(rename = "falseExpression")]
+    #[return_type = "&Expression"]
     false_expression: Box<Expression>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -22,29 +28,8 @@ pub struct Conditional {
     l_value_requested: bool,
     src: String,
     #[serde(rename = "trueExpression")]
+    #[return_type = "&Expression"]
     true_expression: Box<Expression>,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
-}
-
-impl Conditional {
-    pub fn condition(&self) -> &Expression {
-        self.condition.as_ref()
-    }
-
-    pub fn false_expression(&self) -> &Expression {
-        self.false_expression.as_ref()
-    }
-
-    pub fn true_expression(&self) -> &Expression {
-        self.true_expression.as_ref()
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

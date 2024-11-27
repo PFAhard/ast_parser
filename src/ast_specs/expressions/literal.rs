@@ -1,14 +1,17 @@
+use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::common::{TypeDescriptions, LiteralKind};
+use crate::ast_specs::common::{LiteralKind, TypeDescriptions};
 
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Literal {
+    #[use_as_ref]
     #[serde(rename = "argumentTypes")]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
     #[serde(rename = "hexValue")]
     hex_value: String,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -16,6 +19,7 @@ pub struct Literal {
     is_lvalue: bool,
     #[serde(rename = "isPure")]
     is_pure: bool,
+    #[copy]
     kind: LiteralKind,
     #[serde(rename = "lValueRequested")]
     l_value_requested: bool,
@@ -24,30 +28,15 @@ pub struct Literal {
     // subdenomination: (), // @note never seen
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
+    #[clone]
     value: Option<String>,
 }
 
 impl Literal {
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn value(&self) -> Option<String> {
-        self.value.clone()
-    }
-
     pub fn as_name(&self) -> &str {
         match &self.value {
             Some(value) => value,
             None => todo!(),
         }
-    }
-    
-    pub fn kind(&self) -> LiteralKind {
-        self.kind
     }
 }

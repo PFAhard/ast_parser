@@ -1,14 +1,19 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct FunctionCallOptions {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[return_type = "&Expression"]
     expression: Box<Expression>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -19,6 +24,7 @@ pub struct FunctionCallOptions {
     #[serde(rename = "lValueRequested")]
     l_value_requested: bool,
     names: Vec<String>,
+    #[return_type = "&[Expression]"]
     options: Vec<Expression>,
     src: String,
     #[serde(rename = "typeDescriptions")]
@@ -26,22 +32,6 @@ pub struct FunctionCallOptions {
 }
 
 impl FunctionCallOptions {
-    pub fn expression(&self) -> &Expression {
-        self.expression.as_ref()
-    }
-
-    pub fn options(&self) -> &[Expression] {
-        self.options.as_ref()
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
     pub fn full_name(&self) -> String {
         let name = self.expression().extract_name();
         let args: Vec<String> = self

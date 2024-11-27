@@ -1,13 +1,15 @@
+use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::common::{TypeDescriptions, ElementaryTypeName};
+use crate::ast_specs::common::{ElementaryTypeName, TypeDescriptions};
 
-
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ElementaryTypeNameExpression {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -27,17 +29,5 @@ pub struct ElementaryTypeNameExpression {
 impl ElementaryTypeNameExpression {
     pub fn name(&self) -> String {
         self.type_name().name()
-    }
-
-    pub fn type_name(&self) -> &ElementaryTypeName {
-        &self.type_name
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
     }
 }

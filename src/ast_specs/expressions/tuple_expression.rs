@@ -1,15 +1,20 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct TupleExpression {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[use_as_ref]
+    #[return_type = "&[Option<Expression>]"]
     components: Vec<Option<Expression>>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -24,18 +29,4 @@ pub struct TupleExpression {
     src: String,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
-}
-
-impl TupleExpression {
-    pub fn components(&self) -> &[Option<Expression>] {
-        self.components.as_ref()
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

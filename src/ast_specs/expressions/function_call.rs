@@ -1,15 +1,22 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::{FunctionCallKind, TypeDescriptions};
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct FunctionCall {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
+    #[use_as_ref]
+    #[return_type = "&[Expression]"]
     arguments: Vec<Expression>,
+    #[return_type = "&Expression"]
     expression: Box<Expression>,
+    #[copy]
     id: isize,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -23,6 +30,7 @@ pub struct FunctionCall {
     #[serde(rename = "nameLocations")]
     name_locations: Option<Vec<String>>,
     names: Vec<String>,
+    #[return_type = "&str"]
     src: String,
     #[serde(rename = "tryCall")]
     try_call: bool,
@@ -31,23 +39,11 @@ pub struct FunctionCall {
 }
 
 impl FunctionCall {
-    pub fn arguments(&self) -> &[Expression] {
-        self.arguments.as_ref()
-    }
-
-    pub fn expression(&self) -> &Expression {
-        self.expression.as_ref()
-    }
-
     pub fn argument_names(&self) -> Vec<String> {
         self.arguments()
             .iter()
             .map(Expression::extract_name)
             .collect()
-    }
-
-    pub fn src(&self) -> &str {
-        self.src.as_ref()
     }
 
     pub fn full_name(&self) -> String {
@@ -65,18 +61,6 @@ impl FunctionCall {
     pub fn extract_function_definition_id(&self) -> isize {
         let expression = self.expression();
         expression.extract_definition().unwrap_or(-1)
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn kind(&self) -> &FunctionCallKind {
-        &self.kind
     }
 
     pub fn builtin(&self) -> Option<BuiltinFunction> {

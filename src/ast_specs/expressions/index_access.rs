@@ -1,17 +1,24 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct IndexAccess {
     #[serde(rename = "argumentTypes")]
+    #[use_as_ref]
+    #[return_type = "Option<&Vec<TypeDescriptions>>"]
     argument_types: Option<Vec<TypeDescriptions>>,
     #[serde(rename = "baseExpression")]
+    #[return_type = "&Expression"]
     base_expression: Box<Expression>,
+    #[copy]
     id: isize,
     #[serde(rename = "indexExpression")]
+    #[use_deref]
+    #[return_type = "Option<&Expression>"]
     index_expression: Option<Box<Expression>>,
     #[serde(rename = "isConstant")]
     is_constant: bool,
@@ -27,14 +34,6 @@ pub struct IndexAccess {
 }
 
 impl IndexAccess {
-    pub fn base_expression(&self) -> &Expression {
-        self.base_expression.as_ref()
-    }
-
-    pub fn index_expression(&self) -> Option<&Expression> {
-        self.index_expression.as_deref()
-    }
-
     pub fn as_name(&self) -> String {
         let name = self.base_expression.extract_name();
         let index = match self.index_expression() {
@@ -43,13 +42,5 @@ impl IndexAccess {
         };
 
         format!("{name}[{index}]")
-    }
-
-    pub fn argument_types(&self) -> Option<&Vec<TypeDescriptions>> {
-        self.argument_types.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
     }
 }
