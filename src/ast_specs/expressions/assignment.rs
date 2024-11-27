@@ -8,7 +8,8 @@ use super::Expression;
 #[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Assignment {
     #[serde(rename = "argumentTypes")]
-    #[skip_getter]
+    #[use_as_deref]
+    #[return_type = "Option<&[TypeDescriptions]>"]
     argument_types: Option<Vec<TypeDescriptions>>,
     #[copy]
     id: isize,

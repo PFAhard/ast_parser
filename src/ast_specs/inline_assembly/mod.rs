@@ -1,12 +1,12 @@
-
-pub mod yul_statements;
 pub mod yul_expression;
+pub mod yul_statements;
 pub mod yul_typed_name;
 
+use getters::Getters;
 use serde::{Deserialize, Serialize};
 use yul_statements::yul_block::YulBlock;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
 pub struct InlineAssembly {
     #[serde(rename = "AST")]
     pub ast: YulBlock,
@@ -16,14 +16,9 @@ pub struct InlineAssembly {
     #[serde(rename = "externalReferences")]
     pub external_references: Vec<ExternalReference>,
     pub flags: Option<Vec<String>>, // Assuming "memory-safe" is a string in a vector
+    #[copy]
     pub id: isize,
     pub src: String,
-}
-
-impl InlineAssembly {
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

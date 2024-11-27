@@ -1,35 +1,24 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::{LibraryName, TypeName};
 
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct UsingForDirective {
     #[serde(rename = "functionList")]
+    #[use_as_ref]
+    #[return_type = "Option<&serde_json::Value>"]
     function_list: Option<serde_json::Value>,
     global: Option<bool>,
+    #[copy]
     id: isize,
     #[serde(rename = "libraryName")]
+    #[return_type = "Option<&LibraryName>"]
+    #[use_as_ref]
     library_name: Option<LibraryName>,
     src: String,
     #[serde(rename = "typeName")]
+    #[return_type = "Option<&TypeName>"]
+    #[use_as_ref]
     type_name: Option<TypeName>,
-}
-
-impl UsingForDirective {
-    pub fn function_list(&self) -> Option<&serde_json::Value> {
-        self.function_list.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn library_name(&self) -> Option<&LibraryName> {
-        self.library_name.as_ref()
-    }
-
-    pub fn type_name(&self) -> Option<&TypeName> {
-        self.type_name.as_ref()
-    }
 }

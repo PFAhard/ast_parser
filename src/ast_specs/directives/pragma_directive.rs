@@ -1,22 +1,12 @@
+use getters::Getters;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct PragmaDirective {
+    #[copy]
     id: isize,
+    #[return_type = "&[String]"]
     literals: Vec<String>,
+    #[return_type = "&str"]
     src: String,
-}
-
-impl PragmaDirective {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn src(&self) -> &str {
-        &self.src
-    }
-
-    pub fn literals(&self) -> &[String] {
-        &self.literals
-    }
 }

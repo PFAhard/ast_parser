@@ -1,11 +1,13 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::TypeName;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct UserDefinedValueTypeDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,
+    #[copy]
     id: isize,
     name: String,
     #[serde(rename = "nameLocation")]
@@ -13,14 +15,4 @@ pub struct UserDefinedValueTypeDefinition {
     src: String,
     #[serde(rename = "underlyingType")]
     underlying_type: TypeName,
-}
-
-impl UserDefinedValueTypeDefinition {
-    pub fn underlying_type(&self) -> &TypeName {
-        &self.underlying_type
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

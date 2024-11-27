@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::ast_specs::common::Block;
+use crate::ast_specs::{common::Block, inline_assembly::InlineAssembly};
 
 use super::{
     Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement,
@@ -19,7 +19,7 @@ pub enum Body {
     ExpressionStatement(ExpressionStatement),
     ForStatement(ForStatement),
     IfStatement(IfStatement),
-    InlineAssembly(serde_json::Value),
+    InlineAssembly(InlineAssembly),
     PlaceholderStatement(PlaceholderStatement),
     Return(Return),
     RevertStatement(RevertStatement),

@@ -1,41 +1,27 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::{
-    OverrideSpecifier, ParameterList, StructuredDocumentation, Visibility, Block,
+    Block, OverrideSpecifier, ParameterList, StructuredDocumentation, Visibility,
 };
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ModifierDefinition {
     #[serde(rename = "baseModifiers")]
     base_modifiers: Option<Vec<isize>>,
     body: Block,
     documentation: Option<StructuredDocumentation>,
+    #[copy]
     id: isize,
     name: String,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
+    #[return_type = "Option<&OverrideSpecifier>"]
+    #[use_as_ref]
     overrides: Option<OverrideSpecifier>,
     parameters: ParameterList,
     src: String,
     #[serde(rename = "virtual")]
     _virtual: bool,
     visibility: Visibility,
-}
-
-impl ModifierDefinition {
-    pub fn body(&self) -> &Block {
-        &self.body
-    }
-
-    pub fn overrides(&self) -> Option<&OverrideSpecifier> {
-        self.overrides.as_ref()
-    }
-
-    pub fn parameters(&self) -> &ParameterList {
-        &self.parameters
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

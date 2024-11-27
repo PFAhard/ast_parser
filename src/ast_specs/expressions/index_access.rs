@@ -17,7 +17,7 @@ pub struct IndexAccess {
     #[copy]
     id: isize,
     #[serde(rename = "indexExpression")]
-    #[use_deref]
+    #[use_as_deref]
     #[return_type = "Option<&Expression>"]
     index_expression: Option<Box<Expression>>,
     #[serde(rename = "isConstant")]

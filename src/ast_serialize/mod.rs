@@ -1,5 +1,18 @@
 use crate::ast_specs::{
-    ArrayTypeName, Assignment, BaseName, BaseNode, BinaryOperation, Block, Body, Break, Conditional, Continue, ContractDefinition, ContractKind, Directive, DoWhileStatement, ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement, EnumDefinition, EnumValue, ErrorDefinition, EventDefinition, Expression, ExpressionStatement, FalseBody, ForStatement, FunctionCall, FunctionCallKind, FunctionCallOptions, FunctionDefinition, FunctionKind, FunctionTypeName, Identifier, IdentifierPath, IfStatement, IndexAccess, IndexRangeAccess, InheritanceSpecifier, InitializationExpression, Literal, Mapping, MemberAccess, ModifierInvocation, ModifierName, NewExpression, OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement, Return, RevertStatement, SourceUnit, StateMutability, Statement, StructuredDocumentation, TryCatchClause, TryStatement, TupleExpression, TypeName, UnaryOperation, UserDefinedTypeName, VariableDeclaration, VariableDeclarationStatement, Visibility
+    inline_assembly::InlineAssembly, ArrayTypeName, Assignment, BaseName, BaseNode,
+    BinaryOperation, Block, Body, Break, Conditional, Continue, ContractDefinition, ContractKind,
+    Directive, DoWhileStatement, ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement,
+    EnumDefinition, EnumValue, ErrorDefinition, EventDefinition, Expression, ExpressionStatement,
+    FalseBody, ForStatement, FunctionCall, FunctionCallOptions, FunctionDefinition, FunctionKind,
+    FunctionTypeName, Identifier, IdentifierPath, IfStatement, ImportDirective, IndexAccess,
+    IndexRangeAccess, InheritanceSpecifier, InitializationExpression, LibraryName, Literal,
+    Mapping, MemberAccess, ModifierDefinition, ModifierInvocation, ModifierName, NewExpression,
+    OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement, PragmaDirective, Return,
+    RevertStatement, SourceUnit, StateMutability, Statement, StructDefinition,
+    StructuredDocumentation, SymbolAliases, TryCatchClause, TryStatement, TupleExpression,
+    TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName, UserDefinedValueTypeDefinition,
+    UsingForDirective, VariableDeclaration, VariableDeclarationStatement, Visibility,
+    WhileStatement,
 };
 
 pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>";
@@ -141,6 +154,49 @@ pub const TRY_CATCH_STATEMENT: &str = "try <EXPRESSION> {} catch {<CLAUSES>}";
 pub const TRY_CATCH_STATEMENT_EXPRESSION_KEY: &str = "<EXPRESSION>";
 pub const TRY_CATCH_STATEMENT_CLAUSES_KEY: &str = "<CLAUSES>";
 
+pub const CATCH_CLAUSE: &str = "catch <ERROR> <PARAMS> {<BODY>}";
+pub const CATCH_CLAUSE_ERROR_KEY: &str = "<ERROR>";
+pub const CATCH_CLAUSE_PARAMS_KEY: &str = "<PARAMS>";
+pub const CATCH_CLAUSE_BODY_KEY: &str = "<BODY>";
+
+pub const UNCHECKED_BLOCK: &str = "unchecked {<BLOCK>}";
+pub const UNCHECKED_BLOCK_BLOCK_KEY: &str = "<BLOCK>";
+
+pub const WHILE_STATEMENT: &str = "while <CONDITION> {<BODY>}";
+pub const WHILE_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
+pub const WHILE_STATEMENT_BODY_KEY: &str = "<BODY>";
+
+pub const STRUCT_STATEMENT: &str = "struct <NAME> {<MEMBERS>}";
+pub const STRUCT_STATEMENT_NAME_KEY: &str = "<NAME>";
+pub const STRUCT_STATEMENT_MEMBERS_KEY: &str = "<MEMBERS>";
+
+pub const USER_DEFINED_TYPE_DEFINITION: &str = "type <NAME> is <TYPE>";
+pub const USER_DEFINED_TYPE_DEFINITION_NAME_KEY: &str = "<NAME>";
+pub const USER_DEFINED_TYPE_DEFINITION_TYPE_KEY: &str = "<TYPE>";
+
+pub const USING_FOR_DIRECTIVE: &str = "using <LIBRARY> for <TYPE>";
+pub const USING_FOR_DIRECTIVE_TYPE_KEY: &str = "<TYPE>";
+pub const USING_FOR_DIRECTIVE_LIBRARY_KEY: &str = "<LIBRARY>";
+
+pub const MODIFIER: &str = "<NAME>(<PARAMETERS>) <VISIBILITY> <OVERRIDE> {<BODY>}";
+pub const MODIFIER_NAME_KEY: &str = "<NAME>";
+pub const MODIFIER_PARAMETERS_KEY: &str = "<PARAMETERS>";
+pub const MODIFIER_VISIBILITY_KEY: &str = "<VISIBILITY>";
+pub const MODIFIER_OVERRIDE_KEY: &str = "<OVERRIDE>";
+pub const MODIFIER_BODY_KEY: &str = "<BODY>";
+
+pub const IMPORT_DIRECTIVE: &str = "import <ALIASES> from \"<PATH>\"";
+pub const IMPORT_DIRECTIVE_ALIASES_KEY: &str = "<ALIASES>";
+pub const IMPORT_DIRECTIVE_PATH_KEY: &str = "<PATH>";
+
+pub const SYMBOL_ALIASES: &str = "<FOREIGN> <AS> <LOCAL>";
+pub const SYMBOL_ALIASES_AS_KEY: &str = "<AS>";
+pub const SYMBOL_ALIASES_FOREIGN_KEY: &str = "<FOREIGN>";
+pub const SYMBOL_ALIASES_LOCAL_KEY: &str = "<LOCAL>";
+
+pub const PRAGMA: &str = "pragma <LITERALS>";
+pub const PRAGMA_LITERALS_KEY: &str = "<LITERALS>";
+
 pub trait AstSerializer {
     fn to_sol_vec(&self) -> Vec<u8>;
 
@@ -221,7 +277,7 @@ impl AstSerializer for VariableDeclaration {
                 _ => "",
             },
         );
-        var = var.replace(VARIABLE_NAME_KEY, &self.name());
+        var = var.replace(VARIABLE_NAME_KEY, self.name());
         var = var.replace(
             VARIABLE_TERMINATOR_KEY,
             if self.state_variable() { ";" } else { "," },
@@ -569,10 +625,10 @@ impl AstSerializer for ContractDefinition {
             )
             .replace(
                 CONTRACT_INHERITANCE_KEY,
-                if self.base_contracts().is_empty() {
-                    ""
+                &if self.base_contracts().is_empty() {
+                    String::default()
                 } else {
-                    &self.base_contracts().to_sol_string()
+                    self.base_contracts().to_sol_string()
                 },
             )
             .replace(CONTRACT_BODY_KEY, &self.nodes().to_sol_string())
@@ -636,7 +692,7 @@ impl AstSerializer for BaseNode {
 
 impl AstSerializer for EnumDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        ENUM.replace(ENUM_NAME_KEY, &self.name())
+        ENUM.replace(ENUM_NAME_KEY, self.name())
             .replace(ENUM_ENUM_VALUES_KEY, &self.members().to_sol_string())
             .as_bytes()
             .to_vec()
@@ -684,12 +740,12 @@ impl AstSerializer for FunctionDefinition {
             )
             .replace(
                 FUNCTION_RETURN_PARAMETERS_KEY,
-                if self.return_parameter_list().is_none()
+                &if self.return_parameter_list().is_none()
                     || self.return_parameter_list().unwrap().is_empty()
                 {
-                    ""
+                    String::default()
                 } else {
-                    &self.return_parameters().to_sol_string()
+                    self.return_parameters().to_sol_string()
                 },
             )
             .replace(FUNCTION_BODY_KEY, &self.body().to_sol_string())
@@ -921,7 +977,7 @@ impl AstSerializer for IfStatement {
             )
             .replace(
                 IF_STATEMENT_FALSE_BODY_KEY,
-                &self.false_body().to_sol_string,
+                &self.false_body().to_sol_string(),
             )
             .as_bytes()
             .to_vec()
@@ -992,7 +1048,145 @@ impl AstSerializer for TryStatement {
 
 impl AstSerializer for TryCatchClause {
     fn to_sol_vec(&self) -> Vec<u8> {
+        CATCH_CLAUSE
+            .replace(CATCH_CLAUSE_PARAMS_KEY, &self.parameters().to_sol_string())
+            .replace(CATCH_CLAUSE_ERROR_KEY, self.error_name())
+            .replace(CATCH_CLAUSE_BODY_KEY, &self.block().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for UncheckedBlock {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        UNCHECKED_BLOCK
+            .replace(
+                UNCHECKED_BLOCK_BLOCK_KEY,
+                &self.statements().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for WhileStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        WHILE_STATEMENT
+            .replace(
+                WHILE_STATEMENT_CONDITION_KEY,
+                &self.condition().to_sol_string(),
+            )
+            .replace(WHILE_STATEMENT_BODY_KEY, &self.body().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for InlineAssembly {
+    fn to_sol_vec(&self) -> Vec<u8> {
         todo!()
+    }
+}
+
+impl AstSerializer for StructDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        STRUCT_STATEMENT
+            .replace(STRUCT_STATEMENT_NAME_KEY, self.name())
+            .replace(
+                STRUCT_STATEMENT_MEMBERS_KEY,
+                &self.members().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for UserDefinedValueTypeDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        USER_DEFINED_TYPE_DEFINITION
+            .replace(USER_DEFINED_TYPE_DEFINITION_NAME_KEY, self.name())
+            .replace(
+                USER_DEFINED_TYPE_DEFINITION_TYPE_KEY,
+                &self.underlying_type().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for UsingForDirective {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        USING_FOR_DIRECTIVE
+            .replace(
+                USING_FOR_DIRECTIVE_LIBRARY_KEY,
+                &self.library_name().to_sol_string(),
+            )
+            .replace(
+                USING_FOR_DIRECTIVE_TYPE_KEY,
+                &self.type_name().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for LibraryName {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            LibraryName::UserDefinedTypeName(user_defined_type_name) => {
+                user_defined_type_name.to_sol_vec()
+            }
+            LibraryName::IdentifierPath(identifier_path) => identifier_path.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for ModifierDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        MODIFIER
+            .replace(MODIFIER_NAME_KEY, self.name())
+            .replace(MODIFIER_PARAMETERS_KEY, &self.parameters().to_sol_string())
+            .replace(MODIFIER_OVERRIDE_KEY, &self.overrides().to_sol_string())
+            .replace(MODIFIER_VISIBILITY_KEY, &self.visibility().to_sol_string())
+            .replace(MODIFIER_BODY_KEY, &self.body().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for ImportDirective {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        IMPORT_DIRECTIVE
+            .replace(
+                IMPORT_DIRECTIVE_ALIASES_KEY,
+                &self.symbol_aliases().to_sol_string(),
+            )
+            .replace(IMPORT_DIRECTIVE_PATH_KEY, self.file())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for SymbolAliases {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        SYMBOL_ALIASES
+            .replace(SYMBOL_ALIASES_FOREIGN_KEY, &self.foreign().to_sol_string())
+            .replace(
+                SYMBOL_ALIASES_AS_KEY,
+                if self.local().is_some() { "as" } else { "" },
+            )
+            .replace(SYMBOL_ALIASES_LOCAL_KEY, self.local().unwrap_or_default())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for PragmaDirective {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        PRAGMA
+            .replace(PRAGMA_LITERALS_KEY, &self.literals().join(""))
+            .as_bytes()
+            .to_vec()
     }
 }
 

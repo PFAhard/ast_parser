@@ -24,6 +24,8 @@ pub struct ImportDirective {
 #[derive(Deserialize, Debug, Clone, Getters)]
 pub struct SymbolAliases {
     foreign: Identifier,
+    #[use_as_deref]
+    #[return_type = "Option<&str>"]
     local: Option<String>,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
