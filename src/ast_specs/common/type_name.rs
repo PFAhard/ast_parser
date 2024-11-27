@@ -27,7 +27,7 @@ impl TypeName {
                 }
                 format!("{}[]", at_name.base_type().name())
             }
-            TypeName::ElementaryTypeName(elt_name) => elt_name.name(),
+            TypeName::ElementaryTypeName(elt_name) => elt_name.name().to_owned(),
             TypeName::FunctionTypeName(ft_name) => ft_name.name(),
             TypeName::Mapping(mapping) => mapping.name(),
             TypeName::UserDefinedTypeName(udt_name) => udt_name.name(),
@@ -56,8 +56,9 @@ impl ArrayTypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct FunctionTypeName {
+    #[copy]
     id: isize,
     #[serde(rename = "parameterTypes")]
     parameter_types: ParameterList,
@@ -72,18 +73,6 @@ pub struct FunctionTypeName {
 }
 
 impl FunctionTypeName {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn parameter_types(&self) -> &ParameterList {
-        &self.parameter_types
-    }
-
-    pub fn return_parameter_types(&self) -> &ParameterList {
-        &self.return_parameter_types
-    }
-
     pub fn name(&self) -> String {
         let mut name = "function".to_owned();
 
@@ -117,39 +106,34 @@ impl FunctionTypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Mapping {
+    #[copy]
     id: isize,
     #[serde(rename = "keyName")]
+    #[use_as_deref]
+    #[return_type = "Option<&str>"]
     key_name: Option<String>,
     #[serde(rename = "keyNameLocation")]
     key_name_location: Option<String>,
     #[serde(rename = "keyType")]
+    #[return_type = "&TypeName"]
     key_type: Box<TypeName>,
     src: String,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
     #[serde(rename = "valueName")]
+    #[use_as_deref]
+    #[return_type = "Option<&str>"]
     value_name: Option<String>,
     #[serde(rename = "valueNameLocation")]
     value_name_location: Option<String>,
     #[serde(rename = "valueType")]
+    #[return_type = "&TypeName"]
     value_type: Box<TypeName>,
 }
 
 impl Mapping {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn key_type(&self) -> &TypeName {
-        self.key_type.as_ref()
-    }
-
-    pub fn value_type(&self) -> &TypeName {
-        self.value_type.as_ref()
-    }
-
     pub fn name(&self) -> String {
         format!(
             "mapping({} => {})",
@@ -159,16 +143,21 @@ impl Mapping {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct UserDefinedTypeName {
     // #[serde(skip)]
     // #[serde(rename = "contractScope")]
     // contract_scope: (), // @note never seen
+    #[copy]
     id: isize,
+    #[skip_getter]
     name: Option<String>,
     #[serde(rename = "pathNode")]
+    #[use_as_ref]
+    #[return_type = "Option<&IdentifierPath>"]
     path_node: Option<IdentifierPath>,
     #[serde(rename = "referencedDeclaration")]
+    #[copy]
     referenced_declaration: isize,
     src: String,
     #[serde(rename = "typeDescriptions")]
@@ -176,18 +165,6 @@ pub struct UserDefinedTypeName {
 }
 
 impl UserDefinedTypeName {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn path_node(&self) -> Option<&IdentifierPath> {
-        self.path_node.as_ref()
-    }
-
-    pub fn referenced_declaration(&self) -> isize {
-        self.referenced_declaration
-    }
-
     pub fn name(&self) -> String {
         if let Some(name) = self.path_node() {
             name.name().to_owned()
@@ -209,4 +186,3 @@ pub struct ElementaryTypeName {
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
 }
-

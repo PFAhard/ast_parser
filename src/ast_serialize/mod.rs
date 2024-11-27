@@ -1,9 +1,11 @@
 use crate::ast_specs::{
-    ArrayTypeName, Assignment, BinaryOperation, Conditional, Directive, ElementaryTypeName,
-    ElementaryTypeNameExpression, EventDefinition, Expression, FunctionCall, FunctionCallOptions,
-    Identifier, IndexAccess, IndexRangeAccess, Literal, MemberAccess, NewExpression, ParameterList,
-    SourceUnit, StructuredDocumentation, TupleExpression, TypeName, UnaryOperation,
-    VariableDeclaration,
+    ArrayTypeName, Assignment, BaseName, BinaryOperation, Conditional, ContractDefinition,
+    ContractKind, Directive, ElementaryTypeName, ElementaryTypeNameExpression, EventDefinition,
+    Expression, FunctionCall, FunctionCallOptions, FunctionTypeName, Identifier, IdentifierPath,
+    IndexAccess, IndexRangeAccess, InheritanceSpecifier, Literal, Mapping, MemberAccess,
+    NewExpression, ParameterList, SourceUnit, StateMutability, StructuredDocumentation,
+    TupleExpression, TypeName, UnaryOperation, UserDefinedTypeName, VariableDeclaration,
+    Visibility,
 };
 
 pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>";
@@ -72,6 +74,25 @@ pub const UNARY_OPERATION: &str = "<PREFIX><EXPRESSION><SUFFIX>";
 pub const UNARY_OPERATION_PREFIX_KEY: &str = "<PREFIX>";
 pub const UNARY_OPERATION_EXPRESSION_KEY: &str = "<EXPRESSION>";
 pub const UNARY_OPERATION_SUFFIX_KEY: &str = "<SUFFIX>";
+
+pub const FUNCTION_TYPE_NAME: &str = "function(<PARAMETERS>) <VISIBILITY> <MUTABILITY>";
+pub const FUNCTION_TYPE_NAME_PARAMETERS_KEY: &str = "<PARAMETERS>";
+pub const FUNCTION_TYPE_NAME_VISIBILITY_KEY: &str = "<VISIBILITY>";
+pub const FUNCTION_TYPE_NAME_MUTABILITY_KEY: &str = "<MUTABILITY>";
+
+pub const MAPPING: &str = "mapping(<TYPE_LEFT> <NAME_LEFT> => <TYPE_RIGHT> <NAME_RIGHT>)";
+pub const MAPPING_TYPE_LEFT_KEY: &str = "<TYPE_LEFT>";
+pub const MAPPING_NAME_LEFT_KEY: &str = "<NAME_LEFT>";
+pub const MAPPING_TYPE_RIGHT_KEY: &str = "<TYPE_RIGHT>";
+pub const MAPPING_NAME_RIGHT_KEY: &str = "<NAME_RIGHT>";
+
+pub const CONTRACT: &str = "<ABSTRACT> <CONTRACT_KIND> <CONTRACT_NAME> <IS> <INHERITANCE> {<BODY>}";
+pub const CONTRACT_ABSTRACT_KEY: &str = "<ABSTRACT>";
+pub const CONTRACT_CONTRACT_KIND_KEY: &str = "<CONTRACT_KIND>";
+pub const CONTRACT_CONTRACT_NAME_KEY: &str = "<CONTRACT_NAME>";
+pub const CONTRACT_IS_KEY: &str = "<IS>";
+pub const CONTRACT_INHERITANCE_KEY: &str = "<INHERITANCE>";
+pub const CONTRACT_BODY_KEY: &str = "<BODY>";
 
 pub trait AstSerializer {
     fn to_sol_vec(&self) -> Vec<u8>;
@@ -409,6 +430,140 @@ impl AstSerializer for UnaryOperation {
         }
         .as_bytes()
         .to_vec()
+    }
+}
+
+impl AstSerializer for FunctionTypeName {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        FUNCTION_TYPE_NAME
+            .replace(
+                FUNCTION_TYPE_NAME_PARAMETERS_KEY,
+                &self.parameter_types().to_sol_string(),
+            )
+            .replace(
+                FUNCTION_TYPE_NAME_VISIBILITY_KEY,
+                &self.visibility().to_sol_string(),
+            )
+            .replace(
+                FUNCTION_TYPE_NAME_MUTABILITY_KEY,
+                &self.state_mutability().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for Visibility {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            Visibility::External => b"external".to_vec(),
+            Visibility::Public => b"public".to_vec(),
+            Visibility::Internal => b"internal".to_vec(),
+            Visibility::Private => b"private".to_vec(),
+        }
+    }
+}
+
+impl AstSerializer for StateMutability {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            StateMutability::Payable => b"payable".to_vec(),
+            StateMutability::Pure => b"pure".to_vec(),
+            StateMutability::Nonpayable => b"nonpayable".to_vec(),
+            StateMutability::View => b"view".to_vec(),
+        }
+    }
+}
+
+impl AstSerializer for Mapping {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        MAPPING
+            .replace(MAPPING_TYPE_LEFT_KEY, &self.key_type().to_sol_string())
+            .replace(MAPPING_NAME_LEFT_KEY, self.key_name().unwrap_or_default())
+            .replace(MAPPING_TYPE_RIGHT_KEY, &self.value_type().to_sol_string())
+            .replace(
+                MAPPING_NAME_RIGHT_KEY,
+                self.value_name().unwrap_or_default(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for UserDefinedTypeName {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.path_node()
+            .expect("Expected Path Node in UserDefinedTypeName, but...")
+            .name()
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for ContractDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        CONTRACT
+            .replace(
+                CONTRACT_ABSTRACT_KEY,
+                if self._abstract() { "abstract" } else { "" },
+            )
+            .replace(
+                CONTRACT_CONTRACT_KIND_KEY,
+                &self.contract_kind().to_sol_string(),
+            )
+            .replace(CONTRACT_CONTRACT_NAME_KEY, self.name())
+            .replace(
+                CONTRACT_IS_KEY,
+                if self.base_contracts().is_empty() {
+                    ""
+                } else {
+                    "is"
+                },
+            )
+            .replace(
+                CONTRACT_INHERITANCE_KEY,
+                if self.base_contracts().is_empty() {
+                    ""
+                } else {
+                    &self.base_contracts().to_sol_string()
+                },
+            )
+            .replace(CONTRACT_BODY_KEY, &self.nodes().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for ContractKind {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            ContractKind::Contract => b"contract".to_vec(),
+            ContractKind::Interface => b"interface".to_vec(),
+            ContractKind::Library => b"kibrary".to_vec(),
+        }
+    }
+}
+
+impl AstSerializer for InheritanceSpecifier {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.base_name().to_sol_vec()
+    }
+}
+
+impl AstSerializer for BaseName {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            BaseName::UserDefinedTypeName(user_defined_type_name) => {
+                user_defined_type_name.to_sol_vec()
+            }
+            BaseName::IdentifierPath(identifier_path) => identifier_path.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for IdentifierPath {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.name().as_bytes().to_vec()
     }
 }
 

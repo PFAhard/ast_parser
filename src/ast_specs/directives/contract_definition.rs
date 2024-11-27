@@ -1,3 +1,4 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::{
@@ -5,9 +6,10 @@ use crate::ast_specs::{
     BaseNode,
 };
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ContractDefinition {
     #[serde(rename = "abstract")]
+    #[copy]
     _abstract: bool,
     #[serde(rename = "baseContracts")]
     base_contracts: Vec<InheritanceSpecifier>,
@@ -16,50 +18,32 @@ pub struct ContractDefinition {
     #[serde(rename = "contractDependencies")]
     contract_dependencies: Vec<isize>,
     #[serde(rename = "contractKind")]
+    #[copy]
     contract_kind: ContractKind,
     documentation: Option<StructuredDocumentation>,
     #[serde(rename = "fullyImplemented")]
     fully_implemented: bool,
+    #[copy]
     id: isize,
     #[serde(rename = "linearizedBaseContracts")]
+    #[return_type = "&[isize]"]
     linearized_base_contracts: Vec<isize>,
+    #[return_type = "&str"]
     name: String,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
+    #[return_type = "&[BaseNode]"]
     nodes: Vec<BaseNode>,
     scope: isize,
     src: String,
     #[serde(rename = "usedErrors")]
+    #[return_type = "&[isize]"]
     used_errors: Vec<isize>,
 }
 
 impl ContractDefinition {
-    pub fn nodes(&self) -> &[BaseNode] {
-        self.nodes.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
     pub fn is_in_used_errors(&self, id: isize) -> bool {
         self.used_errors.iter().any(|ex_id| ex_id == &id)
-    }
-
-    pub fn used_errors(&self) -> &[isize] {
-        self.used_errors.as_ref()
-    }
-
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
-    }
-
-    pub fn contract_kind(&self) -> ContractKind {
-        self.contract_kind
-    }
-
-    pub fn linearized_base_contracts(&self) -> &[isize] {
-        self.linearized_base_contracts.as_ref()
     }
 }
 
