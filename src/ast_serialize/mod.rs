@@ -1,11 +1,15 @@
 use crate::ast_specs::{
-    ArrayTypeName, Assignment, BaseName, BinaryOperation, Conditional, ContractDefinition,
-    ContractKind, Directive, ElementaryTypeName, ElementaryTypeNameExpression, EventDefinition,
-    Expression, FunctionCall, FunctionCallOptions, FunctionTypeName, Identifier, IdentifierPath,
-    IndexAccess, IndexRangeAccess, InheritanceSpecifier, Literal, Mapping, MemberAccess,
-    NewExpression, ParameterList, SourceUnit, StateMutability, StructuredDocumentation,
-    TupleExpression, TypeName, UnaryOperation, UserDefinedTypeName, VariableDeclaration,
-    Visibility,
+    ArrayTypeName, Assignment, BaseName, BaseNode, BinaryOperation, Block, Body, Break,
+    Conditional, Continue, ContractDefinition, ContractKind, Directive, DoWhileStatement,
+    ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement, EnumDefinition, EnumValue,
+    ErrorDefinition, EventDefinition, Expression, ExpressionStatement, FalseBody, ForStatement,
+    FunctionCall, FunctionCallKind, FunctionCallOptions, FunctionDefinition, FunctionKind,
+    FunctionTypeName, Identifier, IdentifierPath, IfStatement, IndexAccess, IndexRangeAccess,
+    InheritanceSpecifier, InitializationExpression, Literal, Mapping, MemberAccess,
+    ModifierInvocation, ModifierName, NewExpression, OverrideSpecifier, Overrides, ParameterList,
+    PlaceholderStatement, Return, RevertStatement, SourceUnit, StateMutability, Statement,
+    StructuredDocumentation, TupleExpression, TypeName, UnaryOperation, UserDefinedTypeName,
+    VariableDeclaration, VariableDeclarationStatement, Visibility,
 };
 
 pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>";
@@ -93,6 +97,55 @@ pub const CONTRACT_CONTRACT_NAME_KEY: &str = "<CONTRACT_NAME>";
 pub const CONTRACT_IS_KEY: &str = "<IS>";
 pub const CONTRACT_INHERITANCE_KEY: &str = "<INHERITANCE>";
 pub const CONTRACT_BODY_KEY: &str = "<BODY>";
+
+pub const ENUM: &str = "enum <ENUM_NAME> {<ENUM_VALUES>}";
+pub const ENUM_NAME_KEY: &str = "<ENUM_NAME>";
+pub const ENUM_ENUM_VALUES_KEY: &str = "<ENUM_VALUES>";
+
+pub const ERROR: &str = "error <NAME>(<PARAMETERS>)";
+pub const ERROR_NAME_KEY: &str = "<NAME>";
+pub const ERROR_PARAMETERS_KEY: &str = "<PARAMETERS>";
+
+pub const FUNCTION: &str = "<KIND> <NAME>(<PARAMETERS>) <STATE_MUTABILITY> <VISIBILITY> <OVERRIDE> <MODIFIERS> <RETURNS> <RETURN_PARAMETERS> {<BODY>}";
+pub const FUNCTION_KIND_KEY: &str = "<KIND>";
+pub const FUNCTION_NAME_KEY: &str = "<NAME>";
+pub const FUNCTION_PARAMETERS_KEY: &str = "<PARAMETERS>";
+pub const FUNCTION_STATE_MUTABILITY_KEY: &str = "<STATE_MUTABILITY>";
+pub const FUNCTION_VISIBILITY_KEY: &str = "<VISIBILITY>";
+pub const FUNCTION_OVERRIDE_KEY: &str = "<OVERRIDE>";
+pub const FUNCTION_MODIFIERS_KEY: &str = "<MODIFIERS>";
+pub const FUNCTION_RETURNS_KEY: &str = "<RETURNS>";
+pub const FUNCTION_RETURN_PARAMETERS_KEY: &str = "<RETURN_PARAMETERS>";
+pub const FUNCTION_BODY_KEY: &str = "<BODY>";
+
+pub const MODIFIER_INVOCATION: &str = "<NAME> <ARGUMENTS>";
+pub const MODIFIER_INVOCATION_NAME_KEY: &str = "<NAME>";
+pub const MODIFIER_INVOCATION_ARGUMENTS_KEY: &str = "<ARGUMENTS>";
+
+pub const DO_WHILE_STATEMENT: &str = "do {<BODY>} while (<CONDITION>)";
+pub const DO_WHILE_STATEMENT_BODY_KEY: &str = "<BODY>";
+pub const DO_WHILE_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
+
+pub const EMIT_STATEMENT: &str = "emit <FUNCTION>";
+pub const EMIT_EVENT_CALL_KEY: &str = "<FUNCTION>";
+
+pub const FOR_STATEMENT: &str = "for (<INITIALIZATION>;<CONDITION>;<SUB_EXPRESSION>) {<BODY>}";
+pub const FOR_STATEMENT_INITIALIZATION_KEY: &str = "<INITIALIZATION>";
+pub const FOR_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
+pub const FOR_STATEMENT_SUB_EXPRESSION_KEY: &str = "<SUB_EXPRESSION>";
+pub const FOR_STATEMENT_BODY_KEY: &str = "<BODY>";
+
+pub const VARIABLE_DECLARATION_STATEMENT: &str = "<DECLARATIONS> = <INITIALIZATION>";
+pub const VARIABLE_DECLARATION_STATEMENT_DECLARATION_KEY: &str = "<DECLARATIONS>";
+pub const VARIABLE_DECLARATION_STATEMENT_INITIALIZATION_KEY: &str = "<INITIALIZATION>";
+
+pub const IF_STATEMENT: &str = "if <CONDITION> {<TRUE_BODY>} else {<FALSE_BODY>}";
+pub const IF_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
+pub const IF_STATEMENT_TRUE_BODY_KEY: &str = "<TRUE_BODY>";
+pub const IF_STATEMENT_FALSE_BODY_KEY: &str = "<FALSE_BODY>";
+
+pub const REVERT_STATEMENT: &str = "revert <FUNCTION_CALL>";
+pub const REVERT_STATEMENT_FUNCTION_CALL: &str = "<FUNCTION_CALL>";
 
 pub trait AstSerializer {
     fn to_sol_vec(&self) -> Vec<u8>;
@@ -564,6 +617,366 @@ impl AstSerializer for BaseName {
 impl AstSerializer for IdentifierPath {
     fn to_sol_vec(&self) -> Vec<u8> {
         self.name().as_bytes().to_vec()
+    }
+}
+
+impl AstSerializer for BaseNode {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            BaseNode::EnumDefinition(enum_definition) => enum_definition.to_sol_vec(),
+            BaseNode::ErrorDefinition(error_definition) => error_definition.to_sol_vec(),
+            BaseNode::FunctionDefinition(function_definition) => function_definition.to_sol_vec(),
+            BaseNode::StructDefinition(struct_definition) => struct_definition.to_sol_vec(),
+            BaseNode::UserDefinedValueTypeDefinition(user_defined_value_type_definition) => {
+                user_defined_value_type_definition.to_sol_vec()
+            }
+            BaseNode::UsingForDirective(using_for_directive) => using_for_directive.to_sol_vec(),
+            BaseNode::VariableDeclaration(variable_declaration) => {
+                variable_declaration.to_sol_vec()
+            }
+            BaseNode::EventDefinition(event_definition) => event_definition.to_sol_vec(),
+            BaseNode::ModifierDefinition(modifier_definition) => modifier_definition.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for EnumDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        ENUM.replace(ENUM_NAME_KEY, &self.name())
+            .replace(ENUM_ENUM_VALUES_KEY, &self.members().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for EnumValue {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.name().as_bytes().to_vec()
+    }
+}
+
+impl AstSerializer for ErrorDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        ERROR
+            .replace(ERROR_NAME_KEY, self.name())
+            .replace(ERROR_PARAMETERS_KEY, &self.parameters().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for FunctionDefinition {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        FUNCTION
+            .replace(FUNCTION_KIND_KEY, &self.kind().to_sol_string())
+            .replace(FUNCTION_NAME_KEY, self.name())
+            .replace(FUNCTION_PARAMETERS_KEY, &self.parameters().to_sol_string())
+            .replace(
+                FUNCTION_STATE_MUTABILITY_KEY,
+                &self.state_mutability().to_sol_string(),
+            )
+            .replace(FUNCTION_VISIBILITY_KEY, &self.visibility().to_sol_string())
+            .replace(FUNCTION_OVERRIDE_KEY, &self.overrides().to_sol_string())
+            .replace(FUNCTION_MODIFIERS_KEY, &self.modifiers().to_sol_string())
+            .replace(
+                FUNCTION_RETURNS_KEY,
+                if self.return_parameter_list().is_none()
+                    || self.return_parameter_list().unwrap().is_empty()
+                {
+                    ""
+                } else {
+                    "returns"
+                },
+            )
+            .replace(
+                FUNCTION_RETURN_PARAMETERS_KEY,
+                if self.return_parameter_list().is_none()
+                    || self.return_parameter_list().unwrap().is_empty()
+                {
+                    ""
+                } else {
+                    &self.return_parameters().to_sol_string()
+                },
+            )
+            .replace(FUNCTION_BODY_KEY, &self.body().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for OverrideSpecifier {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.overrides().to_sol_vec()
+    }
+}
+
+impl AstSerializer for Overrides {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            Overrides::UserDefinedTypeName(user_defined_type_name) => {
+                user_defined_type_name.to_sol_vec()
+            }
+            Overrides::IdentifierPath(identifier_path) => identifier_path.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for ModifierInvocation {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        MODIFIER_INVOCATION
+            .replace(
+                MODIFIER_INVOCATION_NAME_KEY,
+                &self.modifier_name().to_sol_string(),
+            )
+            .replace(
+                MODIFIER_INVOCATION_ARGUMENTS_KEY,
+                &self.arguments().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for ModifierName {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            ModifierName::Identifier(identifier) => identifier.to_sol_vec(),
+            ModifierName::IdentifierPath(identifier_path) => identifier_path.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for FunctionKind {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            FunctionKind::Function => b"function".to_vec(),
+            FunctionKind::Receive => b"receive".to_vec(),
+            FunctionKind::Constructor => b"constructor".to_vec(),
+            FunctionKind::Fallback => b"fallback".to_vec(),
+            FunctionKind::FreeFunction => b"freeFunction".to_vec(),
+        }
+    }
+}
+
+impl AstSerializer for Block {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.statements().to_sol_vec()
+    }
+}
+
+impl AstSerializer for Statement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            Statement::Block(block) => block.to_sol_vec(),
+            Statement::Break(_break) => _break.to_sol_vec(),
+            Statement::Continue(_continue) => _continue.to_sol_vec(),
+            Statement::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
+            Statement::EmitStatement(emit_statement) => emit_statement.to_sol_vec(),
+            Statement::ExpressionStatement(expression_statement) => {
+                expression_statement.to_sol_vec()
+            }
+            Statement::ForStatement(for_statement) => for_statement.to_sol_vec(),
+            Statement::IfStatement(if_statement) => if_statement.to_sol_vec(),
+            Statement::InlineAssembly(inline_assembly) => inline_assembly.to_sol_vec(),
+            Statement::PlaceholderStatement(placeholder_statement) => {
+                placeholder_statement.to_sol_vec()
+            }
+            Statement::Return(_return) => _return.to_sol_vec(),
+            Statement::RevertStatement(revert_statement) => revert_statement.to_sol_vec(),
+            Statement::TryStatement(try_statement) => try_statement.to_sol_vec(),
+            Statement::UncheckedBlock(unchecked_block) => unchecked_block.to_sol_vec(),
+            Statement::VariableDeclarationStatement(variable_declaration_statement) => {
+                variable_declaration_statement.to_sol_vec()
+            }
+            Statement::WhileStatement(while_statement) => while_statement.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for Break {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        b"break".to_vec()
+    }
+}
+
+impl AstSerializer for Continue {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        b"continue".to_vec()
+    }
+}
+
+impl AstSerializer for Return {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        b"return".to_vec()
+    }
+}
+
+impl AstSerializer for DoWhileStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        DO_WHILE_STATEMENT
+            .replace(DO_WHILE_STATEMENT_BODY_KEY, &self.body().to_sol_string())
+            .replace(
+                DO_WHILE_STATEMENT_CONDITION_KEY,
+                &self.condition().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for Body {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            Body::Block(block) => block.to_sol_vec(),
+            Body::Break(_break) => _break.to_sol_vec(),
+            Body::Continue(_continue) => _continue.to_sol_vec(),
+            Body::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
+            Body::EmitStatement(emit_statement) => emit_statement.to_sol_vec(),
+            Body::ExpressionStatement(expression_statement) => expression_statement.to_sol_vec(),
+            Body::ForStatement(for_statement) => for_statement.to_sol_vec(),
+            Body::IfStatement(if_statement) => if_statement.to_sol_vec(),
+            Body::InlineAssembly(value) => value.to_sol_vec(),
+            Body::PlaceholderStatement(placeholder_statement) => placeholder_statement.to_sol_vec(),
+            Body::Return(_return) => _return.to_sol_vec(),
+            Body::RevertStatement(revert_statement) => revert_statement.to_sol_vec(),
+            Body::TryStatement(try_statement) => try_statement.to_sol_vec(),
+            Body::UncheckedBlock(unchecked_block) => unchecked_block.to_sol_vec(),
+            Body::VariableDeclarationStatement(variable_declaration_statement) => {
+                variable_declaration_statement.to_sol_vec()
+            }
+            Body::WhileStatement(while_statement) => while_statement.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for EmitStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        EMIT_STATEMENT
+            .replace(EMIT_EVENT_CALL_KEY, &self.event_call().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for ExpressionStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.expression().to_sol_vec()
+    }
+}
+
+impl AstSerializer for ForStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        FOR_STATEMENT
+            .replace(
+                FOR_STATEMENT_INITIALIZATION_KEY,
+                &self.initialization_expression().to_sol_string(),
+            )
+            .replace(
+                FOR_STATEMENT_CONDITION_KEY,
+                &self.condition().to_sol_string(),
+            )
+            .replace(
+                FOR_STATEMENT_SUB_EXPRESSION_KEY,
+                &self.loop_expression().to_sol_string(),
+            )
+            .replace(FOR_STATEMENT_BODY_KEY, &self.body().to_sol_string())
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for InitializationExpression {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            InitializationExpression::ExpressionStatement(expression_statement) => {
+                expression_statement.to_sol_vec()
+            }
+            InitializationExpression::VariableDeclarationStatement(
+                variable_declaration_statement,
+            ) => variable_declaration_statement.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for VariableDeclarationStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        VARIABLE_DECLARATION_STATEMENT
+            .replace(
+                VARIABLE_DECLARATION_STATEMENT_DECLARATION_KEY,
+                &self.declarations().to_sol_string(),
+            )
+            .replace(
+                VARIABLE_DECLARATION_STATEMENT_INITIALIZATION_KEY,
+                &self.initial_value().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for IfStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        IF_STATEMENT
+            .replace(
+                IF_STATEMENT_CONDITION_KEY,
+                &self.condition().to_sol_string(),
+            )
+            .replace(
+                IF_STATEMENT_TRUE_BODY_KEY,
+                &self.true_body().to_sol_string(),
+            )
+            .replace(
+                IF_STATEMENT_FALSE_BODY_KEY,
+                &self.false_body().to_sol_string,
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for FalseBody {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            FalseBody::Block(block) => block.to_sol_vec(),
+            FalseBody::Break(_break) => _break.to_sol_vec(),
+            FalseBody::Continue(_continue) => _continue.to_sol_vec(),
+            FalseBody::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
+            FalseBody::EmitStatement(emit_statement) => emit_statement.to_sol_vec(),
+            FalseBody::ExpressionStatement(expression_statement) => {
+                expression_statement.to_sol_vec()
+            }
+            FalseBody::ForStatement(for_statement) => for_statement.to_sol_vec(),
+            FalseBody::IfStatement(if_statement) => if_statement.to_sol_vec(),
+            FalseBody::PlaceholderStatement(placeholder_statement) => {
+                placeholder_statement.to_sol_vec()
+            }
+            FalseBody::Return(_return) => _return.to_sol_vec(),
+            FalseBody::RevertStatement(revert_statement) => revert_statement.to_sol_vec(),
+            FalseBody::TryStatement(try_statement) => try_statement.to_sol_vec(),
+            FalseBody::UncheckedBlock(unchecked_block) => unchecked_block.to_sol_vec(),
+            FalseBody::VariableDeclarationStatement(variable_declaration_statement) => {
+                variable_declaration_statement.to_sol_vec()
+            }
+            FalseBody::WhileStatement(while_statement) => while_statement.to_sol_vec(),
+        }
+    }
+}
+
+impl AstSerializer for PlaceholderStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        b"_".to_vec()
+    }
+}
+
+impl AstSerializer for RevertStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        REVERT_STATEMENT
+            .replace(
+                REVERT_STATEMENT_FUNCTION_CALL,
+                &self.error_call().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
     }
 }
 

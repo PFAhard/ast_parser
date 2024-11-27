@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::{
@@ -9,90 +10,66 @@ use crate::ast_specs::common::{
 
 use super::prelude::VariableDeclaration;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct FunctionDefinition {
     #[serde(rename = "baseFunctions")]
     base_functions: Option<Vec<isize>>,
+    #[return_type = "Option<&Block>"]
+    #[use_as_ref]
     body: Option<Block>,
     documentation: Option<StructuredDocumentation>,
     #[serde(rename = "functionSelector")]
     function_selector: Option<String>,
+    #[copy]
     id: isize,
     implemented: bool,
+    #[copy]
     kind: FunctionKind,
+    #[return_type = "&[ModifierInvocation]"]
     modifiers: Vec<ModifierInvocation>,
+    #[return_type = "&str"]
     name: String,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
+    #[return_type = "Option<&OverrideSpecifier>"]
+    #[use_as_ref]
     overrides: Option<OverrideSpecifier>,
+    #[return_type = "Option<&ParameterList>"]
+    #[use_as_ref]
     parameters: Option<ParameterList>,
     #[serde(rename = "returnParameters")]
+    #[return_type = "Option<&ParameterList>"]
+    #[use_as_ref]
     return_parameters: Option<ParameterList>,
+    #[copy]
     scope: isize,
+    #[return_type = "&str"]
     src: String,
     #[serde(rename = "stateMutability")]
+    #[copy]
     state_mutability: StateMutability,
     #[serde(rename = "virtual")]
     _virtual: bool,
+    #[copy]
     visibility: Visibility,
 }
 
 impl FunctionDefinition {
-    pub fn body(&self) -> Option<&Block> {
-        self.body.as_ref()
-    }
-
-    pub fn name(&self) -> &str {
-        self.name.as_ref()
-    }
-
-    pub fn src(&self) -> &str {
-        self.src.as_ref()
-    }
-
-    pub fn parameters(&self) -> Option<&[VariableDeclaration]> {
+    pub fn parameter_list(&self) -> Option<&[VariableDeclaration]> {
         self.parameters.as_ref().map(|p| p.parameters())
     }
 
-    pub fn parameter_list(&self) -> Option<&ParameterList> {
-        self.parameters.as_ref()
-    }
-
-    pub fn return_parameters(&self) -> Option<&[VariableDeclaration]> {
+    pub fn return_parameter_list(&self) -> Option<&[VariableDeclaration]> {
         self.return_parameters.as_ref().map(|r| r.parameters())
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
     }
 
     pub fn is_id(&self, id: isize) -> bool {
         self.id == id
     }
 
-    pub fn modifiers(&self) -> &[ModifierInvocation] {
-        self.modifiers.as_ref()
-    }
-
-    pub fn overrides(&self) -> Option<&OverrideSpecifier> {
-        self.overrides.as_ref()
-    }
-
-    pub fn scope(&self) -> isize {
-        self.scope
-    }
-
-    pub fn visibility(&self) -> Visibility {
-        self.visibility
-    }
-
-    pub fn state_mutability(&self) -> StateMutability {
-        self.state_mutability
-    }
-
     pub fn full_name(&self) -> String {
         let mut name = self.name().to_owned();
-        if let Some(params) = self.parameter_list() {
+        if let Some(params) = self.parameters() {
             let params: Vec<String> = params
                 .parameters()
                 .iter()
@@ -105,7 +82,7 @@ impl FunctionDefinition {
             name.push_str(params.as_str());
         }
 
-        if let Some(returns) = self.return_parameters() {
+        if let Some(returns) = self.return_parameter_list() {
             let returns: Vec<String> = returns
                 .iter()
                 .map(|x| format!("{} {}", x.type_name().as_ref().unwrap().name(), x.name()))
@@ -120,10 +97,6 @@ impl FunctionDefinition {
         }
 
         name
-    }
-    
-    pub fn kind(&self) -> FunctionKind {
-        self.kind
     }
 }
 
@@ -149,6 +122,6 @@ impl Display for FunctionKind {
             FunctionKind::Constructor => f.write_str("constructor"),
             FunctionKind::Fallback => f.write_str("fallback"),
             FunctionKind::FreeFunction => f.write_str("freeFunction"),
-        } 
+        }
     }
 }

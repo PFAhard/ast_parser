@@ -1,25 +1,17 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::Statement;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct Block {
     documentation: Option<String>,
+    #[copy]
     id: isize,
+    #[return_type = "&str"]
     src: String,
+    #[use_as_deref]
+    #[return_type = "Option<&[Statement]>"]
     statements: Option<Vec<Statement>>,
 }
 
-impl Block {
-    pub fn statements(&self) -> Option<&[Statement]> {
-        self.statements.as_deref()
-    }
-
-    pub fn src(&self) -> &str {
-        self.src.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-}

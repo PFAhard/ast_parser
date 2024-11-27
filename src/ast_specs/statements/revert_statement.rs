@@ -1,22 +1,14 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::expressions::FunctionCall;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct RevertStatement {
     documentation: Option<String>,
     #[serde(rename = "errorCall")]
     error_call: FunctionCall,
+    #[copy]
     id: isize,
     src: String,
-}
-
-impl RevertStatement {
-    pub fn error_call(&self) -> &FunctionCall {
-        &self.error_call
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

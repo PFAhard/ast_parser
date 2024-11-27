@@ -1,7 +1,7 @@
 pub use super::contract_definition::{ContractDefinition, ContractKind};
 pub use super::enum_definition::{EnumDefinition, EnumValue};
 pub use super::error_definition::ErrorDefinition;
-pub use super::function_definition::FunctionDefinition;
+pub use super::function_definition::{FunctionDefinition, FunctionKind};
 pub use super::import_directive::ImportDirective;
 pub use super::pragma_directive::PragmaDirective;
 pub use super::struct_definition::StructDefinition;

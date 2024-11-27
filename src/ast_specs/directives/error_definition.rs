@@ -1,14 +1,17 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::common::{StructuredDocumentation, ParameterList};
 
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct ErrorDefinition {
     documentation: Option<StructuredDocumentation>,
     #[serde(rename = "errorSelector")]
     error_selector: Option<String>,
+    #[copy]
     id: isize,
+    #[return_type = "&str"]
     name: String,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
@@ -16,12 +19,4 @@ pub struct ErrorDefinition {
     src: String,
 }
 
-impl ErrorDefinition {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn parameters(&self) -> &ParameterList {
-        &self.parameters
-    }
-}
+ 

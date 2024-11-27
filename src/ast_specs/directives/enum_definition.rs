@@ -1,10 +1,13 @@
+use getters::Getters;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct EnumDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,
+    #[copy]
     id: isize,
+    #[return_type = "&[EnumValue]"]
     members: Vec<EnumValue>,
     name: String,
     #[serde(rename = "nameLocation")]
@@ -12,27 +15,14 @@ pub struct EnumDefinition {
     src: String,
 }
 
-impl EnumDefinition {
-    pub fn members(&self) -> &[EnumValue] {
-        self.members.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-}
-
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct EnumValue {
+    #[copy]
     id: isize,
+    #[return_type = "&str"]
     name: String,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
     src: String,
 }
-
-impl EnumValue {
-    pub fn id(&self) -> isize {
-        self.id
-    }
-}
+ 

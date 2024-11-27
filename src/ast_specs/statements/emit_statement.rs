@@ -1,22 +1,14 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::expressions::FunctionCall;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct EmitStatement {
     documentation: Option<String>,
     #[serde(rename = "eventCall")]
     event_call: FunctionCall,
+    #[copy]
     id: isize,
     src: String,
-}
-
-impl EmitStatement {
-    pub fn event_call(&self) -> &FunctionCall {
-        &self.event_call
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
 }

@@ -1,32 +1,20 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::{directives::VariableDeclaration, Expression};
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Getters)]
 pub struct VariableDeclarationStatement {
+    #[return_type = "&[Option<isize>]"]
     assignments: Vec<Option<isize>>,
+    #[return_type = "&[Option<VariableDeclaration>]"]
     declarations: Vec<Option<VariableDeclaration>>,
     documentation: Option<String>,
+    #[copy]
     id: isize,
     #[serde(rename = "initialValue")]
+    #[return_type = "Option<&Expression>"]
+    #[use_as_ref]
     initial_value: Option<Expression>,
     src: String,
-}
-
-impl VariableDeclarationStatement {
-    pub fn initial_value(&self) -> Option<&Expression> {
-        self.initial_value.as_ref()
-    }
-
-    pub fn declarations(&self) -> &[Option<VariableDeclaration>] {
-        self.declarations.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn assignments(&self) -> &[Option<isize>] {
-        self.assignments.as_ref()
-    }
 }
