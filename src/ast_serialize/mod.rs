@@ -189,7 +189,7 @@ pub const IMPORT_DIRECTIVE: &str = "import {<ALIASES>} from \"<PATH>\";\n";
 pub const IMPORT_DIRECTIVE_ALIASES_KEY: &str = "<ALIASES>";
 pub const IMPORT_DIRECTIVE_PATH_KEY: &str = "<PATH>";
 
-pub const SYMBOL_ALIASES: &str = "<FOREIGN> <AS> <LOCAL>";
+pub const SYMBOL_ALIASES: &str = "<FOREIGN><AS><LOCAL>";
 pub const SYMBOL_ALIASES_AS_KEY: &str = "<AS>";
 pub const SYMBOL_ALIASES_FOREIGN_KEY: &str = "<FOREIGN>";
 pub const SYMBOL_ALIASES_LOCAL_KEY: &str = "<LOCAL>";
@@ -1174,7 +1174,7 @@ impl AstSerializer for SymbolAliases {
             .replace(SYMBOL_ALIASES_FOREIGN_KEY, &self.foreign().to_sol_string())
             .replace(
                 SYMBOL_ALIASES_AS_KEY,
-                if self.local().is_some() { "as" } else { "" },
+                if self.local().is_some() { " as " } else { "" },
             )
             .replace(SYMBOL_ALIASES_LOCAL_KEY, self.local().unwrap_or_default())
             .as_bytes()
