@@ -1,15 +1,5 @@
 use crate::ast_specs::{
-    ArrayTypeName, Assignment, BaseName, BaseNode, BinaryOperation, Block, Body, Break,
-    Conditional, Continue, ContractDefinition, ContractKind, Directive, DoWhileStatement,
-    ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement, EnumDefinition, EnumValue,
-    ErrorDefinition, EventDefinition, Expression, ExpressionStatement, FalseBody, ForStatement,
-    FunctionCall, FunctionCallKind, FunctionCallOptions, FunctionDefinition, FunctionKind,
-    FunctionTypeName, Identifier, IdentifierPath, IfStatement, IndexAccess, IndexRangeAccess,
-    InheritanceSpecifier, InitializationExpression, Literal, Mapping, MemberAccess,
-    ModifierInvocation, ModifierName, NewExpression, OverrideSpecifier, Overrides, ParameterList,
-    PlaceholderStatement, Return, RevertStatement, SourceUnit, StateMutability, Statement,
-    StructuredDocumentation, TupleExpression, TypeName, UnaryOperation, UserDefinedTypeName,
-    VariableDeclaration, VariableDeclarationStatement, Visibility,
+    ArrayTypeName, Assignment, BaseName, BaseNode, BinaryOperation, Block, Body, Break, Conditional, Continue, ContractDefinition, ContractKind, Directive, DoWhileStatement, ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement, EnumDefinition, EnumValue, ErrorDefinition, EventDefinition, Expression, ExpressionStatement, FalseBody, ForStatement, FunctionCall, FunctionCallKind, FunctionCallOptions, FunctionDefinition, FunctionKind, FunctionTypeName, Identifier, IdentifierPath, IfStatement, IndexAccess, IndexRangeAccess, InheritanceSpecifier, InitializationExpression, Literal, Mapping, MemberAccess, ModifierInvocation, ModifierName, NewExpression, OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement, Return, RevertStatement, SourceUnit, StateMutability, Statement, StructuredDocumentation, TryCatchClause, TryStatement, TupleExpression, TypeName, UnaryOperation, UserDefinedTypeName, VariableDeclaration, VariableDeclarationStatement, Visibility
 };
 
 pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>";
@@ -146,6 +136,10 @@ pub const IF_STATEMENT_FALSE_BODY_KEY: &str = "<FALSE_BODY>";
 
 pub const REVERT_STATEMENT: &str = "revert <FUNCTION_CALL>";
 pub const REVERT_STATEMENT_FUNCTION_CALL: &str = "<FUNCTION_CALL>";
+
+pub const TRY_CATCH_STATEMENT: &str = "try <EXPRESSION> {} catch {<CLAUSES>}";
+pub const TRY_CATCH_STATEMENT_EXPRESSION_KEY: &str = "<EXPRESSION>";
+pub const TRY_CATCH_STATEMENT_CLAUSES_KEY: &str = "<CLAUSES>";
 
 pub trait AstSerializer {
     fn to_sol_vec(&self) -> Vec<u8>;
@@ -977,6 +971,28 @@ impl AstSerializer for RevertStatement {
             )
             .as_bytes()
             .to_vec()
+    }
+}
+
+impl AstSerializer for TryStatement {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        TRY_CATCH_STATEMENT
+            .replace(
+                TRY_CATCH_STATEMENT_CLAUSES_KEY,
+                &self.clauses().to_sol_string(),
+            )
+            .replace(
+                TRY_CATCH_STATEMENT_EXPRESSION_KEY,
+                &self.external_call().to_sol_string(),
+            )
+            .as_bytes()
+            .to_vec()
+    }
+}
+
+impl AstSerializer for TryCatchClause {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        todo!()
     }
 }
 
