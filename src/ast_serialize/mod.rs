@@ -205,6 +205,14 @@ pub trait AstSerializer {
     }
 }
 
+pub trait AstSerializerDelimited<D: Into<u8> + Copy> {
+    fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8>;
+
+    fn to_sol_string_with_delimiter(&self, d: D) -> String {
+        to_string(self.to_sol_vec_with_delimiter(d))
+    }
+}
+
 impl AstSerializer for SourceUnit {
     fn to_sol_vec(&self) -> Vec<u8> {
         let mut out = Vec::new();
@@ -1160,7 +1168,9 @@ impl AstSerializer for ImportDirective {
         IMPORT_DIRECTIVE
             .replace(
                 IMPORT_DIRECTIVE_ALIASES_KEY,
-                &self.symbol_aliases().to_sol_string(),
+                &self
+                    .symbol_aliases()
+                    .to_sol_string_with_delimiter(Delimiter::Comma),
             )
             .replace(IMPORT_DIRECTIVE_PATH_KEY, self.file())
             .as_bytes()
@@ -1214,11 +1224,39 @@ impl<T: AstSerializer> AstSerializer for Vec<T> {
 
 impl<T: AstSerializer> AstSerializer for &[T] {
     fn to_sol_vec(&self) -> Vec<u8> {
+        self.iter().fold(Vec::new(), |mut acc, t| {
+            acc.extend(t.to_sol_vec());
+
+            acc
+        })
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Delimiter {
+    Comma,
+}
+
+impl From<Delimiter> for u8 {
+    fn from(value: Delimiter) -> Self {
+        match value {
+            Delimiter::Comma => b',',
+        }
+    }
+}
+
+impl<T: AstSerializer, D: Into<u8> + Copy> AstSerializerDelimited<D> for Vec<T> {
+    fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8> {
+        self.as_slice().to_sol_vec_with_delimiter(d)
+    }
+}
+impl<T: AstSerializer, D: Into<u8> + Copy> AstSerializerDelimited<D> for &[T] {
+    fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8> {
         let limit = self.len();
         self.iter().enumerate().fold(Vec::new(), |mut acc, (i, t)| {
             acc.extend(t.to_sol_vec());
             if i != limit - 1 {
-                acc.push(b',');
+                acc.push(d.into());
             }
 
             acc
