@@ -224,7 +224,7 @@ impl AstSerializer for SourceUnit {
         out.extend_from_slice(license.as_bytes());
         out.extend(
             self.nodes()
-                .to_sol_vec_with_delimiter(Delimiter::DoubleLine),
+                .to_sol_vec_with_delimiter(Delimiter::NewLine),
         );
 
         out
@@ -1238,6 +1238,7 @@ impl<T: AstSerializer> AstSerializer for &[T] {
 #[derive(Debug, Clone, Copy)]
 pub enum Delimiter {
     Comma,
+    NewLine,
     DoubleLine,
 }
 
@@ -1245,6 +1246,7 @@ impl From<Delimiter> for &[u8] {
     fn from(value: Delimiter) -> Self {
         match value {
             Delimiter::Comma => b", ",
+            Delimiter::NewLine => b"\n",
             Delimiter::DoubleLine => b"\n\n",
         }
     }
