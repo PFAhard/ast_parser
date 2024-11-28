@@ -6,13 +6,13 @@ use crate::ast_specs::{
     FalseBody, ForStatement, FunctionCall, FunctionCallOptions, FunctionDefinition, FunctionKind,
     FunctionTypeName, Identifier, IdentifierPath, IfStatement, ImportDirective, IndexAccess,
     IndexRangeAccess, InheritanceSpecifier, InitializationExpression, LibraryName, Literal,
-    Mapping, MemberAccess, ModifierDefinition, ModifierInvocation, ModifierName, NewExpression,
-    OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement, PragmaDirective, Return,
-    RevertStatement, SourceUnit, StateMutability, Statement, StructDefinition,
-    StructuredDocumentation, SymbolAliases, TryCatchClause, TryStatement, TupleExpression,
-    TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName, UserDefinedValueTypeDefinition,
-    UsingForDirective, VariableDeclaration, VariableDeclarationStatement, Visibility,
-    WhileStatement,
+    Mapping, MemberAccess, ModifierDefinition, ModifierInvocation, ModifierName, Mutability,
+    NewExpression, OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement,
+    PragmaDirective, Return, RevertStatement, SourceUnit, StateMutability, Statement,
+    StorageLocation, StructDefinition, StructuredDocumentation, SymbolAliases, TryCatchClause,
+    TryStatement, TupleExpression, TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName,
+    UserDefinedValueTypeDefinition, UsingForDirective, VariableDeclaration,
+    VariableDeclarationStatement, Visibility, WhileStatement,
 };
 
 pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>\n";
@@ -23,11 +23,17 @@ pub const EVENT_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const EVENT_NAME_KEY: &str = "<EVENT_NAME>";
 pub const EVENT_ARGS_KEY: &str = "<EVENT_ARGS>";
 
-pub const VARIABLE: &str = "<TYPE> <INDEXED> <NAME><TERMINATOR>";
+pub const VARIABLE: &str =
+    "<TYPE><INDEXED><VISIBILITY><MUTABILITY><STORAGE_LOCATION><NAME><ASSIGNMENT><INITIAL_VALUE><TERMINATOR>";
 pub const VARIABLE_TYPE_KEY: &str = "<TYPE>";
 pub const VARIABLE_INDEXED_KEY: &str = "<INDEXED>";
 pub const VARIABLE_INDEXED_KEYWORD: &str = "indexed";
+pub const VARIABLE_VISIBILITY_KEY: &str = "<VISIBILITY>";
+pub const VARIABLE_MUTABILITY_KEY: &str = "<MUTABILITY>";
+pub const VARIABLE_STORAGE_LOCATION_KEY: &str = "<STORAGE_LOCATION>";
 pub const VARIABLE_NAME_KEY: &str = "<NAME>";
+pub const VARIABLE_ASSIGNMENT_KEY: &str = "<ASSIGNMENT>";
+pub const VARIABLE_INITIAL_VALUE_KEY: &str = "<INITIAL_VALUE>";
 pub const VARIABLE_TERMINATOR_KEY: &str = "<TERMINATOR>";
 
 pub const ARRAY_TYPE_NAME: &str = "<BASE_TYPE>[<SIZE>]";
@@ -93,7 +99,9 @@ pub const MAPPING_NAME_LEFT_KEY: &str = "<NAME_LEFT>";
 pub const MAPPING_TYPE_RIGHT_KEY: &str = "<TYPE_RIGHT>";
 pub const MAPPING_NAME_RIGHT_KEY: &str = "<NAME_RIGHT>";
 
-pub const CONTRACT: &str = "<ABSTRACT> <CONTRACT_KIND> <CONTRACT_NAME> <IS> <INHERITANCE> {<BODY>}";
+pub const CONTRACT: &str =
+    "<DOCUMENTATION><ABSTRACT> <CONTRACT_KIND> <CONTRACT_NAME> <IS> <INHERITANCE> {<BODY>}";
+pub const CONTRACT_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const CONTRACT_ABSTRACT_KEY: &str = "<ABSTRACT>";
 pub const CONTRACT_CONTRACT_KIND_KEY: &str = "<CONTRACT_KIND>";
 pub const CONTRACT_CONTRACT_NAME_KEY: &str = "<CONTRACT_NAME>";
@@ -174,7 +182,7 @@ pub const USER_DEFINED_TYPE_DEFINITION: &str = "type <NAME> is <TYPE>";
 pub const USER_DEFINED_TYPE_DEFINITION_NAME_KEY: &str = "<NAME>";
 pub const USER_DEFINED_TYPE_DEFINITION_TYPE_KEY: &str = "<TYPE>";
 
-pub const USING_FOR_DIRECTIVE: &str = "using <LIBRARY> for <TYPE>";
+pub const USING_FOR_DIRECTIVE: &str = "using <LIBRARY> for <TYPE>;";
 pub const USING_FOR_DIRECTIVE_TYPE_KEY: &str = "<TYPE>";
 pub const USING_FOR_DIRECTIVE_LIBRARY_KEY: &str = "<LIBRARY>";
 
@@ -213,6 +221,28 @@ pub trait AstSerializerDelimited<'a, D: Into<&'a [u8]> + Copy> {
     }
 }
 
+pub trait AstSerializerContexted {
+    fn to_sol_vec_contexted(&self, context: Context) -> Vec<u8>;
+
+    fn to_sol_string_contexted(&self, context: Context) -> String {
+        to_string(self.to_sol_vec_contexted(context))
+    }
+}
+
+pub trait AstSerializerContextedAndDelimited<'a, D: Into<&'a [u8]> + Copy> {
+    fn to_sol_vec_contexted_and_delimited(&self, context: Context, d: D) -> Vec<u8>;
+
+    fn to_sol_string_contexted_and_delimited(&self, context: Context, d: D) -> String {
+        to_string(self.to_sol_vec_contexted_and_delimited(context, d))
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Context {
+    ContractScope,
+    ParameterList,
+}
+
 impl AstSerializer for SourceUnit {
     fn to_sol_vec(&self) -> Vec<u8> {
         let mut out = Vec::new();
@@ -244,7 +274,7 @@ impl AstSerializer for Directive {
             }
             Directive::UsingForDirective(using_for_directive) => using_for_directive.to_sol_vec(),
             Directive::VariableDeclaration(variable_declaration) => {
-                variable_declaration.to_sol_vec()
+                variable_declaration.to_sol_vec_contexted(Context::ContractScope)
             }
         }
     }
@@ -266,35 +296,116 @@ impl AstSerializer for EventDefinition {
 
 impl AstSerializer for StructuredDocumentation {
     fn to_sol_vec(&self) -> Vec<u8> {
-        self.text().as_bytes().to_owned()
+        self.text()
+            .lines()
+            .map(|line| {
+                [
+                    if line.starts_with(" ") { "///" } else { "/// " },
+                    line,
+                    "\n",
+                ]
+                .concat()
+            })
+            .collect::<Vec<String>>()
+            .join("")
+            .as_bytes()
+            .to_vec()
     }
 }
 
 impl AstSerializer for ParameterList {
     fn to_sol_vec(&self) -> Vec<u8> {
         self.parameters()
-            .to_sol_vec_with_delimiter(Delimiter::Comma)
+            .to_sol_vec_contexted_and_delimited(Context::ParameterList, Delimiter::Comma)
     }
 }
 
-impl AstSerializer for VariableDeclaration {
-    fn to_sol_vec(&self) -> Vec<u8> {
-        let mut var =
-            VARIABLE.replace(VARIABLE_TYPE_KEY, &to_string(self.type_name().to_sol_vec()));
-        var = var.replace(
-            VARIABLE_INDEXED_KEY,
-            match self.indexed() {
-                Some(true) => VARIABLE_INDEXED_KEYWORD,
-                _ => "",
-            },
-        );
-        var = var.replace(VARIABLE_NAME_KEY, self.name());
-        var = var.replace(
-            VARIABLE_TERMINATOR_KEY,
-            if self.state_variable() { ";" } else { "," },
-        );
+impl AstSerializerContexted for VariableDeclaration {
+    fn to_sol_vec_contexted(&self, context: Context) -> Vec<u8> {
+        match context {
+            Context::ContractScope => VARIABLE
+                .replace(VARIABLE_TYPE_KEY, &to_string(self.type_name().to_sol_vec()))
+                .replace(
+                    VARIABLE_INDEXED_KEY,
+                    &match self.indexed() {
+                        Some(true) => [" ", VARIABLE_INDEXED_KEYWORD].concat(),
+                        _ => String::default(),
+                    },
+                )
+                .replace(
+                    VARIABLE_VISIBILITY_KEY,
+                    &self.visibility().to_sol_string().pad_front(),
+                )
+                .replace(
+                    VARIABLE_MUTABILITY_KEY,
+                    &self.mutability().to_sol_string().pad_front(),
+                )
+                .replace(VARIABLE_STORAGE_LOCATION_KEY, "")
+                .replace(VARIABLE_NAME_KEY, &self.name().pad_front())
+                .replace(
+                    VARIABLE_ASSIGNMENT_KEY,
+                    &if self.value().is_none() {
+                        String::default()
+                    } else {
+                        "=".pad_front()
+                    },
+                )
+                .replace(
+                    VARIABLE_INITIAL_VALUE_KEY,
+                    &if self.value().is_none() {
+                        String::default()
+                    } else {
+                        self.value().to_sol_string().pad_front()
+                    },
+                )
+                .replace(VARIABLE_TERMINATOR_KEY, ";")
+                .as_bytes()
+                .to_vec(),
+            Context::ParameterList => VARIABLE
+                .replace(VARIABLE_TYPE_KEY, &to_string(self.type_name().to_sol_vec()))
+                .replace(
+                    VARIABLE_INDEXED_KEY,
+                    &match self.indexed() {
+                        Some(true) => VARIABLE_INDEXED_KEYWORD.pad_front(),
+                        _ => String::default(),
+                    },
+                )
+                .replace(VARIABLE_VISIBILITY_KEY, "")
+                .replace(VARIABLE_MUTABILITY_KEY, "")
+                .replace(
+                    VARIABLE_STORAGE_LOCATION_KEY,
+                    &self.storage_location().to_sol_string().pad_front(),
+                )
+                .replace(VARIABLE_NAME_KEY, &self.name().pad_front())
+                .replace(VARIABLE_ASSIGNMENT_KEY, "")
+                .replace(VARIABLE_INITIAL_VALUE_KEY, "")
+                .replace(VARIABLE_TERMINATOR_KEY, "")
+                .as_bytes()
+                .to_vec(),
+        }
+    }
+}
 
-        var.as_bytes().to_vec()
+impl AstSerializer for StorageLocation {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            StorageLocation::Calldata => "calldata",
+            StorageLocation::Default => "",
+            StorageLocation::Memory => "memory",
+            StorageLocation::Storage => "storage",
+        }
+        .as_bytes()
+        .to_vec()
+    }
+}
+
+impl AstSerializer for Mutability {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        match self {
+            Mutability::Mutable => b"".to_vec(),
+            Mutability::Immutable => b"immutable".to_vec(),
+            Mutability::Constant => b"constant".to_vec(),
+        }
     }
 }
 
@@ -618,6 +729,10 @@ impl AstSerializer for ContractDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
         CONTRACT
             .replace(
+                CONTRACT_DOCUMENTATION_KEY,
+                &self.documentation().to_sol_string(),
+            )
+            .replace(
                 CONTRACT_ABSTRACT_KEY,
                 if self._abstract() { "abstract" } else { "" },
             )
@@ -639,10 +754,16 @@ impl AstSerializer for ContractDefinition {
                 &if self.base_contracts().is_empty() {
                     String::default()
                 } else {
-                    self.base_contracts().to_sol_string()
+                    self.base_contracts()
+                        .to_sol_string_with_delimiter(Delimiter::Comma)
                 },
             )
-            .replace(CONTRACT_BODY_KEY, &self.nodes().to_sol_string())
+            .replace(
+                CONTRACT_BODY_KEY,
+                &self
+                    .nodes()
+                    .to_sol_string_with_delimiter(Delimiter::NewLine),
+            )
             .as_bytes()
             .to_vec()
     }
@@ -693,7 +814,7 @@ impl AstSerializer for BaseNode {
             }
             BaseNode::UsingForDirective(using_for_directive) => using_for_directive.to_sol_vec(),
             BaseNode::VariableDeclaration(variable_declaration) => {
-                variable_declaration.to_sol_vec()
+                variable_declaration.to_sol_vec_contexted(Context::ContractScope)
             }
             BaseNode::EventDefinition(event_definition) => event_definition.to_sol_vec(),
             BaseNode::ModifierDefinition(modifier_definition) => modifier_definition.to_sol_vec(),
@@ -964,7 +1085,9 @@ impl AstSerializer for VariableDeclarationStatement {
         VARIABLE_DECLARATION_STATEMENT
             .replace(
                 VARIABLE_DECLARATION_STATEMENT_DECLARATION_KEY,
-                &self.declarations().to_sol_string(),
+                &self
+                    .declarations()
+                    .to_sol_string_contexted(Context::ParameterList),
             )
             .replace(
                 VARIABLE_DECLARATION_STATEMENT_INITIALIZATION_KEY,
@@ -1103,10 +1226,14 @@ impl AstSerializer for StructDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
         STRUCT_STATEMENT
             .replace(STRUCT_STATEMENT_NAME_KEY, self.name())
-            .replace(
-                STRUCT_STATEMENT_MEMBERS_KEY,
-                &self.members().to_sol_string(),
-            )
+            .replace(STRUCT_STATEMENT_MEMBERS_KEY, &{
+                let mut p = self.members().to_sol_string_contexted_and_delimited(
+                    Context::ParameterList,
+                    Delimiter::Terminator,
+                );
+                p.push(';');
+                p
+            })
             .as_bytes()
             .to_vec()
     }
@@ -1239,6 +1366,7 @@ pub enum Delimiter {
     Comma,
     NewLine,
     DoubleLine,
+    Terminator,
 }
 
 impl From<Delimiter> for &[u8] {
@@ -1247,6 +1375,7 @@ impl From<Delimiter> for &[u8] {
             Delimiter::Comma => b", ",
             Delimiter::NewLine => b"\n",
             Delimiter::DoubleLine => b"\n\n",
+            Delimiter::Terminator => b";",
         }
     }
 }
@@ -1261,6 +1390,55 @@ impl<T: AstSerializer, D: for<'a> Into<&'a [u8]> + Copy> AstSerializerDelimited<
         let limit = self.len();
         self.iter().enumerate().fold(Vec::new(), |mut acc, (i, t)| {
             acc.extend(t.to_sol_vec());
+            if i != limit - 1 {
+                acc.extend_from_slice(d.into());
+            }
+
+            acc
+        })
+    }
+}
+
+impl<T: AstSerializerContexted> AstSerializerContexted for Vec<T> {
+    fn to_sol_vec_contexted(&self, context: Context) -> Vec<u8> {
+        self.as_slice().to_sol_vec_contexted(context)
+    }
+}
+
+impl<T: AstSerializerContexted> AstSerializerContexted for &[T] {
+    fn to_sol_vec_contexted(&self, context: Context) -> Vec<u8> {
+        self.iter().fold(Vec::new(), |mut acc, t| {
+            acc.extend(t.to_sol_vec_contexted(context));
+
+            acc
+        })
+    }
+}
+
+impl<T: AstSerializerContexted> AstSerializerContexted for Option<T> {
+    fn to_sol_vec_contexted(&self, context: Context) -> Vec<u8> {
+        match self {
+            Some(t) => t.to_sol_vec_contexted(context),
+            None => vec![],
+        }
+    }
+}
+
+impl<T: AstSerializerContexted, D: for<'a> Into<&'a [u8]> + Copy>
+    AstSerializerContextedAndDelimited<'_, D> for Vec<T>
+{
+    fn to_sol_vec_contexted_and_delimited(&self, context: Context, d: D) -> Vec<u8> {
+        self.as_slice()
+            .to_sol_vec_contexted_and_delimited(context, d)
+    }
+}
+impl<T: AstSerializerContexted, D: for<'a> Into<&'a [u8]> + Copy>
+    AstSerializerContextedAndDelimited<'_, D> for &[T]
+{
+    fn to_sol_vec_contexted_and_delimited(&self, context: Context, d: D) -> Vec<u8> {
+        let limit = self.len();
+        self.iter().enumerate().fold(Vec::new(), |mut acc, (i, t)| {
+            acc.extend(t.to_sol_vec_contexted(context));
             if i != limit - 1 {
                 acc.extend_from_slice(d.into());
             }
@@ -1289,7 +1467,18 @@ fn to_string(v: Vec<u8>) -> String {
     String::from_utf8(v).unwrap()
 }
 
-#[test]
-fn test_counter() {
-    pub const AST: &str = "debug\\out\\Counter.sol\\Counter.json";
+pub trait Padded {
+    fn pad_front(&self) -> String;
+}
+
+impl Padded for &str {
+    fn pad_front(&self) -> String {
+        " {Padding}".replace("{Padding}", self)
+    }
+}
+
+impl Padded for String {
+    fn pad_front(&self) -> String {
+        self.as_str().pad_front()
+    }
 }
