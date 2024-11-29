@@ -24,3 +24,10 @@ pub enum FalseBody {
     VariableDeclarationStatement(VariableDeclarationStatement),
     WhileStatement(WhileStatement),
 }
+
+
+impl FalseBody {
+    pub fn is_block(&self) -> bool {
+        matches!(self, FalseBody::Block(_)) || matches!(self, FalseBody::UncheckedBlock(_))
+    }
+}

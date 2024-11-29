@@ -15,6 +15,16 @@ use crate::ast_specs::{
     VariableDeclarationStatement, Visibility, WhileStatement,
 };
 
+macro_rules! ternary {
+    ($cond:expr => $true_expr:expr ; $false_expr:expr) => {
+        if $cond {
+            $true_expr
+        } else {
+            $false_expr
+        }
+    };
+}
+
 pub const LICENSE: &str = "// SPDX-License-Identifier: <LICENSE>\n";
 pub const LICENSE_KEY: &str = "<LICENSE>";
 
@@ -24,7 +34,8 @@ pub const EVENT_NAME_KEY: &str = "<EVENT_NAME>";
 pub const EVENT_ARGS_KEY: &str = "<EVENT_ARGS>";
 
 pub const VARIABLE: &str =
-    "<TYPE><INDEXED><VISIBILITY><MUTABILITY><STORAGE_LOCATION><NAME><ASSIGNMENT><INITIAL_VALUE><TERMINATOR>";
+    "<DOCUMENTATION><TYPE><INDEXED><VISIBILITY><MUTABILITY><STORAGE_LOCATION><NAME><ASSIGNMENT><INITIAL_VALUE><TERMINATOR>";
+pub const VARIABLE_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const VARIABLE_TYPE_KEY: &str = "<TYPE>";
 pub const VARIABLE_INDEXED_KEY: &str = "<INDEXED>";
 pub const VARIABLE_INDEXED_KEYWORD: &str = "indexed";
@@ -40,12 +51,12 @@ pub const ARRAY_TYPE_NAME: &str = "<BASE_TYPE>[<SIZE>]";
 pub const ARRAY_TYPE_NAME_BASE_TYPE_KEY: &str = "<BASE_TYPE>";
 pub const ARRAY_TYPE_NAME_SIZE_KEY: &str = "<SIZE>";
 
-pub const ASSIGNMENT: &str = "<LEFT_HAND_SIDE> <OPERATOR> <RIGHT_HAND_SIDE>;";
+pub const ASSIGNMENT: &str = "<LEFT_HAND_SIDE> <OPERATOR> <RIGHT_HAND_SIDE>";
 pub const ASSIGNMENT_LEFT_HAND_SIDE_KEY: &str = "<LEFT_HAND_SIDE>";
 pub const ASSIGNMENT_OPERATOR_KEY: &str = "<OPERATOR>";
 pub const ASSIGNMENT_RIGHT_HAND_SIDE_KEY: &str = "<RIGHT_HAND_SIDE>";
 
-pub const BINARY_OPERATION: &str = "<LEFT_EXPRESSION> <OPERATOR> <RIGHT_EXPRESSION>;";
+pub const BINARY_OPERATION: &str = "<LEFT_EXPRESSION> <OPERATOR> <RIGHT_EXPRESSION>";
 pub const BINARY_OPERATION_LEFT_EXPRESSION_KEY: &str = "<LEFT_EXPRESSION>";
 pub const BINARY_OPERATION_OPERATOR_KEY: &str = "<OPERATOR>";
 pub const BINARY_OPERATION_RIGHT_EXPRESSION_KEY: &str = "<RIGHT_EXPRESSION>";
@@ -100,7 +111,7 @@ pub const MAPPING_TYPE_RIGHT_KEY: &str = "<TYPE_RIGHT>";
 pub const MAPPING_NAME_RIGHT_KEY: &str = "<NAME_RIGHT>";
 
 pub const CONTRACT: &str =
-    "<DOCUMENTATION><ABSTRACT> <CONTRACT_KIND> <CONTRACT_NAME> <IS> <INHERITANCE> {<BODY>}";
+    "<DOCUMENTATION><ABSTRACT> <CONTRACT_KIND> <CONTRACT_NAME> <IS> <INHERITANCE> {\n<BODY>\n}";
 pub const CONTRACT_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const CONTRACT_ABSTRACT_KEY: &str = "<ABSTRACT>";
 pub const CONTRACT_CONTRACT_KIND_KEY: &str = "<CONTRACT_KIND>";
@@ -117,7 +128,7 @@ pub const ERROR: &str = "error <NAME>(<PARAMETERS>)";
 pub const ERROR_NAME_KEY: &str = "<NAME>";
 pub const ERROR_PARAMETERS_KEY: &str = "<PARAMETERS>";
 
-pub const FUNCTION: &str = "<KIND> <NAME>(<PARAMETERS>) <STATE_MUTABILITY> <VISIBILITY> <OVERRIDE> <MODIFIERS> <RETURNS> <RETURN_PARAMETERS> {<BODY>}";
+pub const FUNCTION: &str = "<KIND> <NAME>(<PARAMETERS>) <STATE_MUTABILITY> <VISIBILITY> <OVERRIDE> <MODIFIERS> <RETURNS> <RETURN_PARAMETERS> {\n<BODY>\n}";
 pub const FUNCTION_KIND_KEY: &str = "<KIND>";
 pub const FUNCTION_NAME_KEY: &str = "<NAME>";
 pub const FUNCTION_PARAMETERS_KEY: &str = "<PARAMETERS>";
@@ -129,7 +140,7 @@ pub const FUNCTION_RETURNS_KEY: &str = "<RETURNS>";
 pub const FUNCTION_RETURN_PARAMETERS_KEY: &str = "<RETURN_PARAMETERS>";
 pub const FUNCTION_BODY_KEY: &str = "<BODY>";
 
-pub const MODIFIER_INVOCATION: &str = "<NAME> <ARGUMENTS>";
+pub const MODIFIER_INVOCATION: &str = "<NAME>(<ARGUMENTS>)";
 pub const MODIFIER_INVOCATION_NAME_KEY: &str = "<NAME>";
 pub const MODIFIER_INVOCATION_ARGUMENTS_KEY: &str = "<ARGUMENTS>";
 
@@ -146,13 +157,17 @@ pub const FOR_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
 pub const FOR_STATEMENT_SUB_EXPRESSION_KEY: &str = "<SUB_EXPRESSION>";
 pub const FOR_STATEMENT_BODY_KEY: &str = "<BODY>";
 
-pub const VARIABLE_DECLARATION_STATEMENT: &str = "<DECLARATIONS> = <INITIALIZATION>";
+pub const VARIABLE_DECLARATION_STATEMENT: &str = "<DECLARATIONS><EQUAL><INITIALIZATION>";
 pub const VARIABLE_DECLARATION_STATEMENT_DECLARATION_KEY: &str = "<DECLARATIONS>";
+pub const VARIABLE_DECLARATION_STATEMENT_EQUAL_KEY: &str = "<EQUAL>";
+pub const EQUAL_KEYWORD: &str = "=";
 pub const VARIABLE_DECLARATION_STATEMENT_INITIALIZATION_KEY: &str = "<INITIALIZATION>";
 
-pub const IF_STATEMENT: &str = "if <CONDITION> {<TRUE_BODY>} else {<FALSE_BODY>}";
+pub const IF_STATEMENT: &str = "if (<CONDITION>)<TRUE_BODY><ELSE><FALSE_BODY>";
 pub const IF_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
 pub const IF_STATEMENT_TRUE_BODY_KEY: &str = "<TRUE_BODY>";
+pub const IF_STATEMENT_ELSE_KEY: &str = "<ELSE>";
+pub const ELSE_KEYWORD: &str = "else";
 pub const IF_STATEMENT_FALSE_BODY_KEY: &str = "<FALSE_BODY>";
 
 pub const REVERT_STATEMENT: &str = "revert <FUNCTION_CALL>";
@@ -167,7 +182,7 @@ pub const CATCH_CLAUSE_ERROR_KEY: &str = "<ERROR>";
 pub const CATCH_CLAUSE_PARAMS_KEY: &str = "<PARAMS>";
 pub const CATCH_CLAUSE_BODY_KEY: &str = "<BODY>";
 
-pub const UNCHECKED_BLOCK: &str = "unchecked {<BLOCK>}";
+pub const UNCHECKED_BLOCK: &str = "unchecked <BLOCK>";
 pub const UNCHECKED_BLOCK_BLOCK_KEY: &str = "<BLOCK>";
 
 pub const WHILE_STATEMENT: &str = "while <CONDITION> {<BODY>}";
@@ -324,6 +339,10 @@ impl AstSerializerContexted for VariableDeclaration {
     fn to_sol_vec_contexted(&self, context: Context) -> Vec<u8> {
         match context {
             Context::ContractScope => VARIABLE
+                .replace(
+                    VARIABLE_DOCUMENTATION_KEY,
+                    &self.documentation().to_sol_string(),
+                )
                 .replace(VARIABLE_TYPE_KEY, &to_string(self.type_name().to_sol_vec()))
                 .replace(
                     VARIABLE_INDEXED_KEY,
@@ -362,6 +381,10 @@ impl AstSerializerContexted for VariableDeclaration {
                 .as_bytes()
                 .to_vec(),
             Context::ParameterList => VARIABLE
+                .replace(
+                    VARIABLE_DOCUMENTATION_KEY,
+                    &self.documentation().to_sol_string(),
+                )
                 .replace(VARIABLE_TYPE_KEY, &to_string(self.type_name().to_sol_vec()))
                 .replace(
                     VARIABLE_INDEXED_KEY,
@@ -529,7 +552,12 @@ impl AstSerializer for FunctionCall {
     fn to_sol_vec(&self) -> Vec<u8> {
         let mut fc =
             FUNCTION_CALL.replace(FUNCTION_CALL_NAME_KEY, &self.expression().to_sol_string());
-        fc = fc.replace(FUNCTION_CALL_ARGS_KEY, &self.arguments().to_sol_string());
+        fc = fc.replace(
+            FUNCTION_CALL_ARGS_KEY,
+            &self
+                .arguments()
+                .to_sol_string_with_delimiter(Delimiter::Comma),
+        );
 
         fc.as_bytes().to_vec()
     }
@@ -604,7 +632,7 @@ impl AstSerializer for MemberAccess {
     fn to_sol_vec(&self) -> Vec<u8> {
         MEMBER_ACCESS
             .replace(MEMBER_ACCESS_BASE_KEY, &self.expression().to_sol_string())
-            .replace(MEMBER_ACCESS_MEMBER_KEY, &self.expression().to_sol_string())
+            .replace(MEMBER_ACCESS_MEMBER_KEY, self.member_name())
             .as_bytes()
             .to_vec()
     }
@@ -694,7 +722,7 @@ impl AstSerializer for StateMutability {
         match self {
             StateMutability::Payable => b"payable".to_vec(),
             StateMutability::Pure => b"pure".to_vec(),
-            StateMutability::Nonpayable => b"nonpayable".to_vec(),
+            StateMutability::Nonpayable => b"".to_vec(),
             StateMutability::View => b"view".to_vec(),
         }
     }
@@ -849,40 +877,76 @@ impl AstSerializer for ErrorDefinition {
 
 impl AstSerializer for FunctionDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        FUNCTION
-            .replace(FUNCTION_KIND_KEY, &self.kind().to_sol_string())
-            .replace(FUNCTION_NAME_KEY, self.name())
-            .replace(FUNCTION_PARAMETERS_KEY, &self.parameters().to_sol_string())
-            .replace(
-                FUNCTION_STATE_MUTABILITY_KEY,
-                &self.state_mutability().to_sol_string(),
-            )
-            .replace(FUNCTION_VISIBILITY_KEY, &self.visibility().to_sol_string())
-            .replace(FUNCTION_OVERRIDE_KEY, &self.overrides().to_sol_string())
-            .replace(FUNCTION_MODIFIERS_KEY, &self.modifiers().to_sol_string())
-            .replace(
-                FUNCTION_RETURNS_KEY,
-                if self.return_parameter_list().is_none()
-                    || self.return_parameter_list().unwrap().is_empty()
-                {
-                    ""
-                } else {
-                    "returns"
-                },
-            )
-            .replace(
-                FUNCTION_RETURN_PARAMETERS_KEY,
-                &if self.return_parameter_list().is_none()
-                    || self.return_parameter_list().unwrap().is_empty()
-                {
-                    String::default()
-                } else {
-                    self.return_parameters().to_sol_string()
-                },
-            )
-            .replace(FUNCTION_BODY_KEY, &self.body().to_sol_string())
-            .as_bytes()
-            .to_vec()
+        match self.kind() {
+            FunctionKind::Function => FUNCTION
+                .replace(FUNCTION_KIND_KEY, &self.kind().to_sol_string())
+                .replace(FUNCTION_NAME_KEY, self.name())
+                .replace(FUNCTION_PARAMETERS_KEY, &self.parameters().to_sol_string())
+                .replace(
+                    FUNCTION_STATE_MUTABILITY_KEY,
+                    &self.state_mutability().to_sol_string(),
+                )
+                .replace(FUNCTION_VISIBILITY_KEY, &self.visibility().to_sol_string())
+                .replace(FUNCTION_OVERRIDE_KEY, &self.overrides().to_sol_string())
+                .replace(FUNCTION_MODIFIERS_KEY, &self.modifiers().to_sol_string())
+                .replace(
+                    FUNCTION_RETURNS_KEY,
+                    if self.return_parameter_list().is_none()
+                        || self.return_parameter_list().unwrap().is_empty()
+                    {
+                        ""
+                    } else {
+                        "returns"
+                    },
+                )
+                .replace(
+                    FUNCTION_RETURN_PARAMETERS_KEY,
+                    &if self.return_parameter_list().is_none()
+                        || self.return_parameter_list().unwrap().is_empty()
+                    {
+                        String::default()
+                    } else {
+                        format!("({})", self.return_parameters().to_sol_string())
+                    },
+                )
+                .replace(FUNCTION_BODY_KEY, &self.body().to_sol_string())
+                .as_bytes()
+                .to_vec(),
+            FunctionKind::Receive => todo!(),
+            FunctionKind::Constructor => FUNCTION
+                .replace(FUNCTION_KIND_KEY, &self.kind().to_sol_string())
+                .replace(FUNCTION_NAME_KEY, self.name())
+                .replace(FUNCTION_PARAMETERS_KEY, &self.parameters().to_sol_string())
+                .replace(FUNCTION_STATE_MUTABILITY_KEY, "")
+                .replace(FUNCTION_VISIBILITY_KEY, &self.visibility().to_sol_string())
+                .replace(FUNCTION_OVERRIDE_KEY, &self.overrides().to_sol_string())
+                .replace(FUNCTION_MODIFIERS_KEY, &self.modifiers().to_sol_string())
+                .replace(
+                    FUNCTION_RETURNS_KEY,
+                    if self.return_parameter_list().is_none()
+                        || self.return_parameter_list().unwrap().is_empty()
+                    {
+                        ""
+                    } else {
+                        "returns"
+                    },
+                )
+                .replace(
+                    FUNCTION_RETURN_PARAMETERS_KEY,
+                    &if self.return_parameter_list().is_none()
+                        || self.return_parameter_list().unwrap().is_empty()
+                    {
+                        String::default()
+                    } else {
+                        self.return_parameters().to_sol_string()
+                    },
+                )
+                .replace(FUNCTION_BODY_KEY, &self.body().to_sol_string())
+                .as_bytes()
+                .to_vec(),
+            FunctionKind::Fallback => todo!(),
+            FunctionKind::FreeFunction => todo!(),
+        }
     }
 }
 
@@ -942,7 +1006,13 @@ impl AstSerializer for FunctionKind {
 
 impl AstSerializer for Block {
     fn to_sol_vec(&self) -> Vec<u8> {
-        self.statements().to_sol_vec()
+        format!(
+            "{{{}}}",
+            self.statements()
+                .to_sol_string_with_delimiter(Delimiter::NewLine)
+        )
+        .as_bytes()
+        .to_vec()
     }
 }
 
@@ -950,25 +1020,43 @@ impl AstSerializer for Statement {
     fn to_sol_vec(&self) -> Vec<u8> {
         match self {
             Statement::Block(block) => block.to_sol_vec(),
-            Statement::Break(_break) => _break.to_sol_vec(),
-            Statement::Continue(_continue) => _continue.to_sol_vec(),
-            Statement::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
-            Statement::EmitStatement(emit_statement) => emit_statement.to_sol_vec(),
-            Statement::ExpressionStatement(expression_statement) => {
-                expression_statement.to_sol_vec()
+            Statement::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
+            Statement::Continue(_continue) => {
+                _continue.to_sol_vec().terminate(";").as_bytes().to_vec()
             }
+            Statement::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
+            Statement::EmitStatement(emit_statement) => emit_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
+            Statement::ExpressionStatement(expression_statement) => expression_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
             Statement::ForStatement(for_statement) => for_statement.to_sol_vec(),
             Statement::IfStatement(if_statement) => if_statement.to_sol_vec(),
             Statement::InlineAssembly(inline_assembly) => inline_assembly.to_sol_vec(),
-            Statement::PlaceholderStatement(placeholder_statement) => {
-                placeholder_statement.to_sol_vec()
-            }
-            Statement::Return(_return) => _return.to_sol_vec(),
-            Statement::RevertStatement(revert_statement) => revert_statement.to_sol_vec(),
+            Statement::PlaceholderStatement(placeholder_statement) => placeholder_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
+            Statement::Return(_return) => _return.to_sol_vec().terminate(";").as_bytes().to_vec(),
+            Statement::RevertStatement(revert_statement) => revert_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
             Statement::TryStatement(try_statement) => try_statement.to_sol_vec(),
             Statement::UncheckedBlock(unchecked_block) => unchecked_block.to_sol_vec(),
             Statement::VariableDeclarationStatement(variable_declaration_statement) => {
-                variable_declaration_statement.to_sol_vec()
+                variable_declaration_statement
+                    .to_sol_vec()
+                    .terminate(";")
+                    .as_bytes()
+                    .to_vec()
             }
             Statement::WhileStatement(while_statement) => while_statement.to_sol_vec(),
         }
@@ -1010,21 +1098,41 @@ impl AstSerializer for Body {
     fn to_sol_vec(&self) -> Vec<u8> {
         match self {
             Body::Block(block) => block.to_sol_vec(),
-            Body::Break(_break) => _break.to_sol_vec(),
-            Body::Continue(_continue) => _continue.to_sol_vec(),
+            Body::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
+            Body::Continue(_continue) => _continue.to_sol_vec().terminate(";").as_bytes().to_vec(),
             Body::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
-            Body::EmitStatement(emit_statement) => emit_statement.to_sol_vec(),
-            Body::ExpressionStatement(expression_statement) => expression_statement.to_sol_vec(),
+            Body::EmitStatement(emit_statement) => emit_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
+            Body::ExpressionStatement(expression_statement) => expression_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
             Body::ForStatement(for_statement) => for_statement.to_sol_vec(),
             Body::IfStatement(if_statement) => if_statement.to_sol_vec(),
             Body::InlineAssembly(value) => value.to_sol_vec(),
-            Body::PlaceholderStatement(placeholder_statement) => placeholder_statement.to_sol_vec(),
-            Body::Return(_return) => _return.to_sol_vec(),
-            Body::RevertStatement(revert_statement) => revert_statement.to_sol_vec(),
+            Body::PlaceholderStatement(placeholder_statement) => placeholder_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
+            Body::Return(_return) => _return.to_sol_vec().terminate(";").as_bytes().to_vec(),
+            Body::RevertStatement(revert_statement) => revert_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
             Body::TryStatement(try_statement) => try_statement.to_sol_vec(),
             Body::UncheckedBlock(unchecked_block) => unchecked_block.to_sol_vec(),
             Body::VariableDeclarationStatement(variable_declaration_statement) => {
-                variable_declaration_statement.to_sol_vec()
+                variable_declaration_statement
+                    .to_sol_vec()
+                    .terminate(";")
+                    .as_bytes()
+                    .to_vec()
             }
             Body::WhileStatement(while_statement) => while_statement.to_sol_vec(),
         }
@@ -1082,16 +1190,24 @@ impl AstSerializer for InitializationExpression {
 
 impl AstSerializer for VariableDeclarationStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
+        let is_initialized = self.initial_value().is_some();
+        let tuple = self.declarations().len() > 1;
+        let declarations = self
+            .declarations()
+            .to_sol_string_contexted_and_delimited(Context::ParameterList, Delimiter::Comma);
+
         VARIABLE_DECLARATION_STATEMENT
             .replace(
                 VARIABLE_DECLARATION_STATEMENT_DECLARATION_KEY,
-                &self
-                    .declarations()
-                    .to_sol_string_contexted(Context::ParameterList),
+                & ternary!(tuple =>  format!("({})", declarations); declarations),
+            )
+            .replace(
+                VARIABLE_DECLARATION_STATEMENT_EQUAL_KEY,
+                &ternary!(is_initialized => EQUAL_KEYWORD.pad_front(); String::default()),
             )
             .replace(
                 VARIABLE_DECLARATION_STATEMENT_INITIALIZATION_KEY,
-                &self.initial_value().to_sol_string(),
+                &ternary!(is_initialized => self.initial_value().to_sol_string().pad_front(); String::default()),
             )
             .as_bytes()
             .to_vec()
@@ -1100,6 +1216,8 @@ impl AstSerializer for VariableDeclarationStatement {
 
 impl AstSerializer for IfStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
+        let false_is_some = self.false_body().is_some();
+
         IF_STATEMENT
             .replace(
                 IF_STATEMENT_CONDITION_KEY,
@@ -1107,11 +1225,15 @@ impl AstSerializer for IfStatement {
             )
             .replace(
                 IF_STATEMENT_TRUE_BODY_KEY,
-                &self.true_body().to_sol_string(),
+                &self.true_body().to_sol_string().pad_front()
+            )
+            .replace(
+                IF_STATEMENT_ELSE_KEY,
+                &ternary!(false_is_some => ELSE_KEYWORD.pad_front(); String::default()),
             )
             .replace(
                 IF_STATEMENT_FALSE_BODY_KEY,
-                &self.false_body().to_sol_string(),
+                &ternary!(false_is_some => self.false_body().to_sol_string().pad_front(); String::default()),
             )
             .as_bytes()
             .to_vec()
@@ -1122,24 +1244,42 @@ impl AstSerializer for FalseBody {
     fn to_sol_vec(&self) -> Vec<u8> {
         match self {
             FalseBody::Block(block) => block.to_sol_vec(),
-            FalseBody::Break(_break) => _break.to_sol_vec(),
-            FalseBody::Continue(_continue) => _continue.to_sol_vec(),
-            FalseBody::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
-            FalseBody::EmitStatement(emit_statement) => emit_statement.to_sol_vec(),
-            FalseBody::ExpressionStatement(expression_statement) => {
-                expression_statement.to_sol_vec()
+            FalseBody::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
+            FalseBody::Continue(_continue) => {
+                _continue.to_sol_vec().terminate(";").as_bytes().to_vec()
             }
+            FalseBody::DoWhileStatement(do_while_statement) => do_while_statement.to_sol_vec(),
+            FalseBody::EmitStatement(emit_statement) => emit_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
+            FalseBody::ExpressionStatement(expression_statement) => expression_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
             FalseBody::ForStatement(for_statement) => for_statement.to_sol_vec(),
             FalseBody::IfStatement(if_statement) => if_statement.to_sol_vec(),
-            FalseBody::PlaceholderStatement(placeholder_statement) => {
-                placeholder_statement.to_sol_vec()
-            }
-            FalseBody::Return(_return) => _return.to_sol_vec(),
-            FalseBody::RevertStatement(revert_statement) => revert_statement.to_sol_vec(),
+            FalseBody::PlaceholderStatement(placeholder_statement) => placeholder_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
+            FalseBody::Return(_return) => _return.to_sol_vec().terminate(";").as_bytes().to_vec(),
+            FalseBody::RevertStatement(revert_statement) => revert_statement
+                .to_sol_vec()
+                .terminate(";")
+                .as_bytes()
+                .to_vec(),
             FalseBody::TryStatement(try_statement) => try_statement.to_sol_vec(),
             FalseBody::UncheckedBlock(unchecked_block) => unchecked_block.to_sol_vec(),
             FalseBody::VariableDeclarationStatement(variable_declaration_statement) => {
-                variable_declaration_statement.to_sol_vec()
+                variable_declaration_statement
+                    .to_sol_vec()
+                    .terminate(";")
+                    .as_bytes()
+                    .to_vec()
             }
             FalseBody::WhileStatement(while_statement) => while_statement.to_sol_vec(),
         }
@@ -1196,7 +1336,7 @@ impl AstSerializer for UncheckedBlock {
         UNCHECKED_BLOCK
             .replace(
                 UNCHECKED_BLOCK_BLOCK_KEY,
-                &self.statements().to_sol_string(),
+                &format!("{{{}}}", self.statements().to_sol_string()),
             )
             .as_bytes()
             .to_vec()
@@ -1424,6 +1564,17 @@ impl<T: AstSerializerContexted> AstSerializerContexted for Option<T> {
     }
 }
 
+impl<T: for<'a> AstSerializerDelimited<'a, D>, D: for<'a> Into<&'a [u8]> + Copy>
+    AstSerializerDelimited<'_, D> for Option<T>
+{
+    fn to_sol_vec_with_delimiter(&self, d: D) -> Vec<u8> {
+        match self {
+            Some(t) => t.to_sol_vec_with_delimiter(d),
+            None => vec![],
+        }
+    }
+}
+
 impl<T: AstSerializerContexted, D: for<'a> Into<&'a [u8]> + Copy>
     AstSerializerContextedAndDelimited<'_, D> for Vec<T>
 {
@@ -1469,16 +1620,46 @@ fn to_string(v: Vec<u8>) -> String {
 
 pub trait Padded {
     fn pad_front(&self) -> String;
+
+    fn terminate(&self, terminator: &str) -> String;
 }
 
 impl Padded for &str {
     fn pad_front(&self) -> String {
         " {Padding}".replace("{Padding}", self)
     }
+
+    fn terminate(&self, terminator: &str) -> String {
+        format!("{self}{terminator}")
+    }
 }
 
 impl Padded for String {
     fn pad_front(&self) -> String {
         self.as_str().pad_front()
+    }
+
+    fn terminate(&self, terminator: &str) -> String {
+        self.as_str().terminate(terminator)
+    }
+}
+
+impl Padded for &[u8] {
+    fn pad_front(&self) -> String {
+        format!(" {}", std::str::from_utf8(self).unwrap())
+    }
+
+    fn terminate(&self, terminator: &str) -> String {
+        format!("{}{terminator}", std::str::from_utf8(self).unwrap())
+    }
+}
+
+impl Padded for Vec<u8> {
+    fn pad_front(&self) -> String {
+        self.as_slice().pad_front()
+    }
+
+    fn terminate(&self, terminator: &str) -> String {
+        self.as_slice().terminate(terminator)
     }
 }
