@@ -128,7 +128,8 @@ pub const ERROR: &str = "error <NAME>(<PARAMETERS>)";
 pub const ERROR_NAME_KEY: &str = "<NAME>";
 pub const ERROR_PARAMETERS_KEY: &str = "<PARAMETERS>";
 
-pub const FUNCTION: &str = "<KIND> <NAME>(<PARAMETERS>) <STATE_MUTABILITY> <VISIBILITY> <OVERRIDE> <MODIFIERS> <RETURNS> <RETURN_PARAMETERS> {\n<BODY>\n}";
+pub const FUNCTION: &str = "<DOCUMENTATION><KIND> <NAME>(<PARAMETERS>) <STATE_MUTABILITY> <VISIBILITY> <OVERRIDE> <MODIFIERS> <RETURNS> <RETURN_PARAMETERS> <BODY>";
+pub const FUNCTION_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const FUNCTION_KIND_KEY: &str = "<KIND>";
 pub const FUNCTION_NAME_KEY: &str = "<NAME>";
 pub const FUNCTION_PARAMETERS_KEY: &str = "<PARAMETERS>";
@@ -151,7 +152,7 @@ pub const DO_WHILE_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
 pub const EMIT_STATEMENT: &str = "emit <FUNCTION>";
 pub const EMIT_EVENT_CALL_KEY: &str = "<FUNCTION>";
 
-pub const FOR_STATEMENT: &str = "for (<INITIALIZATION>;<CONDITION>;<SUB_EXPRESSION>) {<BODY>}";
+pub const FOR_STATEMENT: &str = "for (<INITIALIZATION>;<CONDITION>;<SUB_EXPRESSION>) <BODY>";
 pub const FOR_STATEMENT_INITIALIZATION_KEY: &str = "<INITIALIZATION>";
 pub const FOR_STATEMENT_CONDITION_KEY: &str = "<CONDITION>";
 pub const FOR_STATEMENT_SUB_EXPRESSION_KEY: &str = "<SUB_EXPRESSION>";
@@ -219,6 +220,9 @@ pub const SYMBOL_ALIASES_LOCAL_KEY: &str = "<LOCAL>";
 
 pub const PRAGMA: &str = "pragma <LITERALS>;\n";
 pub const PRAGMA_LITERALS_KEY: &str = "<LITERALS>";
+
+pub const RETURN: &str = "return<EXPRESSION>;";
+pub const RETURN_EXPRESSION_KEY: &str = "<EXPRESSION>";
 
 pub trait AstSerializer {
     fn to_sol_vec(&self) -> Vec<u8>;
@@ -666,7 +670,13 @@ impl AstSerializer for UnaryOperation {
     fn to_sol_vec(&self) -> Vec<u8> {
         if self.prefix() {
             UNARY_OPERATION
-                .replace(UNARY_OPERATION_PREFIX_KEY, self.operator())
+                .replace(
+                    UNARY_OPERATION_PREFIX_KEY,
+                    match self.operator() {
+                        "delete" => "delete ",
+                        _ => self.operator(),
+                    },
+                )
                 .replace(
                     UNARY_OPERATION_EXPRESSION_KEY,
                     &self.sub_expression().to_sol_string(),
@@ -879,6 +889,10 @@ impl AstSerializer for FunctionDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
         match self.kind() {
             FunctionKind::Function => FUNCTION
+                .replace(
+                    FUNCTION_DOCUMENTATION_KEY,
+                    &self.documentation().to_sol_string(),
+                )
                 .replace(FUNCTION_KIND_KEY, &self.kind().to_sol_string())
                 .replace(FUNCTION_NAME_KEY, self.name())
                 .replace(FUNCTION_PARAMETERS_KEY, &self.parameters().to_sol_string())
@@ -914,6 +928,10 @@ impl AstSerializer for FunctionDefinition {
                 .to_vec(),
             FunctionKind::Receive => todo!(),
             FunctionKind::Constructor => FUNCTION
+                .replace(
+                    FUNCTION_DOCUMENTATION_KEY,
+                    &self.documentation().to_sol_string(),
+                )
                 .replace(FUNCTION_KIND_KEY, &self.kind().to_sol_string())
                 .replace(FUNCTION_NAME_KEY, self.name())
                 .replace(FUNCTION_PARAMETERS_KEY, &self.parameters().to_sol_string())
@@ -1077,7 +1095,14 @@ impl AstSerializer for Continue {
 
 impl AstSerializer for Return {
     fn to_sol_vec(&self) -> Vec<u8> {
-        b"return".to_vec()
+        let expr = match self.expression() {
+            Some(e) => e.to_sol_string().pad_front(),
+            None => String::default(),
+        };
+        RETURN
+            .replace(RETURN_EXPRESSION_KEY, &expr)
+            .as_bytes()
+            .to_vec()
     }
 }
 
