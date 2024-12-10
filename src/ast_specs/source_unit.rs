@@ -25,6 +25,14 @@ pub struct SourceUnit {
 }
 
 impl SourceUnit {
+    pub fn artificial_new(license: Option<String>, nodes: Directives) -> Self {
+        Self {
+            license,
+            nodes,
+            ..Default::default()
+        }
+    }
+
     pub fn is_in_exported_symbols(&self, id: isize) -> bool {
         self.exported_symbols
             .values()

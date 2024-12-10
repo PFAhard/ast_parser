@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, Default)]
 pub struct Identifier {
     #[serde(rename = "argumentTypes")]
     #[use_as_ref]
@@ -27,6 +27,13 @@ pub struct Identifier {
 }
 
 impl Identifier {
+    pub fn artificial_new(name: String) -> Self {
+        Self {
+            name,
+            ..Default::default()
+        }
+    }
+
     pub fn is_builtin(&self) -> bool {
         matches!(self.referenced_declaration(), Some(x) if x < 0)
     }

@@ -143,7 +143,7 @@ impl Mapping {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, Default)]
 pub struct UserDefinedTypeName {
     // #[serde(skip)]
     // #[serde(rename = "contractScope")]

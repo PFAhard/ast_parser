@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::Identifier;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, Default)]
 pub struct ImportDirective {
     #[serde(rename = "absolutePath")]
     absolute_path: String,
@@ -21,7 +21,17 @@ pub struct ImportDirective {
     unit_alias: String,
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+impl ImportDirective {
+    pub fn artificial_new(file: String, symbol_aliases: Vec<SymbolAliases>) -> Self {
+        Self {
+            file,
+            symbol_aliases,
+            ..Default::default()
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, Clone, Getters, Default)]
 pub struct SymbolAliases {
     foreign: Identifier,
     #[use_as_deref]
@@ -29,4 +39,14 @@ pub struct SymbolAliases {
     local: Option<String>,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
+}
+
+impl SymbolAliases {
+    pub fn artificial_new(foreign: Identifier, local: Option<String>) -> Self {
+        Self {
+            foreign,
+            local,
+            ..Default::default()
+        }
+    }
 }

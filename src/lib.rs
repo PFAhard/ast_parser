@@ -1,13 +1,15 @@
 #![allow(dead_code, unused_variables)]
 #![allow(clippy::too_many_arguments)]
 pub mod ast_framework;
+pub mod ast_serialize;
 pub mod ast_specs;
 pub mod ast_visitor;
 pub mod error;
-pub mod ast_serialize;
 // pub mod ast_descriptor; TODO:
 
+use ast_specs::SourceUnit;
 pub use error::*;
+use serde::Deserialize;
 
 #[macro_export]
 macro_rules! unwrap_node_type {
@@ -24,6 +26,23 @@ macro_rules! unwrap_node_type {
 
 #[macro_export]
 macro_rules! cast_node_type {
+    ($target:expr; !$pat:ident) => {{
+        use ast_parser::ast_specs::NodeType;
+        use ast_parser::ast_specs::NodeTypeInternal;
+        use ast_parser::ast_visitor::AstVisitor;
+
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    Some(a)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>().pop().unwrap()
+    }};
     ($target:expr; $pat:ident) => {{
         use ast_parser::ast_specs::NodeType;
         use ast_parser::ast_specs::NodeTypeInternal;
@@ -108,3 +127,15 @@ macro_rules! cast_node_type {
 //     let x = 0;
 //     let x = cast_node_type!(x; ContractDefinition; name, to_owned);
 // }
+
+#[derive(Debug, Deserialize)]
+struct FoundryWrapper {
+    ast: SourceUnit,
+}
+
+pub fn cast_to_source_unit<R>(path: R) -> SourceUnit
+where
+    R: std::io::Read,
+{
+    serde_json::from_reader::<_, FoundryWrapper>(path).unwrap().ast
+}

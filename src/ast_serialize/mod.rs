@@ -209,8 +209,10 @@ pub const MODIFIER_VISIBILITY_KEY: &str = "<VISIBILITY>";
 pub const MODIFIER_OVERRIDE_KEY: &str = "<OVERRIDE>";
 pub const MODIFIER_BODY_KEY: &str = "<BODY>";
 
-pub const IMPORT_DIRECTIVE: &str = "import {<ALIASES>} from \"<PATH>\";";
+pub const IMPORT_DIRECTIVE: &str = "import <ALIASES><FROM>\"<PATH>\";";
 pub const IMPORT_DIRECTIVE_ALIASES_KEY: &str = "<ALIASES>";
+pub const IMPORT_DIRECTIVE_FROM_KEY: &str = "<FROM>";
+pub const FROM_KEYWORD: &str = "from";
 pub const IMPORT_DIRECTIVE_PATH_KEY: &str = "<PATH>";
 
 pub const SYMBOL_ALIASES: &str = "<FOREIGN><AS><LOCAL>";
@@ -264,7 +266,7 @@ pub enum Context {
 
 impl AstSerializer for SourceUnit {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("SourceUnit");
+        //dbg!("SourceUnit");
         let mut out = Vec::new();
         let license = LICENSE.replace(
             LICENSE_KEY,
@@ -280,7 +282,7 @@ impl AstSerializer for SourceUnit {
 
 impl AstSerializer for Directive {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Directive");
+        //dbg!("Directive");
         match self {
             Directive::EventDefinition(event_definition) => event_definition.to_sol_vec(),
             Directive::ContractDefinition(contract_definition) => contract_definition.to_sol_vec(),
@@ -303,7 +305,7 @@ impl AstSerializer for Directive {
 
 impl AstSerializer for EventDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("EventDefinition");
+        //dbg!("EventDefinition");
         EVENT
             .replace(
                 EVENT_DOCUMENTATION_KEY,
@@ -318,7 +320,7 @@ impl AstSerializer for EventDefinition {
 
 impl AstSerializer for StructuredDocumentation {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("StructuredDocumentation");
+        //dbg!("StructuredDocumentation");
         self.text()
             .lines()
             .map(|line| {
@@ -338,7 +340,7 @@ impl AstSerializer for StructuredDocumentation {
 
 impl AstSerializer for ParameterList {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ParameterList");
+        //dbg!("ParameterList");
         self.parameters()
             .to_sol_vec_contexted_and_delimited(Context::ParameterList, Delimiter::Comma)
     }
@@ -420,7 +422,7 @@ impl AstSerializerContexted for VariableDeclaration {
 
 impl AstSerializer for StorageLocation {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("StorageLocation");
+        //dbg!("StorageLocation");
         match self {
             StorageLocation::Calldata => "calldata",
             StorageLocation::Default => "",
@@ -434,7 +436,7 @@ impl AstSerializer for StorageLocation {
 
 impl AstSerializer for Mutability {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Mutability");
+        //dbg!("Mutability");
         match self {
             Mutability::Mutable => b"".to_vec(),
             Mutability::Immutable => b"immutable".to_vec(),
@@ -445,7 +447,7 @@ impl AstSerializer for Mutability {
 
 impl AstSerializer for TypeName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("TypeName");
+        //dbg!("TypeName");
         match self {
             TypeName::ArrayTypeName(array_type_name) => array_type_name.to_sol_vec(),
             TypeName::ElementaryTypeName(elementary_type_name) => elementary_type_name.to_sol_vec(),
@@ -460,7 +462,7 @@ impl AstSerializer for TypeName {
 
 impl AstSerializer for ArrayTypeName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ArrayTypeName");
+        //dbg!("ArrayTypeName");
         let mut array = ARRAY_TYPE_NAME.replace(
             ARRAY_TYPE_NAME_BASE_TYPE_KEY,
             &to_string(self.base_type().to_sol_vec()),
@@ -477,7 +479,7 @@ impl AstSerializer for ArrayTypeName {
 
 impl AstSerializer for Expression {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Expression");
+        //dbg!("Expression");
         match self {
             Expression::Assignment(assignment) => assignment.to_sol_vec(),
             Expression::BinaryOperation(binary_operation) => binary_operation.to_sol_vec(),
@@ -503,7 +505,7 @@ impl AstSerializer for Expression {
 
 impl AstSerializer for Assignment {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Assignment");
+        //dbg!("Assignment");
         let mut ass = ASSIGNMENT.replace(
             ASSIGNMENT_LEFT_HAND_SIDE_KEY,
             &self.left_hand_side().to_sol_string(),
@@ -520,7 +522,7 @@ impl AstSerializer for Assignment {
 
 impl AstSerializer for BinaryOperation {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("BinaryOperation");
+        //dbg!("BinaryOperation");
         let mut bin_op = BINARY_OPERATION.replace(
             BINARY_OPERATION_LEFT_EXPRESSION_KEY,
             &self.left_expression().to_sol_string(),
@@ -537,7 +539,7 @@ impl AstSerializer for BinaryOperation {
 
 impl AstSerializer for Conditional {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Conditional");
+        //dbg!("Conditional");
         let mut c =
             CONDITIONAL.replace(CONDITIONAL_CONDITION_KEY, &self.condition().to_sol_string());
         c = c.replace(
@@ -555,14 +557,14 @@ impl AstSerializer for Conditional {
 
 impl AstSerializer for ElementaryTypeNameExpression {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ElementaryTypeNameExpression");
+        //dbg!("ElementaryTypeNameExpression");
         self.type_name().to_sol_vec()
     }
 }
 
 impl AstSerializer for ElementaryTypeName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ElementaryTypeName");
+        //dbg!("ElementaryTypeName");
         if *self.state_mutability() == Some(StateMutability::Payable) {
             format!("{} payable", self.name())
         } else {
@@ -575,7 +577,7 @@ impl AstSerializer for ElementaryTypeName {
 
 impl AstSerializer for FunctionCall {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("FunctionCall");
+        //dbg!("FunctionCall");
         let mut fc =
             FUNCTION_CALL.replace(FUNCTION_CALL_NAME_KEY, &self.expression().to_sol_string());
         fc = fc.replace(
@@ -591,7 +593,7 @@ impl AstSerializer for FunctionCall {
 
 impl AstSerializer for FunctionCallOptions {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("FunctionCallOptions");
+        //dbg!("FunctionCallOptions");
         let mut fc =
             FUNCTION_CALL.replace(FUNCTION_CALL_NAME_KEY, &self.expression().to_sol_string());
 
@@ -606,14 +608,14 @@ impl AstSerializer for FunctionCallOptions {
 
 impl AstSerializer for Identifier {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Identifier");
+        //dbg!("Identifier");
         self.name().as_bytes().to_vec()
     }
 }
 
 impl AstSerializer for IndexAccess {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("IndexAccess");
+        //dbg!("IndexAccess");
         INDEX_ACCESS
             .replace(
                 INDEX_ACCESS_BASE_KEY,
@@ -630,7 +632,7 @@ impl AstSerializer for IndexAccess {
 
 impl AstSerializer for IndexRangeAccess {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("IndexRangeAccess");
+        //dbg!("IndexRangeAccess");
         INDEX_RANGE_ACCESS
             .replace(
                 INDEX_RANGE_ACCESS_BASE_KEY,
@@ -651,7 +653,7 @@ impl AstSerializer for IndexRangeAccess {
 
 impl AstSerializer for Literal {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Literal");
+        //dbg!("Literal");
         self.value()
             .expect("Expect Value in literal AST node, but....")
             .as_bytes()
@@ -661,7 +663,7 @@ impl AstSerializer for Literal {
 
 impl AstSerializer for MemberAccess {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("MemberAccess");
+        //dbg!("MemberAccess");
         MEMBER_ACCESS
             .replace(MEMBER_ACCESS_BASE_KEY, &self.expression().to_sol_string())
             .replace(MEMBER_ACCESS_MEMBER_KEY, self.member_name())
@@ -672,7 +674,7 @@ impl AstSerializer for MemberAccess {
 
 impl AstSerializer for NewExpression {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("NewExpression");
+        //dbg!("NewExpression");
         NEW_EXPRESSION
             .replace(
                 NEW_EXPRESSION_EXPRESSION_KEY,
@@ -685,7 +687,7 @@ impl AstSerializer for NewExpression {
 
 impl AstSerializer for TupleExpression {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("TupleExpression");
+        //dbg!("TupleExpression");
         TUPLE_EXPRESSION
             .replace(
                 TUPLE_EXPRESSION_COMPONENTS_KEY,
@@ -700,7 +702,7 @@ impl AstSerializer for TupleExpression {
 
 impl AstSerializer for UnaryOperation {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("UnaryOperation");
+        //dbg!("UnaryOperation");
         if self.prefix() {
             UNARY_OPERATION
                 .replace(
@@ -731,7 +733,7 @@ impl AstSerializer for UnaryOperation {
 
 impl AstSerializer for FunctionTypeName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("FunctionTypeName");
+        //dbg!("FunctionTypeName");
         FUNCTION_TYPE_NAME
             .replace(
                 FUNCTION_TYPE_NAME_PARAMETERS_KEY,
@@ -752,7 +754,7 @@ impl AstSerializer for FunctionTypeName {
 
 impl AstSerializer for Visibility {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Visibility");
+        //dbg!("Visibility");
         match self {
             Visibility::External => b"external".to_vec(),
             Visibility::Public => b"public".to_vec(),
@@ -764,7 +766,7 @@ impl AstSerializer for Visibility {
 
 impl AstSerializer for StateMutability {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("StateMutability");
+        //dbg!("StateMutability");
         match self {
             StateMutability::Payable => b"payable".to_vec(),
             StateMutability::Pure => b"pure".to_vec(),
@@ -776,7 +778,7 @@ impl AstSerializer for StateMutability {
 
 impl AstSerializer for Mapping {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Mapping");
+        //dbg!("Mapping");
         MAPPING
             .replace(MAPPING_TYPE_LEFT_KEY, &self.key_type().to_sol_string())
             .replace(MAPPING_NAME_LEFT_KEY, self.key_name().unwrap_or_default())
@@ -792,7 +794,7 @@ impl AstSerializer for Mapping {
 
 impl AstSerializer for UserDefinedTypeName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("UserDefinedTypeName");
+        //dbg!("UserDefinedTypeName");
         self.path_node()
             .expect("Expected Path Node in UserDefinedTypeName, but...")
             .name()
@@ -803,7 +805,7 @@ impl AstSerializer for UserDefinedTypeName {
 
 impl AstSerializer for ContractDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ContractDefinition");
+        //dbg!("ContractDefinition");
         CONTRACT
             .replace(
                 CONTRACT_DOCUMENTATION_KEY,
@@ -848,7 +850,7 @@ impl AstSerializer for ContractDefinition {
 
 impl AstSerializer for ContractKind {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ContractKind");
+        //dbg!("ContractKind");
         match self {
             ContractKind::Contract => b"contract".to_vec(),
             ContractKind::Interface => b"interface".to_vec(),
@@ -859,33 +861,34 @@ impl AstSerializer for ContractKind {
 
 impl AstSerializer for InheritanceSpecifier {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("InheritanceSpecifier");
+        //dbg!("InheritanceSpecifier");
         self.base_name().to_sol_vec()
     }
 }
 
 impl AstSerializer for BaseName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("BaseName");
+        //dbg!("BaseName");
         match self {
             BaseName::UserDefinedTypeName(user_defined_type_name) => {
                 user_defined_type_name.to_sol_vec()
             }
             BaseName::IdentifierPath(identifier_path) => identifier_path.to_sol_vec(),
+            BaseName::Fallback => panic!("Fallback couldn't be used in real code"),
         }
     }
 }
 
 impl AstSerializer for IdentifierPath {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("IdentifierPath");
+        //dbg!("IdentifierPath");
         self.name().as_bytes().to_vec()
     }
 }
 
 impl AstSerializer for BaseNode {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("BaseNode");
+        //dbg!("BaseNode");
         match self {
             BaseNode::EnumDefinition(enum_definition) => enum_definition.to_sol_vec(),
             BaseNode::ErrorDefinition(error_definition) => error_definition.to_sol_vec(),
@@ -906,7 +909,7 @@ impl AstSerializer for BaseNode {
 
 impl AstSerializer for EnumDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("EnumDefinition");
+        //dbg!("EnumDefinition");
         ENUM.replace(ENUM_NAME_KEY, self.name())
             .replace(ENUM_ENUM_VALUES_KEY, &self.members().to_sol_string())
             .as_bytes()
@@ -916,14 +919,14 @@ impl AstSerializer for EnumDefinition {
 
 impl AstSerializer for EnumValue {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("EnumValue");
+        //dbg!("EnumValue");
         self.name().as_bytes().to_vec()
     }
 }
 
 impl AstSerializer for ErrorDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ErrorDefinition");
+        //dbg!("ErrorDefinition");
         ERROR
             .replace(ERROR_NAME_KEY, self.name())
             .replace(ERROR_PARAMETERS_KEY, &self.parameters().to_sol_string())
@@ -934,7 +937,7 @@ impl AstSerializer for ErrorDefinition {
 
 impl AstSerializer for FunctionDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("FunctionDefinition");
+        //dbg!("FunctionDefinition");
         match self.kind() {
             FunctionKind::Function => FUNCTION
                 .replace(
@@ -1018,14 +1021,14 @@ impl AstSerializer for FunctionDefinition {
 
 impl AstSerializer for OverrideSpecifier {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("OverrideSpecifier");
+        //dbg!("OverrideSpecifier");
         self.overrides().to_sol_vec()
     }
 }
 
 impl AstSerializer for Overrides {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Overrides");
+        //dbg!("Overrides");
         match self {
             Overrides::UserDefinedTypeName(user_defined_type_name) => {
                 user_defined_type_name.to_sol_vec()
@@ -1037,7 +1040,7 @@ impl AstSerializer for Overrides {
 
 impl AstSerializer for ModifierInvocation {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ModifierInvocation");
+        //dbg!("ModifierInvocation");
         MODIFIER_INVOCATION
             .replace(
                 MODIFIER_INVOCATION_NAME_KEY,
@@ -1054,7 +1057,7 @@ impl AstSerializer for ModifierInvocation {
 
 impl AstSerializer for ModifierName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ModifierName");
+        //dbg!("ModifierName");
         match self {
             ModifierName::Identifier(identifier) => identifier.to_sol_vec(),
             ModifierName::IdentifierPath(identifier_path) => identifier_path.to_sol_vec(),
@@ -1064,7 +1067,7 @@ impl AstSerializer for ModifierName {
 
 impl AstSerializer for FunctionKind {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("FunctionKind");
+        //dbg!("FunctionKind");
         match self {
             FunctionKind::Function => b"function".to_vec(),
             FunctionKind::Receive => b"receive".to_vec(),
@@ -1077,7 +1080,7 @@ impl AstSerializer for FunctionKind {
 
 impl AstSerializer for Block {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Block");
+        //dbg!("Block");
         let mut inner = self
             .statements()
             .to_sol_string_with_delimiter(Delimiter::NewLine)
@@ -1085,14 +1088,14 @@ impl AstSerializer for Block {
             .to_vec();
         inner.insert(0, b'{');
         inner.push(b'}');
-        dbg!(std::str::from_utf8(inner.as_slice())).unwrap();
+        //dbg!(std::str::from_utf8(inner.as_slice())).unwrap();
         inner
     }
 }
 
 impl AstSerializer for Statement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Statement");
+        //dbg!("Statement");
         match self {
             Statement::Block(block) => block.to_sol_vec(),
             Statement::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
@@ -1140,21 +1143,21 @@ impl AstSerializer for Statement {
 
 impl AstSerializer for Break {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Break");
+        //dbg!("Break");
         b"break".to_vec()
     }
 }
 
 impl AstSerializer for Continue {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Continue");
+        //dbg!("Continue");
         b"continue".to_vec()
     }
 }
 
 impl AstSerializer for Return {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Return");
+        //dbg!("Return");
         let expr = match self.expression() {
             Some(e) => e.to_sol_string().pad_front(),
             None => String::default(),
@@ -1168,7 +1171,7 @@ impl AstSerializer for Return {
 
 impl AstSerializer for DoWhileStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("DoWhileStatement");
+        //dbg!("DoWhileStatement");
         DO_WHILE_STATEMENT
             .replace(DO_WHILE_STATEMENT_BODY_KEY, &self.body().to_sol_string())
             .replace(
@@ -1182,7 +1185,7 @@ impl AstSerializer for DoWhileStatement {
 
 impl AstSerializer for Body {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("Body");
+        //dbg!("Body");
         match self {
             Body::Block(block) => block.to_sol_vec(),
             Body::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
@@ -1228,7 +1231,7 @@ impl AstSerializer for Body {
 
 impl AstSerializer for EmitStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("EmitStatement");
+        //dbg!("EmitStatement");
         EMIT_STATEMENT
             .replace(EMIT_EVENT_CALL_KEY, &self.event_call().to_sol_string())
             .as_bytes()
@@ -1238,14 +1241,14 @@ impl AstSerializer for EmitStatement {
 
 impl AstSerializer for ExpressionStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ExpressionStatement");
+        //dbg!("ExpressionStatement");
         self.expression().to_sol_vec()
     }
 }
 
 impl AstSerializer for ForStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ForStatement");
+        //dbg!("ForStatement");
         FOR_STATEMENT
             .replace(
                 FOR_STATEMENT_INITIALIZATION_KEY,
@@ -1267,7 +1270,7 @@ impl AstSerializer for ForStatement {
 
 impl AstSerializer for InitializationExpression {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("InitializationExpression");
+        //dbg!("InitializationExpression");
         match self {
             InitializationExpression::ExpressionStatement(expression_statement) => {
                 expression_statement.to_sol_vec()
@@ -1281,7 +1284,7 @@ impl AstSerializer for InitializationExpression {
 
 impl AstSerializer for VariableDeclarationStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("VariableDeclarationStatement");
+        //dbg!("VariableDeclarationStatement");
         let is_initialized = self.initial_value().is_some();
         let tuple = self.declarations().len() > 1;
         let declarations = self
@@ -1308,7 +1311,7 @@ impl AstSerializer for VariableDeclarationStatement {
 
 impl AstSerializer for IfStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("IfStatement");
+        //dbg!("IfStatement");
         let false_is_some = self.false_body().is_some();
 
         IF_STATEMENT
@@ -1335,7 +1338,7 @@ impl AstSerializer for IfStatement {
 
 impl AstSerializer for FalseBody {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("FalseBody");
+        //dbg!("FalseBody");
         let mut inner = match self {
             FalseBody::Block(block) => block.to_sol_vec(),
             FalseBody::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
@@ -1384,14 +1387,14 @@ impl AstSerializer for FalseBody {
 
 impl AstSerializer for PlaceholderStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("PlaceholderStatement");
+        //dbg!("PlaceholderStatement");
         b"_".to_vec()
     }
 }
 
 impl AstSerializer for RevertStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("RevertStatement");
+        //dbg!("RevertStatement");
         REVERT_STATEMENT
             .replace(
                 REVERT_STATEMENT_FUNCTION_CALL,
@@ -1404,7 +1407,7 @@ impl AstSerializer for RevertStatement {
 
 impl AstSerializer for TryStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("TryStatement");
+        //dbg!("TryStatement");
         TRY_CATCH_STATEMENT
             .replace(
                 TRY_CATCH_STATEMENT_CLAUSES_KEY,
@@ -1421,7 +1424,7 @@ impl AstSerializer for TryStatement {
 
 impl AstSerializer for TryCatchClause {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("TryCatchClause");
+        //dbg!("TryCatchClause");
         CATCH_CLAUSE
             .replace(CATCH_CLAUSE_PARAMS_KEY, &self.parameters().to_sol_string())
             .replace(CATCH_CLAUSE_ERROR_KEY, self.error_name())
@@ -1433,7 +1436,7 @@ impl AstSerializer for TryCatchClause {
 
 impl AstSerializer for UncheckedBlock {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("UncheckedBlock");
+        //dbg!("UncheckedBlock");
         UNCHECKED_BLOCK
             .replace(
                 UNCHECKED_BLOCK_BLOCK_KEY,
@@ -1446,7 +1449,7 @@ impl AstSerializer for UncheckedBlock {
 
 impl AstSerializer for WhileStatement {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("WhileStatement");
+        //dbg!("WhileStatement");
         WHILE_STATEMENT
             .replace(
                 WHILE_STATEMENT_CONDITION_KEY,
@@ -1460,14 +1463,14 @@ impl AstSerializer for WhileStatement {
 
 impl AstSerializer for InlineAssembly {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("InlineAssembly");
+        //dbg!("InlineAssembly");
         todo!()
     }
 }
 
 impl AstSerializer for StructDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("StructDefinition");
+        //dbg!("StructDefinition");
         STRUCT_STATEMENT
             .replace(STRUCT_STATEMENT_NAME_KEY, self.name())
             .replace(STRUCT_STATEMENT_MEMBERS_KEY, &{
@@ -1485,7 +1488,7 @@ impl AstSerializer for StructDefinition {
 
 impl AstSerializer for UserDefinedValueTypeDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("UserDefinedValueTypeDefinition");
+        //dbg!("UserDefinedValueTypeDefinition");
         USER_DEFINED_TYPE_DEFINITION
             .replace(USER_DEFINED_TYPE_DEFINITION_NAME_KEY, self.name())
             .replace(
@@ -1499,7 +1502,7 @@ impl AstSerializer for UserDefinedValueTypeDefinition {
 
 impl AstSerializer for UsingForDirective {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("UsingForDirective");
+        //dbg!("UsingForDirective");
         USING_FOR_DIRECTIVE
             .replace(
                 USING_FOR_DIRECTIVE_LIBRARY_KEY,
@@ -1516,7 +1519,7 @@ impl AstSerializer for UsingForDirective {
 
 impl AstSerializer for LibraryName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("LibraryName");
+        //dbg!("LibraryName");
         match self {
             LibraryName::UserDefinedTypeName(user_defined_type_name) => {
                 user_defined_type_name.to_sol_vec()
@@ -1528,7 +1531,7 @@ impl AstSerializer for LibraryName {
 
 impl AstSerializer for ModifierDefinition {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ModifierDefinition");
+        //dbg!("ModifierDefinition");
         MODIFIER
             .replace(MODIFIER_NAME_KEY, self.name())
             .replace(MODIFIER_PARAMETERS_KEY, &self.parameters().to_sol_string())
@@ -1542,13 +1545,17 @@ impl AstSerializer for ModifierDefinition {
 
 impl AstSerializer for ImportDirective {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("ImportDirective");
+        //dbg!("ImportDirective");
+        let is_aliases = !self.symbol_aliases().is_empty();
+        let aliases = ternary!(is_aliases => format!("{{{}}}", self
+        .symbol_aliases()
+        .to_sol_string_with_delimiter(Delimiter::Comma)); String::default());
+
         IMPORT_DIRECTIVE
+            .replace(IMPORT_DIRECTIVE_ALIASES_KEY, &aliases)
             .replace(
-                IMPORT_DIRECTIVE_ALIASES_KEY,
-                &self
-                    .symbol_aliases()
-                    .to_sol_string_with_delimiter(Delimiter::Comma),
+                IMPORT_DIRECTIVE_FROM_KEY,
+                ternary!(is_aliases => FROM_KEYWORD; ""),
             )
             .replace(IMPORT_DIRECTIVE_PATH_KEY, self.file())
             .as_bytes()
@@ -1558,7 +1565,7 @@ impl AstSerializer for ImportDirective {
 
 impl AstSerializer for SymbolAliases {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("SymbolAliases");
+        //dbg!("SymbolAliases");
         SYMBOL_ALIASES
             .replace(SYMBOL_ALIASES_FOREIGN_KEY, &self.foreign().to_sol_string())
             .replace(
@@ -1573,7 +1580,7 @@ impl AstSerializer for SymbolAliases {
 
 impl AstSerializer for PragmaDirective {
     fn to_sol_vec(&self) -> Vec<u8> {
-        dbg!("PragmaDirective");
+        //dbg!("PragmaDirective");
         let pragma_lits = self
             .literals()
             .iter()

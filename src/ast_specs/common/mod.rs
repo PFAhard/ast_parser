@@ -13,11 +13,13 @@ mod type_name;
 
 pub use prelude::*;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 #[serde(tag = "nodeType")]
 pub enum BaseName {
     UserDefinedTypeName(UserDefinedTypeName),
     IdentifierPath(IdentifierPath),
+    #[default]
+    Fallback
 }
 
 #[derive(Deserialize, Debug, Clone)]

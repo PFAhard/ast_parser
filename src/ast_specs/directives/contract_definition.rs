@@ -6,7 +6,7 @@ use crate::ast_specs::{
     BaseNode,
 };
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, Default)]
 pub struct ContractDefinition {
     #[serde(rename = "abstract")]
     #[copy]
@@ -42,14 +42,32 @@ pub struct ContractDefinition {
 }
 
 impl ContractDefinition {
+    pub fn artificial_new(
+        _abstract: bool,
+        base_contracts: Vec<InheritanceSpecifier>,
+        contract_kind: ContractKind,
+        name: String,
+        nodes: Vec<BaseNode>,
+    ) -> Self {
+        Self {
+            _abstract,
+            base_contracts,
+            contract_kind,
+            name,
+            nodes,
+            ..Default::default()
+        }
+    }
+
     pub fn is_in_used_errors(&self, id: isize) -> bool {
         self.used_errors.iter().any(|ex_id| ex_id == &id)
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ContractKind {
     #[serde(rename = "contract")]
+    #[default]
     Contract,
     #[serde(rename = "interface")]
     Interface,
