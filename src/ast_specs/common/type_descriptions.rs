@@ -1,10 +1,15 @@
+use getters::Getters;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone, Default)]
+#[derive(Deserialize, Debug, Clone, Default, Getters)]
 pub struct TypeDescriptions {
     #[serde(rename = "typeIdentifier")]
+    #[use_as_deref]
+    #[return_type = "Option<&str>"]
     type_identifier: Option<String>,
     #[serde(rename = "typeString")]
+    #[use_as_deref]
+    #[return_type = "Option<&str>"]
     type_string: Option<String>,
 }
 
@@ -13,9 +18,5 @@ impl TypeDescriptions {
         Self {
             ..Default::default()
         }
-    }
-
-    pub fn type_string(&self) -> Option<&String> {
-        self.type_string.as_ref()
     }
 }
