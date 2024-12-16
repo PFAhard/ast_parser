@@ -24,6 +24,7 @@ pub struct FunctionCall {
     is_lvalue: bool,
     #[serde(rename = "isPure")]
     is_pure: bool,
+    #[copy]
     kind: FunctionCallKind,
     #[serde(rename = "lValueRequested")]
     l_value_requested: bool,

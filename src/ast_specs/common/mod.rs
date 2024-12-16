@@ -56,7 +56,7 @@ pub enum StorageLocation {
 //     function {}
 // }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FunctionCallKind {
     #[serde(rename = "functionCall")]
     FunctionCall,
