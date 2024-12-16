@@ -43,4 +43,11 @@ impl FunctionCallOptions {
 
         format!("{name}{{{args}}}")
     }
+
+    pub fn is_builtin(&self) -> bool {
+        self.type_descriptions()
+            .type_identifier()
+            .map(|ti| ti.starts_with("t_function_barecall_payable"))
+            == Some(true)
+    }
 }
