@@ -67,6 +67,10 @@ impl FunctionCall {
     pub fn builtin(&self) -> Option<BuiltinFunction> {
         BuiltinFunction::try_from(self.expression().extract_definition().unwrap_or(0)).ok()
     }
+
+    pub fn is_builtin(&self) -> bool {
+        self.expression().is_builtin()
+    }
 }
 
 #[repr(usize)]

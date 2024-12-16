@@ -94,7 +94,7 @@ impl Expression {
             Expression::BinaryOperation(_) => todo!(),
             Expression::Conditional(_) => todo!(),
             Expression::ElementaryTypeNameExpression(_) => todo!(),
-            Expression::FunctionCall(_) => todo!(),
+            Expression::FunctionCall(fc) => fc.is_builtin(),
             Expression::FunctionCallOptions(_) => todo!(),
             Expression::Identifier(ident) => ident.is_builtin(),
             Expression::IndexAccess(_) => todo!(),
