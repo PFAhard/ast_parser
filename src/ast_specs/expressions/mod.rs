@@ -93,10 +93,7 @@ impl Expression {
             Expression::Assignment(_) => todo!(),
             Expression::BinaryOperation(_) => todo!(),
             Expression::Conditional(_) => todo!(),
-            Expression::ElementaryTypeNameExpression(etne) => {
-                dbg!(etne);
-                todo!()
-            }
+            Expression::ElementaryTypeNameExpression(etne) => false,
             Expression::FunctionCall(fc) => fc.is_builtin(),
             Expression::FunctionCallOptions(_) => todo!(),
             Expression::Identifier(ident) => ident.is_builtin(),
