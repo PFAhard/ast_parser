@@ -95,7 +95,12 @@ impl Expression {
             Expression::Conditional(_) => todo!(),
             Expression::ElementaryTypeNameExpression(etne) => false,
             Expression::FunctionCall(fc) => fc.is_builtin(),
-            Expression::FunctionCallOptions(_) => todo!(),
+            Expression::FunctionCallOptions(fco) => {
+                fco.type_descriptions()
+                    .type_identifier()
+                    .map(|ti| ti.starts_with("t_function_barecall_payable"))
+                    == Some(true)
+            }
             Expression::Identifier(ident) => ident.is_builtin(),
             Expression::IndexAccess(_) => todo!(),
             Expression::IndexRangeAccess(_) => todo!(),
