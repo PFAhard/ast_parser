@@ -7,6 +7,8 @@ pub mod ast_visitor;
 pub mod error;
 // pub mod ast_descriptor; TODO:
 
+use std::fmt::Debug;
+
 use ast_specs::SourceUnit;
 pub use error::*;
 use serde::Deserialize;
@@ -121,6 +123,100 @@ macro_rules! cast_node_type {
             })
             .unzip()
     }};
+    ($target:expr; $pat:ident; $filter:ident) => {{
+        use ast_parser::ast_specs::NodeType;
+        use ast_parser::ast_specs::NodeTypeInternal;
+        use ast_parser::ast_visitor::AstVisitor;
+
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    if a.$filter() {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+    }};
+    ($target:expr; $pat:ident; $filter:ident; $($func:ident),*) => {{
+        use ast_parser::ast_specs::NodeType;
+        use ast_parser::ast_specs::NodeTypeInternal;
+        use ast_parser::ast_visitor::AstVisitor;
+
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    if a.$filter() {
+                        Some(
+                            a$(.$func())*
+                        )
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+    }};
+    ($target:expr; $pat:ident; $filter:ident; $([$($func:ident),* ]),*) => {{
+        use ast_parser::ast_specs::NodeType;
+        use ast_parser::ast_specs::NodeTypeInternal;
+        use ast_parser::ast_visitor::AstVisitor;
+
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    if a.$filter() {
+                        Some(
+                            ($(
+                                a$(.$func())*,
+                            )*)
+                        )
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+    }};
+    ($target:expr; $pat:ident; $filter:ident; $([$($func:ident),* ]),* unzip) => {{
+        use ast_parser::ast_specs::NodeType;
+        use ast_parser::ast_specs::NodeTypeInternal;
+        use ast_parser::ast_visitor::AstVisitor;
+
+        $target
+            .filter_by_node_type(NodeType::$pat)
+            .into_iter()
+            .filter_map(|v| {
+                if let NodeTypeInternal::$pat(a) = v {
+                    if a.$filter() {
+                        Some(
+                            ($(
+                                a$(.$func())*,
+                            )*)
+                        )
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .unzip()
+    }};
 }
 
 // fn test_cast() {
@@ -139,3 +235,4 @@ where
 {
     serde_json::from_reader::<_, FoundryWrapper>(path).unwrap().ast
 }
+

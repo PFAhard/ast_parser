@@ -23,7 +23,22 @@ pub struct ElementaryTypeNameExpression {
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
     #[serde(rename = "typeName")]
-    type_name: ElementaryTypeName,
+    type_name: CompatabilityTypeName,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub enum CompatabilityTypeName {
+    ElementaryTypeName(ElementaryTypeName),
+    Name(String),
+}
+
+impl CompatabilityTypeName {
+    pub fn name(&self) -> &str {
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(t) => t.name(),
+            CompatabilityTypeName::Name(s) => s.as_str(),
+        }
+    }
 }
 
 impl ElementaryTypeNameExpression {
@@ -31,3 +46,5 @@ impl ElementaryTypeNameExpression {
         self.type_name().name().to_owned()
     }
 }
+
+
