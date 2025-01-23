@@ -14,7 +14,7 @@ pub struct ModifierInvocation {
     arguments: Option<Vec<Expression>>,
     #[copy]
     id: isize,
-    kind: ModifierKind,
+    kind: Option<ModifierKind>,
     #[serde(rename = "modifierName")]
     modifier_name: ModifierName,
     #[return_type = "&str"]

@@ -49,7 +49,7 @@ pub struct FunctionDefinition {
     #[copy]
     state_mutability: StateMutability,
     #[serde(rename = "virtual")]
-    _virtual: bool,
+    _virtual: Option<bool>,
     #[copy]
     visibility: Visibility,
 }

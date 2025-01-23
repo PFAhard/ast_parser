@@ -1,7 +1,7 @@
 pub use super::assignment::Assignment;
 pub use super::binary_operation::BinaryOperation;
 pub use super::conditional::Conditional;
-pub use super::elementary_type_name_expression::ElementaryTypeNameExpression;
+pub use super::elementary_type_name_expression::{ElementaryTypeNameExpression, CompatabilityTypeName};
 pub use super::function_call::{FunctionCall, BuiltinFunction};
 pub use super::function_call_options::FunctionCallOptions;
 pub use super::identifier::Identifier;

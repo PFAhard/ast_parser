@@ -51,7 +51,7 @@ pub enum EvmVersion {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExternalReference {
-    pub declaration: isize,
+    pub declaration: Option<isize>,
     #[serde(rename = "isOffset")]
     pub is_offset: bool,
     #[serde(rename = "isSlot")]

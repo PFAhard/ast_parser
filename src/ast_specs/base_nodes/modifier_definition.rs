@@ -22,6 +22,6 @@ pub struct ModifierDefinition {
     parameters: ParameterList,
     src: String,
     #[serde(rename = "virtual")]
-    _virtual: bool,
+    _virtual: Option<bool>,
     visibility: Visibility,
 }

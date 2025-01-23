@@ -1,18 +1,19 @@
 use crate::ast_specs::{
     inline_assembly::InlineAssembly, ArrayTypeName, Assignment, BaseName, BaseNode,
-    BinaryOperation, Block, Body, Break, Conditional, Continue, ContractDefinition, ContractKind,
-    Directive, DoWhileStatement, ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement,
-    EnumDefinition, EnumValue, ErrorDefinition, EventDefinition, Expression, ExpressionStatement,
-    FalseBody, ForStatement, FunctionCall, FunctionCallOptions, FunctionDefinition, FunctionKind,
-    FunctionTypeName, Identifier, IdentifierPath, IfStatement, ImportDirective, IndexAccess,
-    IndexRangeAccess, InheritanceSpecifier, InitializationExpression, LibraryName, Literal,
-    Mapping, MemberAccess, ModifierDefinition, ModifierInvocation, ModifierName, Mutability,
-    NewExpression, OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement,
-    PragmaDirective, Return, RevertStatement, SourceUnit, StateMutability, Statement,
-    StorageLocation, StructDefinition, StructuredDocumentation, SymbolAliases, TryCatchClause,
-    TryStatement, TupleExpression, TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName,
-    UserDefinedValueTypeDefinition, UsingForDirective, VariableDeclaration,
-    VariableDeclarationStatement, Visibility, WhileStatement,
+    BinaryOperation, Block, Body, Break, CompatabilityTypeName, Conditional, Continue,
+    ContractDefinition, ContractKind, Directive, DoWhileStatement, ElementaryTypeName,
+    ElementaryTypeNameExpression, EmitStatement, EnumDefinition, EnumValue, ErrorDefinition,
+    EventDefinition, Expression, ExpressionStatement, FalseBody, ForStatement, FunctionCall,
+    FunctionCallOptions, FunctionDefinition, FunctionKind, FunctionTypeName, Identifier,
+    IdentifierPath, IfStatement, ImportDirective, IndexAccess, IndexRangeAccess,
+    InheritanceSpecifier, InitializationExpression, LibraryName, Literal, Mapping, MemberAccess,
+    ModifierDefinition, ModifierInvocation, ModifierName, Mutability, NewExpression,
+    OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement, PragmaDirective, Return,
+    RevertStatement, SourceUnit, StateMutability, Statement, StorageLocation, StructDefinition,
+    StructuredDocumentation, SymbolAliases, TryCatchClause, TryStatement, TupleExpression,
+    TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName, UserDefinedValueTypeDefinition,
+    UsingForDirective, VariableDeclaration, VariableDeclarationStatement, Visibility,
+    WhileStatement,
 };
 
 macro_rules! ternary {
@@ -503,6 +504,12 @@ impl AstSerializer for Expression {
     }
 }
 
+impl AstSerializer for ElementaryTypeNameExpression {
+    fn to_sol_vec(&self) -> Vec<u8> {
+        self.type_name().to_sol_vec()
+    }
+}
+
 impl AstSerializer for Assignment {
     fn to_sol_vec(&self) -> Vec<u8> {
         //dbg!("Assignment");
@@ -554,11 +561,14 @@ impl AstSerializer for Conditional {
         c.as_bytes().to_vec()
     }
 }
-
-impl AstSerializer for ElementaryTypeNameExpression {
+impl AstSerializer for CompatabilityTypeName {
     fn to_sol_vec(&self) -> Vec<u8> {
-        //dbg!("ElementaryTypeNameExpression");
-        self.type_name().to_sol_vec()
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(elementary_type_name) => {
+                elementary_type_name.to_sol_vec()
+            }
+            CompatabilityTypeName::Name(s) => s.as_bytes().to_vec(),
+        }
     }
 }
 
@@ -813,7 +823,11 @@ impl AstSerializer for ContractDefinition {
             )
             .replace(
                 CONTRACT_ABSTRACT_KEY,
-                if self._abstract() { "abstract" } else { "" },
+                if self._abstract().unwrap_or_default() {
+                    "abstract"
+                } else {
+                    ""
+                },
             )
             .replace(
                 CONTRACT_CONTRACT_KIND_KEY,

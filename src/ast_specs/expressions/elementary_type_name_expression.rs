@@ -27,6 +27,7 @@ pub struct ElementaryTypeNameExpression {
 }
 
 #[derive(Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum CompatabilityTypeName {
     ElementaryTypeName(ElementaryTypeName),
     Name(String),

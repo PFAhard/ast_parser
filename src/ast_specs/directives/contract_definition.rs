@@ -10,7 +10,7 @@ use crate::ast_specs::{
 pub struct ContractDefinition {
     #[serde(rename = "abstract")]
     #[copy]
-    _abstract: bool,
+    _abstract: Option<bool>,
     #[serde(rename = "baseContracts")]
     base_contracts: Vec<InheritanceSpecifier>,
     #[serde(rename = "canonicalName")]
@@ -37,8 +37,8 @@ pub struct ContractDefinition {
     scope: isize,
     src: String,
     #[serde(rename = "usedErrors")]
-    #[return_type = "&[isize]"]
-    used_errors: Vec<isize>,
+    #[return_type = "&std::option::Option<Vec<isize>>"]
+    used_errors: Option<Vec<isize>>,
 }
 
 impl ContractDefinition {
@@ -50,7 +50,7 @@ impl ContractDefinition {
         nodes: Vec<BaseNode>,
     ) -> Self {
         Self {
-            _abstract,
+            _abstract: Some(_abstract),
             base_contracts,
             contract_kind,
             name,
@@ -60,7 +60,11 @@ impl ContractDefinition {
     }
 
     pub fn is_in_used_errors(&self, id: isize) -> bool {
-        self.used_errors.iter().any(|ex_id| ex_id == &id)
+        self.used_errors
+            .as_ref()
+            .unwrap_or(&vec![])
+            .iter()
+            .any(|ex_id| ex_id == &id)
     }
 }
 

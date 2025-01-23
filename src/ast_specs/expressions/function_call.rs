@@ -34,7 +34,7 @@ pub struct FunctionCall {
     #[return_type = "&str"]
     src: String,
     #[serde(rename = "tryCall")]
-    try_call: bool,
+    try_call: Option<bool>,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
 }

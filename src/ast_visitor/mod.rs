@@ -1,30 +1,33 @@
 #![warn(clippy::all)]
-use crate::ast_specs::inline_assembly::{
-    yul_expression::{
-        yul_function_call::YulFunctionCall,
-        yul_identifier::YulIdentifier,
-        yul_literal::{
-            yul_literal_hex_value::YulLiteralHexValue, yul_literal_value::YulLiteralValue,
-            YulLiteral,
+use crate::ast_specs::{
+    inline_assembly::{
+        yul_expression::{
+            yul_function_call::YulFunctionCall,
+            yul_identifier::YulIdentifier,
+            yul_literal::{
+                yul_literal_hex_value::YulLiteralHexValue, yul_literal_value::YulLiteralValue,
+                YulLiteral,
+            },
+            YulExpression,
         },
-        YulExpression,
+        yul_statements::{
+            yul_assignment::YulAssignment,
+            yul_block::YulBlock,
+            yul_break::YulBreak,
+            yul_continue::YulContinue,
+            yul_expression_statement::YulExpressionStatement,
+            yul_for_loop::YulForLoop,
+            yul_function_definition::YulFunctionDefinition,
+            yul_if::YulIf,
+            yul_leave::YulLeave,
+            yul_switch::{CaseValue, YulCase, YulSwitch},
+            yul_variable_declaration::YulVariableDeclaration,
+            YulStatement,
+        },
+        yul_typed_name::YulTypedName,
+        ExternalReference, InlineAssembly,
     },
-    yul_statements::{
-        yul_assignment::YulAssignment,
-        yul_block::YulBlock,
-        yul_break::YulBreak,
-        yul_continue::YulContinue,
-        yul_expression_statement::YulExpressionStatement,
-        yul_for_loop::YulForLoop,
-        yul_function_definition::YulFunctionDefinition,
-        yul_if::YulIf,
-        yul_leave::YulLeave,
-        yul_switch::{CaseValue, YulCase, YulSwitch},
-        yul_variable_declaration::YulVariableDeclaration,
-        YulStatement,
-    },
-    yul_typed_name::YulTypedName,
-    ExternalReference, InlineAssembly,
+    CompatabilityTypeName,
 };
 
 use super::ast_specs::{
@@ -2408,6 +2411,43 @@ impl AstVisitor for Conditional {
     }
 }
 
+impl AstVisitor for CompatabilityTypeName {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(etn) => etn.filter_by_node_type(node_type),
+            CompatabilityTypeName::Name(_) => Vec::new(),
+        }
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(etn) => etn.filter_by_reference_id(id),
+            CompatabilityTypeName::Name(_) => Vec::new(),
+        }
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(etn) => etn.filter_by_id(id),
+            CompatabilityTypeName::Name(_) => Vec::new(),
+        }
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(etn) => etn.childrens_id(),
+            CompatabilityTypeName::Name(_) => Vec::new(),
+        }
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            CompatabilityTypeName::ElementaryTypeName(etn) => etn.references(),
+            CompatabilityTypeName::Name(_) => Vec::new(),
+        }
+    }
+}
+
 impl AstVisitor for ElementaryTypeNameExpression {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
         let node_type: NodeType = node_type.into();
@@ -3079,7 +3119,7 @@ impl AstVisitor for ExternalReference {
     }
 
     fn references(&self) -> Vec<isize> {
-        vec![self.declaration]
+        self.declaration.iter().cloned().collect()
     }
 }
 
