@@ -2,6 +2,8 @@ pub mod yul_expression;
 pub mod yul_statements;
 pub mod yul_typed_name;
 
+use std::collections::HashMap;
+
 use getters::Getters;
 use serde::{Deserialize, Serialize};
 use yul_statements::yul_block::YulBlock;
@@ -9,17 +11,18 @@ use yul_statements::yul_block::YulBlock;
 #[derive(Debug, Serialize, Deserialize, Clone, Getters)]
 pub struct InlineAssembly {
     #[serde(rename = "AST")]
-    pub ast: YulBlock,
+    pub ast: Option<YulBlock>,
     pub documentation: Option<String>,
     #[serde(rename = "evmVersion")]
-    pub evm_version: EvmVersion,
+    pub evm_version: Option<EvmVersion>,
     #[serde(rename = "externalReferences")]
-    pub external_references: Vec<ExternalReference>,
+    pub external_references: Vec<ExternalReferenceCompatible>,
     pub flags: Option<Vec<String>>, // Assuming "memory-safe" is a string in a vector
     #[copy]
     pub id: isize,
     pub src: String,
 }
+
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum EvmVersion {
@@ -51,7 +54,7 @@ pub enum EvmVersion {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExternalReference {
-    pub declaration: Option<isize>,
+    pub declaration: isize,
     #[serde(rename = "isOffset")]
     pub is_offset: bool,
     #[serde(rename = "isSlot")]
@@ -60,6 +63,15 @@ pub struct ExternalReference {
     pub suffix: Option<Suffix>,
     #[serde(rename = "valueSize")]
     pub value_size: i32,
+}
+
+pub type ExternalReferenceOld = HashMap<String, ExternalReference>;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[serde(untagged)]
+pub enum ExternalReferenceCompatible {
+    ExternalReference(ExternalReference),
+    ExternalReferenceOld(ExternalReferenceOld),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -25,7 +25,7 @@ use crate::ast_specs::{
             YulStatement,
         },
         yul_typed_name::YulTypedName,
-        ExternalReference, InlineAssembly,
+        ExternalReference, ExternalReferenceCompatible, InlineAssembly,
     },
     CompatabilityTypeName,
 };
@@ -3101,6 +3101,35 @@ impl AstVisitor for InlineAssembly {
     }
 }
 
+impl AstVisitor for ExternalReferenceCompatible {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        todo!()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        todo!()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        match self {
+            ExternalReferenceCompatible::ExternalReference(external_reference) => {
+                external_reference.references()
+            }
+            ExternalReferenceCompatible::ExternalReferenceOld(hash_map) => {
+                hash_map.values().flat_map(AstVisitor::references).collect()
+            }
+        }
+    }
+}
+
 impl AstVisitor for ExternalReference {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
         todo!()
@@ -3119,7 +3148,7 @@ impl AstVisitor for ExternalReference {
     }
 
     fn references(&self) -> Vec<isize> {
-        self.declaration.iter().cloned().collect()
+        vec![self.declaration]
     }
 }
 
