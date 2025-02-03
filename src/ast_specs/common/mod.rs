@@ -29,7 +29,7 @@ pub enum LibraryName {
     IdentifierPath(IdentifierPath),
 }
 
-#[derive(Deserialize, Debug, Clone, Copy)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Mutability {
     #[serde(rename = "mutable")]
     Mutable,

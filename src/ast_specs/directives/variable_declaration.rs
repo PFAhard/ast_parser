@@ -19,6 +19,7 @@ pub struct VariableDeclaration {
     function_selector: Option<String>,
     id: isize,
     indexed: Option<bool>,
+    #[copy]
     mutability: Option<Mutability>,
     name: String,
     #[serde(rename = "nameLocation")]
