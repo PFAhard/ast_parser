@@ -19,6 +19,16 @@ use self::{
     yul_leave::YulLeave, yul_switch::YulSwitch, yul_variable_declaration::YulVariableDeclaration,
 };
 
+macro_rules! impl_from_for_yul_statement {
+    ($variant:ident) => {
+        impl From<&$variant> for YulStatement {
+            fn from(value: &$variant) -> Self {
+                YulStatement::$variant(value.clone())
+            }
+        }
+    };
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "nodeType")]
 pub enum YulStatement {
@@ -34,3 +44,15 @@ pub enum YulStatement {
     YulSwitch(YulSwitch),
     YulVariableDeclaration(YulVariableDeclaration),
 }
+
+impl_from_for_yul_statement!(YulAssignment);
+impl_from_for_yul_statement!(YulBlock);
+impl_from_for_yul_statement!(YulBreak);
+impl_from_for_yul_statement!(YulContinue);
+impl_from_for_yul_statement!(YulExpressionStatement);
+impl_from_for_yul_statement!(YulLeave);
+impl_from_for_yul_statement!(YulForLoop);
+impl_from_for_yul_statement!(YulFunctionDefinition);
+impl_from_for_yul_statement!(YulIf);
+impl_from_for_yul_statement!(YulSwitch);
+impl_from_for_yul_statement!(YulVariableDeclaration);

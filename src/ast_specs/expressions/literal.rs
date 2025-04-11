@@ -1,9 +1,9 @@
 use getters::Getters;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::ast_specs::common::{LiteralKind, TypeDescriptions};
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Serialize, Debug, Clone, Getters)]
 pub struct Literal {
     #[use_as_ref]
     #[serde(rename = "argumentTypes")]
@@ -24,8 +24,7 @@ pub struct Literal {
     #[serde(rename = "lValueRequested")]
     l_value_requested: bool,
     src: String,
-    // #[serde(skip)]
-    // subdenomination: (), // @note never seen
+    subdenomination: Option<Subdenomination>,
     #[serde(rename = "typeDescriptions")]
     type_descriptions: TypeDescriptions,
     #[clone]
@@ -39,4 +38,19 @@ impl Literal {
             None => todo!(),
         }
     }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum Subdenomination {
+    Weeks,
+    Days,
+    Hours,
+    Minutes,
+    Seconds,
+    Wei,
+    Gwei,
+    Ether,
+    Finney,
+    Szabo,
 }

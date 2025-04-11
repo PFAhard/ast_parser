@@ -100,7 +100,7 @@ impl FunctionDefinition {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Copy)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FunctionKind {
     #[serde(rename = "function")]
     Function,

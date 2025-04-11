@@ -17,10 +17,12 @@ pub struct VariableDeclaration {
     documentation: Option<StructuredDocumentation>,
     #[serde(rename = "functionSelector")]
     function_selector: Option<String>,
+    #[copy]
     id: isize,
     indexed: Option<bool>,
     #[copy]
     mutability: Option<Mutability>,
+    #[clone]
     name: String,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,

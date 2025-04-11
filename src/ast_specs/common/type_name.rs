@@ -8,6 +8,28 @@ use super::{
     type_descriptions::TypeDescriptions, StateMutability, Visibility,
 };
 
+
+macro_rules! impl_type_conversion {
+    ($variant:ident) => {
+        impl From<$variant> for TypeName {
+            fn from(v: $variant) -> Self {
+                TypeName::$variant(v)
+            }
+        }
+
+        impl TryFrom<TypeName> for $variant {
+            type Error = &'static str;
+
+            fn try_from(value: TypeName) -> Result<Self, Self::Error> {
+                match value {
+                    TypeName::$variant(v) => Ok(v),
+                    _ => Err("Invalid variant type"),
+                }
+            }
+        }
+    };
+}
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
 pub enum TypeName {
@@ -17,6 +39,12 @@ pub enum TypeName {
     Mapping(Mapping),
     UserDefinedTypeName(UserDefinedTypeName),
 }
+
+impl_type_conversion!(ArrayTypeName);
+impl_type_conversion!(ElementaryTypeName);
+impl_type_conversion!(FunctionTypeName);
+impl_type_conversion!(Mapping);
+impl_type_conversion!(UserDefinedTypeName);
 
 impl TypeName {
     pub fn name(&self) -> String {

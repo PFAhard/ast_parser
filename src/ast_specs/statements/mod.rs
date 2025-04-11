@@ -22,6 +22,27 @@ pub use prelude::*;
 
 use super::{common::Block, inline_assembly::InlineAssembly};
 
+macro_rules! impl_statement_from {
+    ($variant:ident) => {
+        impl From<$variant> for Statement {
+            fn from(value: $variant) -> Self {
+                Statement::$variant(value)
+            }
+        }
+
+        impl TryFrom<Statement> for $variant {
+            type Error = Statement;
+
+            fn try_from(value: Statement) -> Result<Self, Self::Error> {
+                match value {
+                    Statement::$variant(v) => Ok(v),
+                    other => Err(other),
+                }
+            }
+        }
+    };
+}
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
 pub enum Statement {
@@ -42,6 +63,23 @@ pub enum Statement {
     VariableDeclarationStatement(VariableDeclarationStatement),
     WhileStatement(WhileStatement),
 }
+
+impl_statement_from!(Block);
+impl_statement_from!(Break);
+impl_statement_from!(Continue);
+impl_statement_from!(DoWhileStatement);
+impl_statement_from!(EmitStatement);
+impl_statement_from!(ExpressionStatement);
+impl_statement_from!(ForStatement);
+impl_statement_from!(IfStatement);
+impl_statement_from!(InlineAssembly);
+impl_statement_from!(PlaceholderStatement);
+impl_statement_from!(Return);
+impl_statement_from!(RevertStatement);
+impl_statement_from!(TryStatement);
+impl_statement_from!(UncheckedBlock);
+impl_statement_from!(VariableDeclarationStatement);
+impl_statement_from!(WhileStatement);
 
 impl Statement {
     pub fn id(&self) -> isize {

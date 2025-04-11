@@ -18,7 +18,17 @@ use serde::Deserialize;
 
 pub use prelude::*;
 
-// @note
+#[macro_export]
+macro_rules! impl_from {
+    ($variant:ident) => {
+        impl From<$variant> for Expression {
+            fn from(v: $variant) -> Self {
+                Expression::$variant(v)
+            }
+        }
+    };
+}
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "nodeType")]
 pub enum Expression {
@@ -37,6 +47,21 @@ pub enum Expression {
     TupleExpression(TupleExpression),
     UnaryOperation(UnaryOperation),
 }
+
+impl_from!(Assignment);
+impl_from!(BinaryOperation);
+impl_from!(Conditional);
+impl_from!(ElementaryTypeNameExpression);
+impl_from!(FunctionCall);
+impl_from!(FunctionCallOptions);
+impl_from!(Identifier);
+impl_from!(IndexAccess);
+impl_from!(IndexRangeAccess);
+impl_from!(Literal);
+impl_from!(MemberAccess);
+impl_from!(NewExpression);
+impl_from!(TupleExpression);
+impl_from!(UnaryOperation);
 
 impl Expression {
     pub fn extract_name(&self) -> String {
@@ -65,6 +90,8 @@ impl Expression {
             Expression::MemberAccess(member_access) => member_access.referenced_declaration(),
             Expression::ElementaryTypeNameExpression(_) => None,
             Expression::FunctionCallOptions(fco) => fco.expression().extract_definition(),
+            Expression::FunctionCall(fc) => fc.expression().extract_definition(),
+            Expression::IndexAccess(ia) => ia.base_expression().extract_definition(),
             _ => unimplemented!("{:?}", self),
         }
     }
@@ -95,7 +122,7 @@ impl Expression {
             Expression::Conditional(_) => todo!(),
             Expression::ElementaryTypeNameExpression(etne) => false,
             Expression::FunctionCall(fc) => fc.is_builtin(),
-            Expression::FunctionCallOptions(fco) => {fco.is_builtin()}
+            Expression::FunctionCallOptions(fco) => fco.is_builtin(),
             Expression::Identifier(ident) => ident.is_builtin(),
             Expression::IndexAccess(_) => todo!(),
             Expression::IndexRangeAccess(_) => todo!(),

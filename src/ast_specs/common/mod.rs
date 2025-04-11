@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 mod block;
 mod identifier_path;
@@ -19,7 +19,7 @@ pub enum BaseName {
     UserDefinedTypeName(UserDefinedTypeName),
     IdentifierPath(IdentifierPath),
     #[default]
-    Fallback
+    Fallback,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -66,7 +66,7 @@ pub enum FunctionCallKind {
     StructConstructorCall,
 }
 
-#[derive(Deserialize, Debug, Clone, Copy)]
+#[derive(Deserialize, Serialize, Debug, Clone, Copy)]
 pub enum LiteralKind {
     #[serde(rename = "bool")]
     Bool,
@@ -90,6 +90,17 @@ pub enum StateMutability {
     Nonpayable,
     #[serde(rename = "view")]
     View,
+}
+
+impl std::fmt::Display for StateMutability {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StateMutability::Payable => write!(f, "payable"),
+            StateMutability::Pure => write!(f, "pure"),
+            StateMutability::Nonpayable => write!(f, "nonpayable"),
+            StateMutability::View => write!(f, "view"),
+        }
+    }
 }
 
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]

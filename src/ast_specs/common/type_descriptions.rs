@@ -1,7 +1,7 @@
 use getters::Getters;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug, Clone, Default, Getters)]
+#[derive(Deserialize, Debug, Serialize, Clone, Default, Getters)]
 pub struct TypeDescriptions {
     #[serde(rename = "typeIdentifier")]
     #[use_as_deref]

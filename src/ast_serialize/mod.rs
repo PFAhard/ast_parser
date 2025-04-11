@@ -1353,7 +1353,7 @@ impl AstSerializer for IfStatement {
 impl AstSerializer for FalseBody {
     fn to_sol_vec(&self) -> Vec<u8> {
         //dbg!("FalseBody");
-        let mut inner = match self {
+        let inner = match self {
             FalseBody::Block(block) => block.to_sol_vec(),
             FalseBody::Break(_break) => _break.to_sol_vec().terminate(";").as_bytes().to_vec(),
             FalseBody::Continue(_continue) => {

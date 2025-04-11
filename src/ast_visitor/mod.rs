@@ -580,7 +580,7 @@ impl AstVisitor for VariableDeclaration {
         let mut result = self.value().filter_by_id(id);
         result.append(&mut self.overrides().filter_by_id(id));
         result.append(&mut self.type_name().filter_by_id(id));
-        if id == *self.id() {
+        if id == self.id() {
             result.push(NodeTypeInternal::VariableDeclaration(self.clone()));
         }
         result
@@ -590,7 +590,7 @@ impl AstVisitor for VariableDeclaration {
         let mut result = self.value().childrens_id();
         result.append(&mut self.overrides().childrens_id());
         result.append(&mut self.type_name().childrens_id());
-        result.push(*self.id());
+        result.push(self.id());
         result
     }
 
