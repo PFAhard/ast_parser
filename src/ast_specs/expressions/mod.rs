@@ -87,7 +87,9 @@ impl Expression {
         match self {
             Expression::Identifier(identifier) => identifier.referenced_declaration(),
             Expression::NewExpression(_) => None,
-            Expression::MemberAccess(member_access) => member_access.referenced_declaration(),
+            Expression::MemberAccess(member_access) => member_access
+                .referenced_declaration()
+                .or(member_access.expression().extract_definition()),
             Expression::ElementaryTypeNameExpression(_) => None,
             Expression::FunctionCallOptions(fco) => fco.expression().extract_definition(),
             Expression::FunctionCall(fc) => fc.expression().extract_definition(),
