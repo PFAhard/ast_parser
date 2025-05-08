@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 mod block;
@@ -80,7 +82,7 @@ pub enum LiteralKind {
     UnicodeString,
 }
 
-#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StateMutability {
     #[serde(rename = "payable")]
     Payable,
@@ -103,7 +105,7 @@ impl std::fmt::Display for StateMutability {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Visibility {
     #[serde(rename = "external")]
     External,
@@ -113,4 +115,15 @@ pub enum Visibility {
     Internal,
     #[serde(rename = "private")]
     Private,
+}
+
+impl Display for Visibility {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Visibility::External => f.write_str("external"),
+            Visibility::Public => f.write_str("public"),
+            Visibility::Internal => f.write_str("internal"),
+            Visibility::Private => f.write_str("private"),
+        }
+    }
 }

@@ -1,5 +1,7 @@
+use std::fmt::Display;
+
 use getters::Getters;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::ast_specs::{
     common::{InheritanceSpecifier, StructuredDocumentation},
@@ -68,7 +70,7 @@ impl ContractDefinition {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ContractKind {
     #[serde(rename = "contract")]
     #[default]
@@ -77,4 +79,14 @@ pub enum ContractKind {
     Interface,
     #[serde(rename = "library")]
     Library,
+}
+
+impl Display for ContractKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ContractKind::Contract => write!(f, "contract"),
+            ContractKind::Interface => write!(f, "interface"),
+            ContractKind::Library => write!(f, "library"),
+        }
+    }
 }
