@@ -103,3 +103,41 @@ impl Statement {
         }
     }
 }
+
+impl From<Body> for Statement {
+    fn from(value: Body) -> Self {
+        match value {
+            Body::Block(block) => block.into(),
+            Body::Break(break_statement) => break_statement.into(),
+            Body::Continue(continue_statement) => continue_statement.into(),
+            Body::DoWhileStatement(do_while_statement) => do_while_statement.into(),
+            Body::EmitStatement(emit_statement) => emit_statement.into(),
+            Body::ExpressionStatement(expression_statement) => expression_statement.into(),
+            Body::ForStatement(for_statement) => for_statement.into(),
+            Body::IfStatement(if_statement) => if_statement.into(),
+            Body::InlineAssembly(inline_assembly) => inline_assembly.into(),
+            Body::PlaceholderStatement(placeholder_statement) => placeholder_statement.into(),
+            Body::Return(ret) => ret.into(),
+            Body::RevertStatement(revert_statement) => revert_statement.into(),
+            Body::TryStatement(try_statement) => try_statement.into(),
+            Body::UncheckedBlock(unchecked_block) => unchecked_block.into(),
+            Body::VariableDeclarationStatement(variable_declaration_statement) => {
+                variable_declaration_statement.into()
+            }
+            Body::WhileStatement(while_statement) => while_statement.into(),
+        }
+    }
+}
+
+impl From<InitializationExpression> for Statement {
+    fn from(value: InitializationExpression) -> Self {
+        match value {
+            InitializationExpression::ExpressionStatement(expression_statement) => {
+                expression_statement.into()
+            }
+            InitializationExpression::VariableDeclarationStatement(
+                variable_declaration_statement,
+            ) => variable_declaration_statement.into(),
+        }
+    }
+}

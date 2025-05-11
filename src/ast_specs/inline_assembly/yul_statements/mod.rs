@@ -21,9 +21,15 @@ use self::{
 
 macro_rules! impl_from_for_yul_statement {
     ($variant:ident) => {
+        impl From<$variant> for YulStatement {
+            fn from(value: $variant) -> Self {
+                YulStatement::$variant(value)
+            }
+        }
+
         impl From<&$variant> for YulStatement {
             fn from(value: &$variant) -> Self {
-                YulStatement::$variant(value.clone())
+                YulStatement::from(value.to_owned())
             }
         }
     };
