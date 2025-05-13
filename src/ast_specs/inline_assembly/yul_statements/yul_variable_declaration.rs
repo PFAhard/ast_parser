@@ -1,8 +1,11 @@
+use getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::ast_specs::inline_assembly::{yul_expression::YulExpression, yul_typed_name::YulTypedName};
+use crate::ast_specs::inline_assembly::{
+    yul_expression::YulExpression, yul_typed_name::YulTypedName,
+};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
 pub struct YulVariableDeclaration {
     #[serde(rename = "nativeSrc")]
     pub native_src: Option<String>,

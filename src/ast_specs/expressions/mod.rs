@@ -18,8 +18,6 @@ use serde::Deserialize;
 
 pub use prelude::*;
 
-use super::{InitializationExpression, Statement};
-
 #[macro_export]
 macro_rules! impl_from {
     ($variant:ident) => {
@@ -157,4 +155,3 @@ impl Expression {
         }
     }
 }
-

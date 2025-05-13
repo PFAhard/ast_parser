@@ -1,6 +1,7 @@
+use getters::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
 pub struct YulIdentifier {
     pub name: String,
     #[serde(rename = "nativeSrc")]
