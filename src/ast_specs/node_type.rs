@@ -24,70 +24,9 @@ use super::{
     },
     SourceUnit, SymbolAliases,
 };
+use crate::ast_specs::inline_assembly::InlineAssembly;
 
 use crate::{unwrap_node_type, AstParserError};
-
-#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NodeType {
-    ArrayTypeName,
-    Assignment,
-    BinaryOperation,
-    Block,
-    Break,
-    Conditional,
-    Continue,
-    ContractDefinition,
-    DoWhileStatement,
-    ElementaryTypeName,
-    ElementaryTypeNameExpression,
-    EmitStatement,
-    EnumDefinition,
-    EnumValue,
-    ErrorDefinition,
-    EventDefinition,
-    ExpressionStatement,
-    ForStatement,
-    FunctionCall,
-    FunctionCallOptions,
-    FunctionDefinition,
-    FunctionTypeName,
-    Identifier,
-    IdentifierPath,
-    IfStatement,
-    ImportDirective,
-    IndexAccess,
-    IndexRangeAccess,
-    InheritanceSpecifier,
-    InlineAssembly,
-    Literal,
-    Mapping,
-    MemberAccess,
-    ModifierDefinition,
-    ModifierInvocation,
-    NewExpression,
-    OverrideSpecifier,
-    ParameterList,
-    PlaceholderStatement,
-    PragmaDirective,
-    Return,
-    RevertStatement,
-    SourceUnit,
-    StructDefinition,
-    StructuredDocumentation,
-    TryCatchClause,
-    TryStatement,
-    TupleExpression,
-    TypeDescriptions,
-    UnaryOperation,
-    UncheckedBlock,
-    UserDefinedTypeName,
-    UserDefinedValueTypeDefinition,
-    UsingForDirective,
-    VariableDeclaration,
-    VariableDeclarationStatement,
-    WhileStatement,
-    SymbolAliases,
-}
 
 impl From<&NodeType> for NodeType {
     fn from(value: &NodeType) -> Self {
@@ -99,132 +38,6 @@ impl From<String> for NodeType {
     fn from(value: String) -> Self {
         NodeType::from(value.as_str())
     }
-}
-
-impl From<&str> for NodeType {
-    fn from(value: &str) -> Self {
-        match value {
-            "ArrayTypeName" => NodeType::ArrayTypeName,
-            "Assignment" => NodeType::Assignment,
-            "BinaryOperation" => NodeType::BinaryOperation,
-            "Block" => NodeType::Block,
-            "Break" => NodeType::Break,
-            "Conditional" => NodeType::Conditional,
-            "Continue" => NodeType::Continue,
-            "ContractDefinition" => NodeType::ContractDefinition,
-            "DoWhileStatement" => NodeType::DoWhileStatement,
-            "ElementaryTypeName" => NodeType::ElementaryTypeName,
-            "ElementaryTypeNameExpression" => NodeType::ElementaryTypeNameExpression,
-            "EmitStatement" => NodeType::EmitStatement,
-            "EnumDefinition" => NodeType::EnumDefinition,
-            "EnumValue" => NodeType::EnumValue,
-            "ErrorDefinition" => NodeType::ErrorDefinition,
-            "EventDefinition" => NodeType::EventDefinition,
-            "ExpressionStatement" => NodeType::ExpressionStatement,
-            "ForStatement" => NodeType::ForStatement,
-            "FunctionCall" => NodeType::FunctionCall,
-            "FunctionCallOptions" => NodeType::FunctionCallOptions,
-            "FunctionDefinition" => NodeType::FunctionDefinition,
-            "FunctionTypeName" => NodeType::FunctionTypeName,
-            "Identifier" => NodeType::Identifier,
-            "IdentifierPath" => NodeType::IdentifierPath,
-            "IfStatement" => NodeType::IfStatement,
-            "ImportDirective" => NodeType::ImportDirective,
-            "IndexAccess" => NodeType::IndexAccess,
-            "IndexRangeAccess" => NodeType::IndexRangeAccess,
-            "InheritanceSpecifier" => NodeType::InheritanceSpecifier,
-            "InlineAssembly" => NodeType::InlineAssembly,
-            "Literal" => NodeType::Literal,
-            "Mapping" => NodeType::Mapping,
-            "MemberAccess" => NodeType::MemberAccess,
-            "ModifierDefinition" => NodeType::ModifierDefinition,
-            "ModifierInvocation" => NodeType::ModifierInvocation,
-            "NewExpression" => NodeType::NewExpression,
-            "OverrideSpecifier" => NodeType::OverrideSpecifier,
-            "ParameterList" => NodeType::ParameterList,
-            "PlaceholderStatement" => NodeType::PlaceholderStatement,
-            "PragmaDirective" => NodeType::PragmaDirective,
-            "Return" => NodeType::Return,
-            "RevertStatement" => NodeType::RevertStatement,
-            "SourceUnit" => NodeType::SourceUnit,
-            "StructDefinition" => NodeType::StructDefinition,
-            "StructuredDocumentation" => NodeType::StructuredDocumentation,
-            "TryCatchClause" => NodeType::TryCatchClause,
-            "TryStatement" => NodeType::TryStatement,
-            "TupleExpression" => NodeType::TupleExpression,
-            "TypeDescriptions" => NodeType::TypeDescriptions,
-            "UnaryOperation" => NodeType::UnaryOperation,
-            "UncheckedBlock" => NodeType::UncheckedBlock,
-            "UserDefinedTypeName" => NodeType::UserDefinedTypeName,
-            "UserDefinedValueTypeDefinition" => NodeType::UserDefinedValueTypeDefinition,
-            "UsingForDirective" => NodeType::UsingForDirective,
-            "VariableDeclaration" => NodeType::VariableDeclaration,
-            "VariableDeclarationStatement" => NodeType::VariableDeclarationStatement,
-            "WhileStatement" => NodeType::WhileStatement,
-            _ => unreachable!("Should be valid node type, but: {}", value),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum NodeTypeInternal {
-    ArrayTypeName(ArrayTypeName),
-    Assignment(Assignment),
-    BinaryOperation(BinaryOperation),
-    Block(Block),
-    Break(Break),
-    Conditional(Conditional),
-    Continue(Continue),
-    ContractDefinition(ContractDefinition),
-    DoWhileStatement(DoWhileStatement),
-    ElementaryTypeName(ElementaryTypeName),
-    ElementaryTypeNameExpression(ElementaryTypeNameExpression),
-    EmitStatement(EmitStatement),
-    EnumDefinition(EnumDefinition),
-    EnumValue(EnumValue),
-    ErrorDefinition(ErrorDefinition),
-    EventDefinition(EventDefinition),
-    ExpressionStatement(ExpressionStatement),
-    ForStatement(ForStatement),
-    FunctionCall(FunctionCall),
-    FunctionCallOptions(FunctionCallOptions),
-    FunctionDefinition(FunctionDefinition),
-    FunctionTypeName(FunctionTypeName),
-    Identifier(Identifier),
-    IdentifierPath(IdentifierPath),
-    IfStatement(IfStatement),
-    ImportDirective(ImportDirective),
-    SymbolAliases(SymbolAliases),
-    IndexAccess(IndexAccess),
-    IndexRangeAccess(IndexRangeAccess),
-    InheritanceSpecifier(InheritanceSpecifier),
-    Literal(Literal),
-    Mapping(Mapping),
-    MemberAccess(MemberAccess),
-    ModifierDefinition(ModifierDefinition),
-    ModifierInvocation(ModifierInvocation),
-    NewExpression(NewExpression),
-    OverrideSpecifier(OverrideSpecifier),
-    ParameterList(ParameterList),
-    PlaceholderStatement(PlaceholderStatement),
-    PragmaDirective(PragmaDirective),
-    Return(Return),
-    RevertStatement(RevertStatement),
-    SourceUnit(SourceUnit),
-    StructDefinition(StructDefinition),
-    StructuredDocumentation(StructuredDocumentation),
-    TryCatchClause(TryCatchClause),
-    TryStatement(TryStatement),
-    TupleExpression(TupleExpression),
-    TypeDescriptions(TypeDescriptions),
-    UnaryOperation(UnaryOperation),
-    UncheckedBlock(UncheckedBlock),
-    UserDefinedTypeName(UserDefinedTypeName),
-    UserDefinedValueTypeDefinition(UserDefinedValueTypeDefinition),
-    UsingForDirective(UsingForDirective),
-    VariableDeclaration(VariableDeclaration),
-    VariableDeclarationStatement(VariableDeclarationStatement),
-    WhileStatement(WhileStatement),
 }
 
 impl NodeTypeInternal {
@@ -259,4 +72,110 @@ impl NodeTypeInternal {
     pub fn function_definition(self) -> crate::AstParserResult<FunctionDefinition> {
         unwrap_node_type!(self, NodeTypeInternal::FunctionDefinition)
     }
+}
+
+macro_rules! global_nodes_logic {
+    (
+        $(
+            $variant:ident $([no_src: $no_src:literal])?
+        ),*
+    ) => {
+        #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+        pub enum NodeType {
+            $(
+                $variant,
+            )*
+        }
+
+        impl From<&str> for NodeType {
+            fn from(value: &str) -> Self {
+                match value {
+                    $(
+                        stringify!($variant) => NodeType::$variant,
+                    )*
+                    _ => unreachable!("Should be valid node type, but: {}", value),
+                }
+            }
+        }
+
+        #[derive(Debug)]
+        pub enum NodeTypeInternal {
+            $(
+                $variant($variant),
+            )*
+        }
+
+        impl NodeTypeInternal {
+            pub fn src(&self) -> &str {
+                match self {
+                    $(
+                        $(#[cfg(not($no_src))])?
+                        NodeTypeInternal::$variant(v) => &v.src(),
+                    )*
+                    _ => unreachable!("This Node type do not have an src"),
+                }
+            }
+        }
+    };
+}
+
+global_nodes_logic! {
+    ArrayTypeName,
+    Assignment,
+    BinaryOperation,
+    Block,
+    Break,
+    Conditional,
+    Continue [no_src: true],
+    ContractDefinition,
+    DoWhileStatement,
+    ElementaryTypeName,
+    ElementaryTypeNameExpression,
+    EmitStatement,
+    EnumDefinition,
+    EnumValue,
+    ErrorDefinition,
+    EventDefinition,
+    ExpressionStatement,
+    ForStatement,
+    FunctionCall,
+    FunctionCallOptions,
+    FunctionDefinition,
+    FunctionTypeName,
+    Identifier,
+    IdentifierPath,
+    IfStatement,
+    ImportDirective,
+    IndexAccess,
+    IndexRangeAccess,
+    InheritanceSpecifier,
+    InlineAssembly,
+    Literal,
+    Mapping,
+    MemberAccess,
+    ModifierDefinition,
+    ModifierInvocation,
+    NewExpression,
+    OverrideSpecifier,
+    ParameterList,
+    PlaceholderStatement,
+    PragmaDirective,
+    Return [no_src: true],
+    RevertStatement,
+    SourceUnit,
+    StructDefinition,
+    StructuredDocumentation,
+    TryCatchClause,
+    TryStatement,
+    TupleExpression,
+    TypeDescriptions [no_src: true],
+    UnaryOperation,
+    UncheckedBlock,
+    UserDefinedTypeName,
+    UserDefinedValueTypeDefinition,
+    UsingForDirective,
+    VariableDeclaration,
+    VariableDeclarationStatement,
+    WhileStatement,
+    SymbolAliases [no_src: true]
 }
