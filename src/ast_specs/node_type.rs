@@ -40,40 +40,6 @@ impl From<String> for NodeType {
     }
 }
 
-impl NodeTypeInternal {
-    pub fn import_directive(self) -> crate::AstParserResult<ImportDirective> {
-        unwrap_node_type!(self, NodeTypeInternal::ImportDirective)
-    }
-
-    pub fn variable_declaration(self) -> crate::AstParserResult<VariableDeclaration> {
-        unwrap_node_type!(self, NodeTypeInternal::VariableDeclaration)
-    }
-
-    pub fn identifier(self) -> crate::AstParserResult<Identifier> {
-        unwrap_node_type!(self, NodeTypeInternal::Identifier)
-    }
-
-    pub fn block(self) -> crate::AstParserResult<Block> {
-        unwrap_node_type!(self, NodeTypeInternal::Block)
-    }
-
-    pub fn modifier_definition(self) -> crate::AstParserResult<ModifierDefinition> {
-        unwrap_node_type!(self, NodeTypeInternal::ModifierDefinition)
-    }
-
-    pub fn contract_definition(self) -> crate::AstParserResult<ContractDefinition> {
-        unwrap_node_type!(self, NodeTypeInternal::ContractDefinition)
-    }
-
-    pub fn function_call(self) -> crate::AstParserResult<FunctionCall> {
-        unwrap_node_type!(self, NodeTypeInternal::FunctionCall)
-    }
-
-    pub fn function_definition(self) -> crate::AstParserResult<FunctionDefinition> {
-        unwrap_node_type!(self, NodeTypeInternal::FunctionDefinition)
-    }
-}
-
 macro_rules! global_nodes_logic {
     (
         $(
@@ -114,6 +80,14 @@ macro_rules! global_nodes_logic {
                     )*
                     _ => unreachable!("This Node type do not have an src"),
                 }
+            }
+
+            paste::paste! {
+                $(
+                    pub fn [< cast_ $variant:snake >](self) -> $crate::AstParserResult<$variant> {
+                        unwrap_node_type!(self, NodeTypeInternal::$variant)
+                    }
+                )*
             }
         }
     };
