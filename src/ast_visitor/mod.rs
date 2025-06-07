@@ -361,7 +361,7 @@ impl AstVisitor for ImportDirective {
 
     fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
         let mut result = self.symbol_aliases().filter_by_id(id);
-        if id == *self.id() {
+        if id == self.id() {
             result.push(NodeTypeInternal::ImportDirective(self.clone()));
         }
         result
@@ -369,7 +369,7 @@ impl AstVisitor for ImportDirective {
 
     fn childrens_id(&self) -> Vec<isize> {
         let mut result = self.symbol_aliases().childrens_id();
-        result.push(*self.id());
+        result.push(self.id());
         result
     }
 

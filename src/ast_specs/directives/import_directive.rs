@@ -8,6 +8,7 @@ pub struct ImportDirective {
     #[serde(rename = "absolutePath")]
     absolute_path: String,
     file: String,
+    #[copy]
     id: isize,
     #[serde(rename = "nameLocation")]
     name_location: Option<String>,
