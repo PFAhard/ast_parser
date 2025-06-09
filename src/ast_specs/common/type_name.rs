@@ -8,7 +8,6 @@ use super::{
     type_descriptions::TypeDescriptions, StateMutability, Visibility,
 };
 
-
 macro_rules! impl_type_conversion {
     ($variant:ident) => {
         impl From<$variant> for TypeName {
@@ -199,6 +198,10 @@ impl UserDefinedTypeName {
         } else {
             unimplemented!()
         }
+    }
+
+    pub fn ref_dec_visitor(&self) -> Option<isize> {
+        Some(self.referenced_declaration)
     }
 }
 

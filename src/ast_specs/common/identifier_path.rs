@@ -24,6 +24,10 @@ impl IdentifierPath {
             ..Default::default()
         }
     }
+
+    pub fn ref_dec_visitor(&self) -> Option<isize> {
+        Some(self.referenced_declaration)
+    }
 }
 
 impl Display for IdentifierPath {

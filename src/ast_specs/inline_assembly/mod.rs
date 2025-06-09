@@ -52,7 +52,7 @@ pub enum EvmVersion {
     Cancun,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
 pub struct ExternalReference {
     pub declaration: isize,
     #[serde(rename = "isOffset")]

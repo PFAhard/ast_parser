@@ -14,7 +14,7 @@ pub struct YulSwitch {
     pub src: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
 pub struct YulCase {
     pub body: YulBlock,
     #[serde(rename = "nativeSrc")]

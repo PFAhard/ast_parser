@@ -37,6 +37,10 @@ impl Identifier {
     pub fn is_builtin(&self) -> bool {
         matches!(self.referenced_declaration(), Some(x) if x < 0)
     }
+
+    pub fn ref_dec_visitor(&self) -> Option<isize> {
+        self.referenced_declaration
+    }
 }
 
 impl Display for Identifier {

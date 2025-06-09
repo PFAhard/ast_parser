@@ -41,6 +41,16 @@ pub enum Mutability {
     Constant,
 }
 
+impl Display for Mutability {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Mutability::Mutable => f.write_str("mutable"),
+            Mutability::Immutable => f.write_str("immutable"),
+            Mutability::Constant => f.write_str("constant"),
+        }
+    }
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub enum StorageLocation {
     #[serde(rename = "calldata")]
