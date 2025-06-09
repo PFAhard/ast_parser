@@ -7,7 +7,7 @@ use crate::ast_specs::{expressions::Identifier, Expression};
 
 use super::identifier_path::IdentifierPath;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ModifierInvocation {
     #[return_type = "Option<&Vec<Expression>>"]
     #[use_as_ref]
@@ -30,7 +30,7 @@ impl ModifierInvocation {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum ModifierKind {
     #[serde(rename = "modifierInvocation")]
     ModifierInvocation,
@@ -38,7 +38,7 @@ pub enum ModifierKind {
     BaseConstructorSpecifier,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum ModifierName {
     Identifier(Identifier),

@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::directives::VariableDeclaration;
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct ParameterList {
     #[copy]
     id: isize,

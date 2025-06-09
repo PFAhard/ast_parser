@@ -5,7 +5,7 @@ use crate::ast_specs::common::Visibility;
 
 use super::prelude::VariableDeclaration;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct StructDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: String,

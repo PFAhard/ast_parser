@@ -5,7 +5,7 @@ use crate::ast_specs::Expression;
 
 use super::Body;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct WhileStatement {
     #[return_type = "&Body"]
     body: Box<Body>,

@@ -5,7 +5,7 @@ use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct Assignment {
     #[serde(rename = "argumentTypes")]
     #[use_as_deref]

@@ -35,7 +35,7 @@ macro_rules! impl_from_for_yul_statement {
     };
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum YulStatement {
     YulAssignment(YulAssignment),

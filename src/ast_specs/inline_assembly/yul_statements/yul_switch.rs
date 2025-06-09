@@ -5,7 +5,7 @@ use crate::ast_specs::inline_assembly::yul_expression::{yul_literal::YulLiteral,
 
 use super::yul_block::YulBlock;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulSwitch {
     pub cases: Vec<YulCase>,
     pub expression: YulExpression,
@@ -14,7 +14,7 @@ pub struct YulSwitch {
     pub src: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulCase {
     pub body: YulBlock,
     #[serde(rename = "nativeSrc")]
@@ -23,7 +23,7 @@ pub struct YulCase {
     pub value: CaseValue,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 #[serde(untagged)]
 pub enum CaseValue {

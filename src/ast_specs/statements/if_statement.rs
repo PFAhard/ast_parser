@@ -5,7 +5,7 @@ use crate::ast_specs::Expression;
 
 use super::FalseBody;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct IfStatement {
     #[use_as_ref]
     #[return_type = "Option<&Expression>"]

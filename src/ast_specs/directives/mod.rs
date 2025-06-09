@@ -17,7 +17,7 @@ use super::EventDefinition;
 
 pub type Directives = Vec<Directive>;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum Directive {
     EventDefinition(EventDefinition),

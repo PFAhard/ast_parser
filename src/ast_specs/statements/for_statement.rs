@@ -5,7 +5,7 @@ use crate::ast_specs::Expression;
 
 use super::{Body, ExpressionStatement, VariableDeclarationStatement};
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ForStatement {
     body: Box<Body>,
     #[return_type = "Option<&Expression>"]
@@ -25,7 +25,7 @@ pub struct ForStatement {
     src: String,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum InitializationExpression {
     ExpressionStatement(ExpressionStatement),

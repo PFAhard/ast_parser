@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct EnumDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,
@@ -15,7 +15,7 @@ pub struct EnumDefinition {
     src: String,
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct EnumValue {
     #[copy]
     id: isize,

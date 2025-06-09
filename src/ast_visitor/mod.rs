@@ -29,7 +29,7 @@ use crate::ast_specs::{
         yul_typed_name::YulTypedName,
         ExternalReference, ExternalReferenceCompatible, InlineAssembly,
     },
-    CompatabilityTypeName,
+    CompatabilityTypeName, NodeTypeInternalRef,
 };
 
 use super::ast_specs::{
@@ -70,7 +70,12 @@ pub trait AstVisitor {
 
     fn references(&self) -> Vec<isize>;
 
-    // fn step_back(&self, su: &SourceUnit) -> &NodeTypeInternal;
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>>;
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool;
 }
 
 macro_rules! ast_visitor {
@@ -150,6 +155,42 @@ macro_rules! ast_visitor {
                     )?
                     result
                 }
+
+                fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+                    &'b self,
+                    target: N,
+                ) -> Option<NodeTypeInternalRef<'b>> {
+                    $(
+                        if self.$inner().is_node(target) {
+                            return Some(self.into());
+                        }
+                    )else*
+                    $(
+                        {
+                            let bind = self.$inner();
+                            let tmp_x = bind.step_back(target);
+                            if tmp_x.is_some() {
+                                // TODO: USAGE OF BLACK MAGIC IS ILLIGAL
+                                let tmp_b: Option<NodeTypeInternalRef<'b>> = unsafe {
+                                    std::mem::transmute::<Option<NodeTypeInternalRef<'_>>, Option<NodeTypeInternalRef<'b>>>(
+                                        tmp_x,
+                                    )
+                                };
+
+                                return tmp_b;
+                            }
+                        }
+                    )*
+
+                    None
+                }
+
+                fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+                    let target_node = target.into();
+                    let self_node = NodeTypeInternalRef::from(self);
+                    dbg!(target_node, self_node);
+                    dbg!(target_node == self_node)
+                }
             }
         )*
     };
@@ -208,6 +249,21 @@ macro_rules! ast_visitor {
                         )*
                     }
                 }
+
+                fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+                    &'b self,
+                    target: N,
+                ) -> Option<NodeTypeInternalRef<'b>> {
+                    match self {
+                        $(
+                            $target::$variant(i) =>  i.step_back(target),
+                        )*
+                    }
+                }
+
+                fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+                    false
+                }
             }
         )*
     };
@@ -222,6 +278,15 @@ macro_rules! ast_visitor {
             fn childrens_id(&self) -> Vec<isize> {vec![]}
 
             fn references(&self) -> Vec<isize> {vec![]}
+
+            fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+                    &'b self,
+                    target: N,
+                ) -> Option<NodeTypeInternalRef<'b>> {
+                None
+            }
+
+            fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {false}
         }
     };
 }
@@ -386,6 +451,17 @@ impl AstVisitor for serde_json::Value {
     fn references(&self) -> Vec<isize> {
         vec![]
     }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        None
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        false
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for Option<T> {
@@ -425,6 +501,23 @@ impl<T: AstVisitor> AstVisitor for Option<T> {
             None => vec![],
         }
     }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        match self {
+            Some(t) => t.step_back(target),
+            None => None,
+        }
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        match self {
+            Some(t) => t.is_node(target),
+            None => false,
+        }
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for Vec<T> {
@@ -452,6 +545,17 @@ impl<T: AstVisitor> AstVisitor for Vec<T> {
 
     fn references(&self) -> Vec<isize> {
         self.iter().flat_map(|node| node.references()).collect()
+    }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.iter().find_map(|node| node.step_back(target))
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        self.iter().any(|node| node.is_node(target))
     }
 }
 
@@ -481,6 +585,17 @@ impl<T: AstVisitor> AstVisitor for &[T] {
     fn references(&self) -> Vec<isize> {
         self.iter().flat_map(|node| node.references()).collect()
     }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.iter().find_map(|node| node.step_back(target))
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        self.iter().any(|node| node.is_node(target))
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for &T {
@@ -505,6 +620,17 @@ impl<T: AstVisitor> AstVisitor for &T {
     fn references(&self) -> Vec<isize> {
         (*self).references()
     }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        (*self).step_back(target)
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        (*self).is_node(target)
+    }
 }
 
 impl<T: AstVisitor> AstVisitor for Box<T> {
@@ -528,6 +654,17 @@ impl<T: AstVisitor> AstVisitor for Box<T> {
 
     fn references(&self) -> Vec<isize> {
         self.as_ref().references()
+    }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.as_ref().step_back(target)
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        self.as_ref().is_node(target)
     }
 }
 

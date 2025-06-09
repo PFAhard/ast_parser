@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::TypeDescriptions;
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct Identifier {
     #[serde(rename = "argumentTypes")]
     #[use_as_ref]

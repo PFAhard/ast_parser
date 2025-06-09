@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::ast_specs::common::{StructuredDocumentation, ParameterList};
 
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ErrorDefinition {
     documentation: Option<StructuredDocumentation>,
     #[serde(rename = "errorSelector")]

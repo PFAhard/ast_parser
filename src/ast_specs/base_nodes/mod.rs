@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 pub use prelude::*;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum BaseNode {
     EnumDefinition(EnumDefinition),

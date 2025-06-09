@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use super::YulStatement;
 
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulBlock {
     #[serde(rename = "nativeSrc")]
     pub native_src: Option<String>,

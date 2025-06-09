@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::{directives::VariableDeclaration, Expression};
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct VariableDeclarationStatement {
     #[return_type = "&[Option<isize>]"]
     assignments: Vec<Option<isize>>,

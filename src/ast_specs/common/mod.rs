@@ -15,7 +15,7 @@ mod type_name;
 
 pub use prelude::*;
 
-#[derive(Deserialize, Debug, Clone, Default)]
+#[derive(Deserialize, Debug, Clone, Default, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum BaseName {
     UserDefinedTypeName(UserDefinedTypeName),
@@ -24,7 +24,7 @@ pub enum BaseName {
     Fallback,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum LibraryName {
     UserDefinedTypeName(UserDefinedTypeName),
@@ -51,7 +51,7 @@ impl Display for Mutability {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum StorageLocation {
     #[serde(rename = "calldata")]
     Calldata,
@@ -78,7 +78,7 @@ pub enum FunctionCallKind {
     StructConstructorCall,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Copy)]
+#[derive(Deserialize, Serialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LiteralKind {
     #[serde(rename = "bool")]
     Bool,

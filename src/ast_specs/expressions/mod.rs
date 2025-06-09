@@ -29,7 +29,7 @@ macro_rules! impl_from {
     };
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum Expression {
     Assignment(Assignment),

@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::TypeName;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct UserDefinedValueTypeDefinition {
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,

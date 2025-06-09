@@ -5,7 +5,7 @@ use crate::ast_specs::Expression;
 
 use super::BaseName;
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct InheritanceSpecifier {
     arguments: Option<Vec<Expression>>,
     #[serde(rename = "baseName")]

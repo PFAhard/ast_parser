@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::{LibraryName, TypeName};
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct UsingForDirective {
     #[serde(rename = "functionList")]
     #[use_as_ref]

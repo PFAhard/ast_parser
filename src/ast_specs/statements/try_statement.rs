@@ -6,7 +6,7 @@ use crate::ast_specs::{
     expressions::FunctionCall,
 };
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct TryStatement {
     #[return_type = "&[TryCatchClause]"]
     clauses: Vec<TryCatchClause>,
@@ -18,7 +18,7 @@ pub struct TryStatement {
     src: String,
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct TryCatchClause {
     block: Block,
     #[serde(rename = "errorName")]

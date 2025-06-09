@@ -4,7 +4,7 @@ use serde::Deserialize;
 use super::Statement;
 
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct UncheckedBlock {
     documentation: Option<String>,
     #[copy]

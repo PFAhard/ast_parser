@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::{ParameterList, StructuredDocumentation};
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct EventDefinition {
     anonymous: bool,
     documentation: Option<StructuredDocumentation>,

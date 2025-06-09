@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::{ElementaryTypeName, TypeDescriptions};
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ElementaryTypeNameExpression {
     #[serde(rename = "argumentTypes")]
     #[use_as_ref]
@@ -26,7 +26,7 @@ pub struct ElementaryTypeNameExpression {
     type_name: CompatabilityTypeName,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum CompatabilityTypeName {
     ElementaryTypeName(ElementaryTypeName),

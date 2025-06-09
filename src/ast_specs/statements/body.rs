@@ -8,7 +8,7 @@ use super::{
     VariableDeclarationStatement, WhileStatement,
 };
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum Body {
     Block(Block),

@@ -5,7 +5,7 @@ use crate::ast_specs::inline_assembly::{
     yul_expression::YulExpression, yul_typed_name::YulTypedName,
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulVariableDeclaration {
     #[serde(rename = "nativeSrc")]
     pub native_src: Option<String>,

@@ -5,7 +5,7 @@ use crate::ast_specs::common::{
     Block, OverrideSpecifier, ParameterList, StructuredDocumentation, Visibility,
 };
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ModifierDefinition {
     #[serde(rename = "baseModifiers")]
     base_modifiers: Option<Vec<isize>>,

@@ -8,7 +8,7 @@ use crate::ast_specs::{
     BaseNode,
 };
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct ContractDefinition {
     #[serde(rename = "abstract")]
     #[copy]

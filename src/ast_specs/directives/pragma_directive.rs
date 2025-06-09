@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct PragmaDirective {
     #[copy]
     id: isize,

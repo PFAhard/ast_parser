@@ -5,7 +5,7 @@ use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct TupleExpression {
     #[serde(rename = "argumentTypes")]
     #[use_as_ref]

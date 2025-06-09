@@ -9,7 +9,7 @@ use crate::ast_specs::{
     Expression,
 };
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct VariableDeclaration {
     #[serde(rename = "baseFunctions")]
     base_functions: Option<Vec<isize>>,

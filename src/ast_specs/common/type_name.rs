@@ -29,7 +29,7 @@ macro_rules! impl_type_conversion {
     };
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum TypeName {
     ArrayTypeName(ArrayTypeName),
@@ -62,7 +62,7 @@ impl TypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ArrayTypeName {
     #[serde(rename = "baseType")]
     #[use_as_ref]
@@ -83,7 +83,7 @@ impl ArrayTypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct FunctionTypeName {
     #[copy]
     id: isize,
@@ -133,7 +133,7 @@ impl FunctionTypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct Mapping {
     #[copy]
     id: isize,
@@ -170,7 +170,7 @@ impl Mapping {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct UserDefinedTypeName {
     // #[serde(skip)]
     // #[serde(rename = "contractScope")]
@@ -205,7 +205,7 @@ impl UserDefinedTypeName {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ElementaryTypeName {
     #[copy]
     id: isize,

@@ -4,7 +4,7 @@ use crate::ast_specs::common::Block;
 
 use super::{prelude::*, Statement};
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum FalseBody {
     Block(Block),

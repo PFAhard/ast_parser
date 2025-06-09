@@ -10,7 +10,7 @@ use crate::ast_specs::common::{
 
 use super::prelude::VariableDeclaration;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct FunctionDefinition {
     #[serde(rename = "baseFunctions")]
     base_functions: Option<Vec<isize>>,

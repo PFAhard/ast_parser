@@ -8,7 +8,7 @@ use super::{
     Directive,
 };
 
-#[derive(Deserialize, Debug, Clone, Default, Getters)]
+#[derive(Deserialize, Debug, Clone, Default, Getters, PartialEq, Eq)]
 pub struct SourceUnit {
     #[serde(rename = "absolutePath")]
     #[return_type = "&str"]
@@ -49,4 +49,10 @@ impl SourceUnit {
             .find(|cd| cd.name() == target_name)
             .unwrap()
     }
+
+    pub fn debug_nodes<'a>(&'a self) -> &'a [Directive] {
+        &self.nodes
+    }
 }
+
+

@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::Expression;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Return {
     documentation: Option<String>,
     expression: Option<Expression>,

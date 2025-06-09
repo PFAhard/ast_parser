@@ -8,7 +8,7 @@ use getters::Getters;
 use serde::{Deserialize, Serialize};
 use yul_statements::yul_block::YulBlock;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct InlineAssembly {
     #[serde(rename = "AST")]
     pub ast: Option<YulBlock>,
@@ -24,7 +24,7 @@ pub struct InlineAssembly {
 }
 
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum EvmVersion {
     #[serde(rename = "homestead")]
     Homestead,
@@ -52,7 +52,7 @@ pub enum EvmVersion {
     Cancun,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct ExternalReference {
     pub declaration: isize,
     #[serde(rename = "isOffset")]
@@ -67,14 +67,14 @@ pub struct ExternalReference {
 
 pub type ExternalReferenceOld = HashMap<String, ExternalReference>;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Getters)]
+#[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum ExternalReferenceCompatible {
     ExternalReference(ExternalReference),
     ExternalReferenceOld(ExternalReferenceOld),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum Suffix {
     #[serde(rename = "offset")]
     Offset,

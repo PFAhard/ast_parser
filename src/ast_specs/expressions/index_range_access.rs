@@ -5,7 +5,7 @@ use crate::ast_specs::common::TypeDescriptions;
 
 use super::Expression;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct IndexRangeAccess {
     #[serde(rename = "argumentTypes")]
     #[return_type = "Option<&Vec<TypeDescriptions>>"]

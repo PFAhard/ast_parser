@@ -3,7 +3,7 @@ use std::fmt::Display;
 use getters::Getters;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Clone, Getters, Default)]
+#[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]
 pub struct IdentifierPath {
     #[copy]
     id: isize,

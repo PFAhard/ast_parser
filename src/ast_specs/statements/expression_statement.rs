@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::Expression;
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ExpressionStatement {
     documentation: Option<String>,
     #[return_type = "&Option<Expression>"]

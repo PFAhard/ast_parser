@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use yul_function_call::YulFunctionCall;
 use yul_identifier::YulIdentifier;
 use yul_literal::YulLiteral;
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]
 pub enum YulExpression {
     YulFunctionCall(YulFunctionCall),

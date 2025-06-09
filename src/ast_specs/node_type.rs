@@ -114,6 +114,32 @@ macro_rules! global_nodes_logic {
                 )*
             }
         }
+
+        impl PartialEq for NodeTypeInternal {
+            fn eq(&self, other: &Self) -> bool {
+                match (self, other) {
+                    $(
+                        (Self::$variant(l0), Self::$variant(r0)) => l0 == r0,
+                    )*
+                    _ => false,
+                }
+            }
+        }
+
+        #[derive(Debug, PartialEq, Eq, Copy, Clone)]
+        pub enum NodeTypeInternalRef<'a> {
+            $(
+                $variant(&'a $variant),
+            )*
+        }
+
+        $(
+            impl<'a> From<&'a $variant> for NodeTypeInternalRef<'a> {
+                fn from(value: &'a $variant) -> Self {
+                    Self::$variant(value)
+                }
+            }
+        )*
     };
 }
 
@@ -195,3 +221,4 @@ global_nodes_logic! {
     YulTypedName [no_src: true],
     YulSwitch [no_src: true]
 }
+

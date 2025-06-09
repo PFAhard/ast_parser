@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ast_specs::common::{LiteralKind, TypeDescriptions};
 
-#[derive(Deserialize, Serialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Serialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct Literal {
     #[use_as_ref]
     #[serde(rename = "argumentTypes")]
@@ -40,7 +40,7 @@ impl Literal {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Subdenomination {
     Weeks,

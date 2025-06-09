@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::{TypeDescriptions, TypeName};
 
-#[derive(Deserialize, Debug, Clone, Getters)]
+#[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct NewExpression {
     #[serde(rename = "argumentTypes")]
     #[return_type = "Option<&Vec<TypeDescriptions>>"]
