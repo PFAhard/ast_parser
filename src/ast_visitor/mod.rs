@@ -1,5 +1,5 @@
 #![warn(clippy::all)]
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 
 use crate::ast_specs::{
     inline_assembly::{
@@ -188,8 +188,7 @@ macro_rules! ast_visitor {
                 fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
                     let target_node = target.into();
                     let self_node = NodeTypeInternalRef::from(self);
-                    dbg!(target_node, self_node);
-                    dbg!(target_node == self_node)
+                    target_node == self_node
                 }
             }
         )*
@@ -262,7 +261,11 @@ macro_rules! ast_visitor {
                 }
 
                 fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
-                    false
+                    match self {
+                        $(
+                            $target::$variant(i) =>  i.is_node(target),
+                        )*
+                    }
                 }
             }
         )*
@@ -464,7 +467,7 @@ impl AstVisitor for serde_json::Value {
     }
 }
 
-impl<T: AstVisitor> AstVisitor for Option<T> {
+impl<T: AstVisitor + Debug> AstVisitor for Option<T> {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
         let node_type: NodeType = node_type.into();
 
@@ -560,6 +563,45 @@ impl<T: AstVisitor> AstVisitor for Vec<T> {
 }
 
 impl<T: AstVisitor> AstVisitor for &[T] {
+    fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
+        let node_type: NodeType = node_type.into();
+
+        self.iter()
+            .flat_map(|node| node.filter_by_node_type(node_type))
+            .collect()
+    }
+
+    fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        self.iter()
+            .flat_map(|node| node.filter_by_reference_id(id))
+            .collect()
+    }
+
+    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+        self.iter().flat_map(|node| node.filter_by_id(id)).collect()
+    }
+
+    fn childrens_id(&self) -> Vec<isize> {
+        self.iter().flat_map(|node| node.childrens_id()).collect()
+    }
+
+    fn references(&self) -> Vec<isize> {
+        self.iter().flat_map(|node| node.references()).collect()
+    }
+
+    fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        target: N,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.iter().find_map(|node| node.step_back(target))
+    }
+
+    fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
+        self.iter().any(|node| node.is_node(target))
+    }
+}
+
+impl<T: AstVisitor> AstVisitor for [T] {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
         let node_type: NodeType = node_type.into();
 

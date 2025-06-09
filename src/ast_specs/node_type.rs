@@ -48,7 +48,7 @@ use super::{
     },
     SourceUnit, SymbolAliases,
 };
-use crate::ast_specs::inline_assembly::InlineAssembly;
+use crate::{ast_specs::inline_assembly::InlineAssembly, check_node_type};
 
 use crate::{unwrap_node_type, AstParserError};
 
@@ -131,6 +131,23 @@ macro_rules! global_nodes_logic {
             $(
                 $variant(&'a $variant),
             )*
+        }
+
+        impl NodeTypeInternalRef<'_> {
+            paste::paste! {
+                $(
+                    pub fn [< is_ $variant:snake >](self) -> bool {
+                        check_node_type!(self, NodeTypeInternalRef::$variant)
+                    }
+
+                    pub fn [< cast_ $variant:snake >](&self) -> Option<&$variant> {
+                        match self {
+                            NodeTypeInternalRef::$variant(val) => Some(val),
+                            _ => None
+                        }
+                    }
+                )*
+            }
         }
 
         $(
@@ -221,4 +238,3 @@ global_nodes_logic! {
     YulTypedName [no_src: true],
     YulSwitch [no_src: true]
 }
-

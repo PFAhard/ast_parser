@@ -28,6 +28,13 @@ macro_rules! unwrap_node_type {
 }
 
 #[macro_export]
+macro_rules! check_node_type {
+    ($target: expr, $pat: path) => {{
+        matches!($target, $pat(_))
+    }};
+}
+
+#[macro_export]
 macro_rules! cast_node_type {
     ($target:expr; !$pat:ident) => {{
         use ast_parser::ast_specs::NodeType;
@@ -234,6 +241,7 @@ pub fn cast_to_source_unit<R>(path: R) -> SourceUnit
 where
     R: std::io::Read,
 {
-    serde_json::from_reader::<_, FoundryWrapper>(path).unwrap().ast
+    serde_json::from_reader::<_, FoundryWrapper>(path)
+        .unwrap()
+        .ast
 }
-
