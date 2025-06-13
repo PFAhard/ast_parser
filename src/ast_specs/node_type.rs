@@ -70,7 +70,7 @@ impl From<String> for NodeType {
 macro_rules! global_nodes_logic {
     (
         $(
-            $variant:ident $([no_src: $no_src:literal])? $([no_id: $no_id:literal])?
+            $variant:ident $(#[no_src: $no_src:literal])? $(#[no_id: $no_id:literal])? $(#[has_refs: $has_refs:literal])?
         ),*
     ) => {
         #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -166,6 +166,18 @@ macro_rules! global_nodes_logic {
                         _ => unreachable!("has not id field"),
                     }
                 }
+
+                #[allow(unused_doc_comments)]
+                pub fn reference_id(&self) -> Option<isize> {
+                    match self {
+                        $(
+                            $(
+                                NodeTypeInternalRef::$variant(val) =>  {$has_refs;val.ref_dec_visitor()}
+                            )?
+                        )*
+                        _ => None,
+                    }
+                }
             }
         }
 
@@ -196,7 +208,7 @@ global_nodes_logic! {
     Block,
     Break,
     Conditional,
-    Continue [no_src: true],
+    Continue #[no_src: true],
     ContractDefinition,
     DoWhileStatement,
     ElementaryTypeName,
@@ -207,13 +219,14 @@ global_nodes_logic! {
     ErrorDefinition,
     EventDefinition,
     ExpressionStatement,
+    ExternalReference #[no_src: true] #[no_id: true],
     ForStatement,
     FunctionCall,
     FunctionCallOptions,
     FunctionDefinition,
     FunctionTypeName,
-    Identifier,
-    IdentifierPath,
+    Identifier #[has_refs: true],
+    IdentifierPath #[has_refs: true],
     IfStatement,
     ImportDirective,
     IndexAccess,
@@ -222,7 +235,7 @@ global_nodes_logic! {
     InlineAssembly,
     Literal,
     Mapping,
-    MemberAccess,
+    MemberAccess #[has_refs: true],
     ModifierDefinition,
     ModifierInvocation,
     NewExpression,
@@ -230,42 +243,41 @@ global_nodes_logic! {
     ParameterList,
     PlaceholderStatement,
     PragmaDirective,
-    Return [no_src: true],
+    Return #[no_src: true],
     RevertStatement,
     SourceUnit,
     StructDefinition,
     StructuredDocumentation,
+    SymbolAliases #[no_src: true] #[no_id: true],
     TryCatchClause,
     TryStatement,
     TupleExpression,
-    TypeDescriptions [no_src: true] [no_id: true],
+    TypeDescriptions #[no_src: true] #[no_id: true],
     UnaryOperation,
     UncheckedBlock,
-    UserDefinedTypeName,
+    UserDefinedTypeName #[has_refs: true],
     UserDefinedValueTypeDefinition,
     UsingForDirective,
     VariableDeclaration,
     VariableDeclarationStatement,
     WhileStatement,
-    SymbolAliases [no_src: true] [no_id: true],
-    ExternalReference [no_src: true] [no_id: true],
-    YulBlock [no_src: true] [no_id: true],
-    YulVariableDeclaration [no_src: true] [no_id: true],
-    YulCase [no_src: true] [no_id: true],
-    YulIf [no_src: true] [no_id: true],
-    YulFunctionDefinition [no_src: true] [no_id: true],
-    YulForLoop [no_src: true] [no_id: true],
-    YulLeave [no_src: true] [no_id: true],
-    YulExpressionStatement [no_src: true] [no_id: true],
-    YulContinue [no_src: true] [no_id: true],
-    YulBreak [no_src: true] [no_id: true],
-    YulAssignment [no_src: true] [no_id: true],
-    YulIdentifier [no_src: true] [no_id: true],
-    YulFunctionCall [no_src: true] [no_id: true],
-    YulLiteralValue [no_src: true] [no_id: true],
-    YulLiteralHexValue [no_src: true] [no_id: true],
-    YulTypedName [no_src: true] [no_id: true],
-    YulSwitch [no_src: true] [no_id: true]
+    YulAssignment #[no_src: true] #[no_id: true],
+    YulBlock #[no_src: true] #[no_id: true],
+    YulBreak #[no_src: true] #[no_id: true],
+    YulCase #[no_src: true] #[no_id: true],
+    YulContinue #[no_src: true] #[no_id: true],
+    YulExpressionStatement #[no_src: true] #[no_id: true],
+    YulForLoop #[no_src: true] #[no_id: true],
+    YulFunctionCall #[no_src: true] #[no_id: true],
+    YulFunctionDefinition #[no_src: true] #[no_id: true],
+    YulIdentifier #[no_src: true] #[no_id: true],
+    YulIf #[no_src: true] #[no_id: true],
+    YulLeave #[no_src: true] #[no_id: true],
+    YulLiteralHexValue #[no_src: true] #[no_id: true],
+    YulLiteralValue #[no_src: true] #[no_id: true],
+    YulSwitch #[no_src: true] #[no_id: true],
+    YulTypedName #[no_src: true] #[no_id: true],
+    YulVariableDeclaration #[no_src: true] #[no_id: true]
 }
 
 macro_rules! enums_into_node_internal {
