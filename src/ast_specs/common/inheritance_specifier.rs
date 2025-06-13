@@ -10,6 +10,7 @@ pub struct InheritanceSpecifier {
     arguments: Option<Vec<Expression>>,
     #[serde(rename = "baseName")]
     base_name: BaseName,
+    #[copy]
     id: isize,
     src: String,
 }

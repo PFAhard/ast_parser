@@ -23,6 +23,7 @@ use super::{
             yul_identifier::YulIdentifier,
             yul_literal::{
                 yul_literal_hex_value::YulLiteralHexValue, yul_literal_value::YulLiteralValue,
+                YulLiteral,
             },
         },
         yul_statements::{
@@ -37,6 +38,7 @@ use super::{
             yul_leave::YulLeave,
             yul_switch::{YulCase, YulSwitch},
             yul_variable_declaration::YulVariableDeclaration,
+            YulStatement,
         },
         yul_typed_name::YulTypedName,
         ExternalReference,
@@ -46,7 +48,8 @@ use super::{
         IfStatement, PlaceholderStatement, Return, RevertStatement, TryCatchClause, TryStatement,
         UncheckedBlock, VariableDeclarationStatement, WhileStatement,
     },
-    SourceUnit, SymbolAliases,
+    BaseNode, Body, Directive, Expression, FalseBody, InitializationExpression, LibraryName,
+    ModifierName, Overrides, SourceUnit, Statement, SymbolAliases, TypeName,
 };
 use crate::{ast_specs::inline_assembly::InlineAssembly, check_node_type};
 
@@ -67,7 +70,7 @@ impl From<String> for NodeType {
 macro_rules! global_nodes_logic {
     (
         $(
-            $variant:ident $([no_src: $no_src:literal])?
+            $variant:ident $([no_src: $no_src:literal])? $([no_id: $no_id:literal])?
         ),*
     ) => {
         #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -147,6 +150,16 @@ macro_rules! global_nodes_logic {
                         }
                     }
                 )*
+
+                pub fn id(&self) -> isize {
+                    match self {
+                        $(
+                            $(#[cfg(not($no_id))])?
+                            NodeTypeInternalRef::$variant(val) => val.id(),
+                        )*
+                        _ => unreachable!("has not id field"),
+                    }
+                }
             }
         }
 
@@ -157,6 +170,16 @@ macro_rules! global_nodes_logic {
                 }
             }
         )*
+
+        impl<'a> From<&'a NodeTypeInternal> for NodeTypeInternalRef<'a> {
+            fn from(value: &'a NodeTypeInternal) -> Self {
+                match value {
+                    $(
+                        NodeTypeInternal::$variant(ref_val) => NodeTypeInternalRef::$variant(ref_val),
+                    )*
+                }
+            }
+        }
     };
 }
 
@@ -209,7 +232,7 @@ global_nodes_logic! {
     TryCatchClause,
     TryStatement,
     TupleExpression,
-    TypeDescriptions [no_src: true],
+    TypeDescriptions [no_src: true] [no_id: true],
     UnaryOperation,
     UncheckedBlock,
     UserDefinedTypeName,
@@ -218,23 +241,113 @@ global_nodes_logic! {
     VariableDeclaration,
     VariableDeclarationStatement,
     WhileStatement,
-    SymbolAliases [no_src: true],
-    ExternalReference [no_src: true],
-    YulBlock [no_src: true],
-    YulVariableDeclaration [no_src: true],
-    YulCase [no_src: true],
-    YulIf [no_src: true],
-    YulFunctionDefinition [no_src: true],
-    YulForLoop [no_src: true],
-    YulLeave [no_src: true],
-    YulExpressionStatement [no_src: true],
-    YulContinue [no_src: true],
-    YulBreak [no_src: true],
-    YulAssignment [no_src: true],
-    YulIdentifier [no_src: true],
-    YulFunctionCall [no_src: true],
-    YulLiteralValue [no_src: true],
-    YulLiteralHexValue [no_src: true],
-    YulTypedName [no_src: true],
-    YulSwitch [no_src: true]
+    SymbolAliases [no_src: true] [no_id: true],
+    ExternalReference [no_src: true] [no_id: true],
+    YulBlock [no_src: true] [no_id: true],
+    YulVariableDeclaration [no_src: true] [no_id: true],
+    YulCase [no_src: true] [no_id: true],
+    YulIf [no_src: true] [no_id: true],
+    YulFunctionDefinition [no_src: true] [no_id: true],
+    YulForLoop [no_src: true] [no_id: true],
+    YulLeave [no_src: true] [no_id: true],
+    YulExpressionStatement [no_src: true] [no_id: true],
+    YulContinue [no_src: true] [no_id: true],
+    YulBreak [no_src: true] [no_id: true],
+    YulAssignment [no_src: true] [no_id: true],
+    YulIdentifier [no_src: true] [no_id: true],
+    YulFunctionCall [no_src: true] [no_id: true],
+    YulLiteralValue [no_src: true] [no_id: true],
+    YulLiteralHexValue [no_src: true] [no_id: true],
+    YulTypedName [no_src: true] [no_id: true],
+    YulSwitch [no_src: true] [no_id: true]
 }
+
+macro_rules! enums_into_node_internal {
+    (
+        $(
+            $e_name:ident: (
+                $(
+                    $variant:ident
+                ),*
+            );
+        )*
+    ) => {
+        $(
+            impl<'a> From<&'a $e_name> for NodeTypeInternalRef<'a> {
+                fn from(value: &'a $e_name) -> Self {
+                    match value {
+                        $(
+                            $e_name::$variant(ref_val) => NodeTypeInternalRef::$variant(ref_val),
+                        )*
+                    }
+                }
+            }
+        )*
+
+        $(
+            impl From<$e_name> for NodeTypeInternal {
+                fn from(value: $e_name) -> Self {
+                    match value {
+                        $(
+                            $e_name::$variant(val) => NodeTypeInternal::$variant(val),
+                        )*
+                    }
+                }
+            }
+        )*
+    };
+}
+
+enums_into_node_internal! {
+    Directive: (
+        EventDefinition, ContractDefinition, EnumDefinition, ErrorDefinition, FunctionDefinition, ImportDirective, PragmaDirective, StructDefinition, UserDefinedValueTypeDefinition, UsingForDirective, VariableDeclaration
+    );
+    BaseNode: (
+        EnumDefinition, ErrorDefinition, FunctionDefinition, StructDefinition, UserDefinedValueTypeDefinition, UsingForDirective, VariableDeclaration, EventDefinition, ModifierDefinition
+    );
+    Statement: (
+        Block, Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement, IfStatement, PlaceholderStatement, Return, RevertStatement, TryStatement, UncheckedBlock, VariableDeclarationStatement, WhileStatement, InlineAssembly
+    );
+    ModifierName: (
+        Identifier, IdentifierPath
+    );
+    Overrides: (
+        UserDefinedTypeName, IdentifierPath
+    );
+    TypeName: (
+        ArrayTypeName, ElementaryTypeName, FunctionTypeName, Mapping, UserDefinedTypeName
+    );
+    LibraryName: (
+        UserDefinedTypeName, IdentifierPath
+    );
+    Expression: (
+        Assignment, BinaryOperation, Conditional, ElementaryTypeNameExpression, FunctionCall, FunctionCallOptions, Identifier, IndexAccess, IndexRangeAccess, Literal, MemberAccess, NewExpression, TupleExpression, UnaryOperation
+    );
+    Body: (
+        Block, Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement, IfStatement, InlineAssembly, PlaceholderStatement, Return, RevertStatement, TryStatement, UncheckedBlock, VariableDeclarationStatement, WhileStatement
+    );
+    InitializationExpression: (
+        ExpressionStatement, VariableDeclarationStatement
+    );
+    FalseBody: (
+        Block, Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement, IfStatement, PlaceholderStatement, Return, RevertStatement, TryStatement, UncheckedBlock, VariableDeclarationStatement, WhileStatement
+    );
+    YulStatement: (
+        YulAssignment, YulBlock, YulBreak, YulContinue, YulExpressionStatement, YulLeave, YulForLoop, YulFunctionDefinition, YulIf, YulSwitch, YulVariableDeclaration
+    );
+    YulLiteral: (
+        YulLiteralValue, YulLiteralHexValue
+    );
+}
+
+// impl<T> From<Option<T>> for NodeTypeInternalRef<'_>
+// where
+//     for<'a> NodeTypeInternalRef<'a>: From<T>,
+// {
+//     fn from(value: Option<T>) -> Self {
+//         match value {
+//             Some(_) => todo!(),
+//             None => todo!(),
+//         }
+//     }
+// } TODO: TURNED OUT NOT USEFUL FOR NOW
