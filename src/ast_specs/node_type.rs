@@ -136,18 +136,24 @@ macro_rules! global_nodes_logic {
             )*
         }
 
+        impl<'a> NodeTypeInternalRef<'a> {
+            paste::paste! {
+                $(
+                    pub fn [< cast_ $variant:snake >](self) -> Option<&'a $variant> {
+                        match self {
+                            NodeTypeInternalRef::$variant(val) => Some(val),
+                            _ => None
+                        }
+                    }
+                )*
+            }
+        }
+
         impl NodeTypeInternalRef<'_> {
             paste::paste! {
                 $(
                     pub fn [< is_ $variant:snake >](self) -> bool {
                         check_node_type!(self, NodeTypeInternalRef::$variant)
-                    }
-
-                    pub fn [< cast_ $variant:snake >](&self) -> Option<&$variant> {
-                        match self {
-                            NodeTypeInternalRef::$variant(val) => Some(val),
-                            _ => None
-                        }
                     }
                 )*
 
