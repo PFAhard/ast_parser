@@ -46,4 +46,8 @@ impl MemberAccess {
     pub fn is_builtin(&self) -> bool {
         self.expression().is_builtin()
     }
+
+    pub fn ref_dec_visitor(&self) -> Option<isize> {
+        self.referenced_declaration
+    }
 }
