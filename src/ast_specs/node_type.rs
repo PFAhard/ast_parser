@@ -369,3 +369,6 @@ enums_into_node_internal! {
 //         }
 //     }
 // } TODO: TURNED OUT NOT USEFUL FOR NOW
+
+pub type NTI = NodeTypeInternal;
+pub type NTIref<'a> = NodeTypeInternalRef<'a>;
