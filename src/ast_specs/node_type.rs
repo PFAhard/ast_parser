@@ -182,6 +182,12 @@ macro_rules! global_nodes_logic {
         }
 
         $(
+            impl From<$variant> for NodeTypeInternal {
+                fn from(value: $variant) -> Self {
+                    Self::$variant(value)
+                }
+            }
+
             impl<'a> From<&'a $variant> for NodeTypeInternalRef<'a> {
                 fn from(value: &'a $variant) -> Self {
                     Self::$variant(value)
@@ -358,17 +364,24 @@ enums_into_node_internal! {
     );
 }
 
-// impl<T> From<Option<T>> for NodeTypeInternalRef<'_>
-// where
-//     for<'a> NodeTypeInternalRef<'a>: From<T>,
-// {
-//     fn from(value: Option<T>) -> Self {
-//         match value {
-//             Some(_) => todo!(),
-//             None => todo!(),
-//         }
-//     }
-// } TODO: TURNED OUT NOT USEFUL FOR NOW
-
 pub type NTI = NodeTypeInternal;
 pub type NTIref<'a> = NodeTypeInternalRef<'a>;
+
+pub trait IntoNTI {
+    fn into_nti(self) -> NodeTypeInternal;
+    fn into_nti_ref<'a>(&'a self) -> NodeTypeInternalRef<'a>;
+}
+
+impl<T> IntoNTI for T
+where
+    T: Into<NodeTypeInternal>,
+    for<'a> &'a T: Into<NodeTypeInternalRef<'a>>,
+{
+    fn into_nti(self) -> NodeTypeInternal {
+        self.into()
+    }
+
+    fn into_nti_ref<'a>(&'a self) -> NodeTypeInternalRef<'a> {
+        self.into()
+    }
+}
