@@ -204,6 +204,26 @@ macro_rules! global_nodes_logic {
                 }
             }
         }
+
+        impl From<&NodeTypeInternal> for NodeType {
+            fn from(value: &NodeTypeInternal) -> Self {
+                match value {
+                    $(
+                        NodeTypeInternal::$variant(ref_val) => Self::$variant,
+                    )*
+                }
+            }
+        }
+
+        impl<'a> From<NodeTypeInternalRef<'a>> for NodeType {
+            fn from(value: NodeTypeInternalRef<'a>) -> Self {
+                match value {
+                    $(
+                        NodeTypeInternalRef::$variant(ref_val) => Self::$variant,
+                    )*
+                }
+            }
+        }
     };
 }
 

@@ -111,6 +111,12 @@ pub trait AstVisitor {
         target: N,
     ) -> Option<NodeTypeInternalRef<'b>>;
 
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>>;
+
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool;
 }
 
@@ -275,6 +281,25 @@ macro_rules! ast_visitor {
                     None
                 }
 
+                fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+                    &'b self,
+                    from: N,
+                    to: NodeType,
+                ) -> Option<NodeTypeInternalRef<'b>> {
+                    let mut current = self.step_back(from)?;
+                    loop {
+                        if NodeType::from(current) == to {
+                            return Some(current);
+                        }
+                        // Move up the tree
+                        match self.step_back(current) {
+                            Some(parent) => current = parent,
+                            None => break,
+                        }
+                    }
+                    None
+                }
+
                 fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
                     let target_node = target.into();
                     let self_node = NodeTypeInternalRef::from(self);
@@ -376,6 +401,18 @@ macro_rules! ast_visitor {
                     }
                 }
 
+                fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+                    &'b self,
+                    from: N,
+                    to: NodeType,
+                ) -> Option<NodeTypeInternalRef<'b>> {
+                    match self {
+                        $(
+                            $target::$variant(i) =>  i.step_back_until(from, to),
+                        )*
+                    }
+                }
+
                 fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
                     match self {
                         $(
@@ -405,9 +442,17 @@ macro_rules! ast_visitor {
             fn references(&self) -> Vec<isize> {vec![]}
 
             fn step_back<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
-                    &'b self,
-                    target: N,
-                ) -> Option<NodeTypeInternalRef<'b>> {
+                &'b self,
+                target: N,
+            ) -> Option<NodeTypeInternalRef<'b>> {
+                None
+            }
+
+            fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+                &'b self,
+                from: N,
+                to: NodeType,
+            ) -> Option<NodeTypeInternalRef<'b>>  {
                 None
             }
 
@@ -625,6 +670,17 @@ impl<T: AstVisitor + Debug> AstVisitor for Option<T> {
         }
     }
 
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        match self {
+            Some(t) => t.step_back_until(from, to),
+            None => None,
+        }
+    }
+
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
         match self {
             Some(t) => t.is_node(target),
@@ -690,6 +746,14 @@ impl<T: AstVisitor> AstVisitor for Vec<T> {
         self.iter().find_map(|node| node.step_back(target))
     }
 
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.iter().find_map(|node| node.step_back_until(from, to))
+    }
+
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
         self.iter().any(|node| node.is_node(target))
     }
@@ -750,6 +814,14 @@ impl<T: AstVisitor> AstVisitor for &[T] {
         target: N,
     ) -> Option<NodeTypeInternalRef<'b>> {
         self.iter().find_map(|node| node.step_back(target))
+    }
+
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.iter().find_map(|node| node.step_back_until(from, to))
     }
 
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
@@ -814,6 +886,14 @@ impl<T: AstVisitor> AstVisitor for [T] {
         self.iter().find_map(|node| node.step_back(target))
     }
 
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.iter().find_map(|node| node.step_back_until(from, to))
+    }
+
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
         self.iter().any(|node| node.is_node(target))
     }
@@ -866,6 +946,14 @@ impl<T: AstVisitor> AstVisitor for &T {
         (*self).step_back(target)
     }
 
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        (*self).step_back_until(from, to)
+    }
+
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
         (*self).is_node(target)
     }
@@ -916,6 +1004,14 @@ impl<T: AstVisitor> AstVisitor for Box<T> {
         target: N,
     ) -> Option<NodeTypeInternalRef<'b>> {
         self.as_ref().step_back(target)
+    }
+
+    fn step_back_until<'a, 'b, N: Into<NodeTypeInternalRef<'a>> + Copy>(
+        &'b self,
+        from: N,
+        to: NodeType,
+    ) -> Option<NodeTypeInternalRef<'b>> {
+        self.as_ref().step_back_until(from, to)
     }
 
     fn is_node<'a, N: Into<NodeTypeInternalRef<'a>> + Copy>(&self, target: N) -> bool {
