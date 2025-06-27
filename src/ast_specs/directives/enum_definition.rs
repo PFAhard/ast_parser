@@ -1,8 +1,11 @@
 use getters::Getters;
 use serde::Deserialize;
 
+use crate::ast_specs::StructuredDocumentation;
+
 #[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct EnumDefinition {
+    documentation: Option<StructuredDocumentation>,
     #[serde(rename = "canonicalName")]
     canonical_name: Option<String>,
     #[copy]
@@ -25,4 +28,3 @@ pub struct EnumValue {
     name_location: Option<String>,
     src: String,
 }
- 

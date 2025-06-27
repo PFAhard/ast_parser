@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::common::Visibility;
+use crate::ast_specs::{common::Visibility, StructuredDocumentation};
 
 use super::prelude::VariableDeclaration;
 
@@ -11,6 +11,7 @@ pub struct StructDefinition {
     canonical_name: String,
     #[copy]
     id: isize,
+    documentation: Option<StructuredDocumentation>,
     #[return_type = "&[VariableDeclaration]"]
     members: Vec<VariableDeclaration>,
     #[return_type = "&str"]
