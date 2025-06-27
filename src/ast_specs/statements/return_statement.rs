@@ -1,27 +1,18 @@
+use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::Expression;
 
-#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq, Getters)]
 pub struct Return {
     documentation: Option<String>,
+    #[return_type = "Option<&Expression>"]
+    #[use_as_ref]
     expression: Option<Expression>,
     #[serde(rename = "functionReturnParameters")]
+    #[copy]
     function_return_parameters: Option<isize>,
+    #[copy]
     id: isize,
     src: String,
-}
-
-impl Return {
-    pub fn expression(&self) -> Option<&Expression> {
-        self.expression.as_ref()
-    }
-
-    pub fn id(&self) -> isize {
-        self.id
-    }
-
-    pub fn function_return_parameters(&self) -> &Option<isize> {
-        &self.function_return_parameters
-    }
 }
