@@ -6,6 +6,7 @@ pub mod ast_serialize;
 pub mod ast_specs;
 pub mod ast_visitor;
 pub mod error;
+pub mod utils;
 // pub mod ast_descriptor; TODO:
 
 use std::fmt::Debug;

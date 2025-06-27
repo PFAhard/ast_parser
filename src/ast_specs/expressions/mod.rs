@@ -18,50 +18,27 @@ use serde::Deserialize;
 
 pub use prelude::*;
 
-#[macro_export]
-macro_rules! impl_from {
-    ($variant:ident) => {
-        impl From<$variant> for Expression {
-            fn from(v: $variant) -> Self {
-                Expression::$variant(v)
-            }
-        }
-    };
+crate::enum_refs! {
+    #[derive_owned(Deserialize)]
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[serde(tag = "nodeType")]
+    pub enum Expression {
+        Assignment(Assignment),
+        BinaryOperation(BinaryOperation),
+        Conditional(Conditional),
+        ElementaryTypeNameExpression(ElementaryTypeNameExpression),
+        FunctionCall(FunctionCall),
+        FunctionCallOptions(FunctionCallOptions),
+        Identifier(Identifier),
+        IndexAccess(IndexAccess),
+        IndexRangeAccess(IndexRangeAccess),
+        Literal(Literal),
+        MemberAccess(MemberAccess),
+        NewExpression(NewExpression),
+        TupleExpression(TupleExpression),
+        UnaryOperation(UnaryOperation),
+    }
 }
-
-#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
-#[serde(tag = "nodeType")]
-pub enum Expression {
-    Assignment(Assignment),
-    BinaryOperation(BinaryOperation),
-    Conditional(Conditional),
-    ElementaryTypeNameExpression(ElementaryTypeNameExpression),
-    FunctionCall(FunctionCall),
-    FunctionCallOptions(FunctionCallOptions),
-    Identifier(Identifier),
-    IndexAccess(IndexAccess),
-    IndexRangeAccess(IndexRangeAccess),
-    Literal(Literal),
-    MemberAccess(MemberAccess),
-    NewExpression(NewExpression),
-    TupleExpression(TupleExpression),
-    UnaryOperation(UnaryOperation),
-}
-
-impl_from!(Assignment);
-impl_from!(BinaryOperation);
-impl_from!(Conditional);
-impl_from!(ElementaryTypeNameExpression);
-impl_from!(FunctionCall);
-impl_from!(FunctionCallOptions);
-impl_from!(Identifier);
-impl_from!(IndexAccess);
-impl_from!(IndexRangeAccess);
-impl_from!(Literal);
-impl_from!(MemberAccess);
-impl_from!(NewExpression);
-impl_from!(TupleExpression);
-impl_from!(UnaryOperation);
 
 impl Expression {
     pub fn extract_name(&self) -> String {
