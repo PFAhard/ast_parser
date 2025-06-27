@@ -89,7 +89,7 @@ pub trait AstVisitor {
     /// Violating these requirements will lead to undefined behavior.
     unsafe fn filter_ref_by_reference_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>>;
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal>;
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal>;
 
     /// # Safety
     /// This function performs lifetime transmutation and is unsafe.
@@ -100,7 +100,7 @@ pub trait AstVisitor {
     ///
     /// This is used internally by the AST visitor to convert reference lifetimes while traversing the tree.
     /// Violating these requirements will lead to undefined behavior.
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>>;
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>>;
 
     fn childrens_id(&self) -> Vec<isize>;
 
@@ -144,7 +144,7 @@ macro_rules! ast_visitor {
         )*
     ) => {
         $(
-            #[allow(unused_mut)]
+            #[allow(unused_mut, unused_doc_comments)]
             impl AstVisitor for $target {
                 fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal> {
                     let node_type: NodeType = node_type.into();
@@ -204,28 +204,34 @@ macro_rules! ast_visitor {
                     result
                 }
 
-                fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
-                    let mut result = vec![];
+                fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
                     $(
-                        result.append(&mut self.$inner().filter_by_id(id));
+                        if let Some(node) = self.$inner().filter_by_id(id) {
+                            return Some(node);
+                        }
                     )*
+
                     $(#[cfg(not($no_id))])?
                     if id == self.id() {
-                        result.push(NodeTypeInternal::$target(self.clone()));
+                        return Some(NodeTypeInternal::$target(self.clone()));
                     }
-                    result
+
+                    None
                 }
 
-                unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
-                    let mut result = vec![];
+                unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
                     $(
-                        result.extend(self.$inner().filter_ref_by_id(id).into_iter().map(|el| dark_magic(el)));
+                        if let Some(node) = self.$inner().filter_ref_by_id(id).map(|el| unsafe {dark_magic(el)}) {
+                            return Some(node);
+                        }
                     )*
+
                     $(#[cfg(not($no_id))])?
                     if id == self.id() {
-                        result.push(NodeTypeInternalRef::$target(self));
+                        return Some(NodeTypeInternalRef::$target(self));
                     }
-                    result
+
+                    None
                 }
 
                 fn childrens_id(&self) -> Vec<isize> {
@@ -358,7 +364,7 @@ macro_rules! ast_visitor {
                     }
                 }
 
-                fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+                fn filter_by_id(&self,id:isize) -> Option<NodeTypeInternal> {
                     match self {
                         $(
                             $target::$variant(i) => i.filter_by_id(id),
@@ -366,7 +372,7 @@ macro_rules! ast_visitor {
                     }
                 }
 
-                unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
+                unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
                     match self {
                         $(
                             $target::$variant(i) => i.filter_ref_by_id(id),
@@ -433,9 +439,9 @@ macro_rules! ast_visitor {
 
             unsafe fn filter_ref_by_reference_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {vec![]}
 
-            fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {vec![]}
+            fn filter_by_id(&self,id:isize) -> Option<NodeTypeInternal> {None}
 
-            unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {vec![]}
+            unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {None}
 
             fn childrens_id(&self) -> Vec<isize> {vec![]}
 
@@ -632,17 +638,17 @@ impl<T: AstVisitor + Debug> AstVisitor for Option<T> {
         }
     }
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
         match self {
             Some(t) => t.filter_by_id(id),
-            None => vec![],
+            None => None,
         }
     }
 
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
         match self {
             Some(t) => t.filter_ref_by_id(id),
-            None => vec![],
+            None => None,
         }
     }
 
@@ -721,14 +727,12 @@ impl<T: AstVisitor> AstVisitor for Vec<T> {
             .collect()
     }
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
-        self.iter().flat_map(|node| node.filter_by_id(id)).collect()
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
+        self.iter().find_map(|node| node.filter_by_id(id))
     }
 
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
-        self.iter()
-            .flat_map(|node| node.filter_ref_by_id(id))
-            .collect()
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
+        self.iter().find_map(|node| node.filter_ref_by_id(id))
     }
 
     fn childrens_id(&self) -> Vec<isize> {
@@ -791,14 +795,12 @@ impl<T: AstVisitor> AstVisitor for &[T] {
             .collect()
     }
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
-        self.iter().flat_map(|node| node.filter_by_id(id)).collect()
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
+        self.iter().find_map(|node| node.filter_by_id(id))
     }
 
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
-        self.iter()
-            .flat_map(|node| node.filter_ref_by_id(id))
-            .collect()
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
+        self.iter().find_map(|node| node.filter_ref_by_id(id))
     }
 
     fn childrens_id(&self) -> Vec<isize> {
@@ -861,14 +863,12 @@ impl<T: AstVisitor> AstVisitor for [T] {
             .collect()
     }
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
-        self.iter().flat_map(|node| node.filter_by_id(id)).collect()
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
+        self.iter().find_map(|node| node.filter_by_id(id))
     }
 
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
-        self.iter()
-            .flat_map(|node| node.filter_ref_by_id(id))
-            .collect()
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
+        self.iter().find_map(|node| node.filter_ref_by_id(id))
     }
 
     fn childrens_id(&self) -> Vec<isize> {
@@ -923,11 +923,11 @@ impl<T: AstVisitor> AstVisitor for &T {
         (*self).filter_ref_by_reference_id(id)
     }
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
         (*self).filter_by_id(id)
     }
 
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
         (*self).filter_ref_by_id(id)
     }
 
@@ -983,11 +983,11 @@ impl<T: AstVisitor> AstVisitor for Box<T> {
         self.as_ref().filter_ref_by_reference_id(id)
     }
 
-    fn filter_by_id(&self, id: isize) -> Vec<NodeTypeInternal> {
+    fn filter_by_id(&self, id: isize) -> Option<NodeTypeInternal> {
         self.as_ref().filter_by_id(id)
     }
 
-    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Vec<NodeTypeInternalRef<'a>> {
+    unsafe fn filter_ref_by_id<'a>(&'a self, id: isize) -> Option<NodeTypeInternalRef<'a>> {
         self.as_ref().filter_ref_by_id(id)
     }
 
