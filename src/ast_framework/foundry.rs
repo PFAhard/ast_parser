@@ -5,7 +5,7 @@ use crate::ast_specs::SourceUnit;
 
 #[derive(Deserialize, Debug)]
 pub struct FoundryOutput {
-    ast: SourceUnit,
+    pub ast: SourceUnit,
 }
 
 impl FoundryOutput {

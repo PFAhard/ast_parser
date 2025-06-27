@@ -21,6 +21,7 @@ pub struct SourceUnit {
     #[use_as_ref]
     #[return_type = "&[Directive]"]
     nodes: Directives,
+    #[return_type = "&str"]
     src: String,
 }
 

@@ -1,4 +1,3 @@
-#![feature(cfg_boolean_literals)]
 #![allow(dead_code, unused_variables)]
 #![allow(clippy::too_many_arguments)]
 pub mod ast_framework;
