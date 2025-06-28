@@ -40,6 +40,51 @@ crate::enum_refs! {
     }
 }
 
+macro_rules! ex_delegate_functions {
+    (@inner
+        $enum_name:ident, $f_name:ident, $r_type:ty;
+        $($variant:ident),*
+    ) => {
+        pub fn $f_name(&self) -> $r_type {
+            match self {
+                $(
+                    $enum_name::$variant(i) => i.$f_name(),
+                )*
+            }
+        }
+    };
+    (
+        $($variant:ident),*
+    ) => {
+        impl Expression {
+            ex_delegate_functions!(@inner Expression, id, isize; $($variant),*);
+            ex_delegate_functions!(@inner Expression, src, &str; $($variant),*);
+        }
+
+        impl ExpressionRef<'_> {
+            ex_delegate_functions!(@inner ExpressionRef, id, isize; $($variant),*);
+            ex_delegate_functions!(@inner ExpressionRef, src, &str; $($variant),*);
+        }
+    };
+}
+
+ex_delegate_functions!(
+    Assignment,
+    BinaryOperation,
+    Conditional,
+    ElementaryTypeNameExpression,
+    FunctionCall,
+    FunctionCallOptions,
+    Identifier,
+    IndexAccess,
+    IndexRangeAccess,
+    Literal,
+    MemberAccess,
+    NewExpression,
+    TupleExpression,
+    UnaryOperation
+);
+
 impl Expression {
     pub fn extract_name(&self) -> String {
         match self {
@@ -75,25 +120,6 @@ impl Expression {
         }
     }
 
-    pub fn src(&self) -> &str {
-        match self {
-            Expression::Assignment(_) => todo!(),
-            Expression::BinaryOperation(_) => todo!(),
-            Expression::Conditional(_) => todo!(),
-            Expression::ElementaryTypeNameExpression(_) => todo!(),
-            Expression::FunctionCall(_) => todo!(),
-            Expression::FunctionCallOptions(_) => todo!(),
-            Expression::Identifier(ident) => ident.src(),
-            Expression::IndexAccess(_) => todo!(),
-            Expression::IndexRangeAccess(_) => todo!(),
-            Expression::Literal(_) => todo!(),
-            Expression::MemberAccess(_) => todo!(),
-            Expression::NewExpression(_) => todo!(),
-            Expression::TupleExpression(_) => todo!(),
-            Expression::UnaryOperation(_) => todo!(),
-        }
-    }
-
     pub fn is_builtin(&self) -> bool {
         match self {
             Expression::Assignment(_) => todo!(),
@@ -110,25 +136,6 @@ impl Expression {
             Expression::NewExpression(_) => todo!(),
             Expression::TupleExpression(_) => todo!(),
             Expression::UnaryOperation(_) => todo!(),
-        }
-    }
-
-    pub fn id(&self) -> isize {
-        match self {
-            Expression::Assignment(i) => i.id(),
-            Expression::BinaryOperation(bin_op) => bin_op.id(),
-            Expression::Conditional(i) => i.id(),
-            Expression::ElementaryTypeNameExpression(i) => i.id(),
-            Expression::FunctionCall(i) => i.id(),
-            Expression::FunctionCallOptions(i) => i.id(),
-            Expression::Identifier(i) => i.id(),
-            Expression::IndexAccess(i) => i.id(),
-            Expression::IndexRangeAccess(i) => i.id(),
-            Expression::Literal(i) => i.id(),
-            Expression::MemberAccess(ma) => ma.id(),
-            Expression::NewExpression(i) => i.id(),
-            Expression::TupleExpression(i) => i.id(),
-            Expression::UnaryOperation(i) => i.id(),
         }
     }
 }
