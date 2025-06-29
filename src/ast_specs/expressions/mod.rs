@@ -14,6 +14,7 @@ mod prelude;
 mod tuple_expression;
 mod unary_operation;
 
+use crate::ast_specs::TypeDescriptions;
 use serde::Deserialize;
 
 pub use prelude::*;
@@ -59,11 +60,13 @@ macro_rules! ex_delegate_functions {
         impl Expression {
             ex_delegate_functions!(@inner Expression, id, isize; $($variant),*);
             ex_delegate_functions!(@inner Expression, src, &str; $($variant),*);
+            ex_delegate_functions!(@inner Expression, type_descriptions, &TypeDescriptions; $($variant),*);
         }
 
         impl ExpressionRef<'_> {
             ex_delegate_functions!(@inner ExpressionRef, id, isize; $($variant),*);
             ex_delegate_functions!(@inner ExpressionRef, src, &str; $($variant),*);
+            ex_delegate_functions!(@inner ExpressionRef, type_descriptions, &TypeDescriptions; $($variant),*);
         }
     };
 }
