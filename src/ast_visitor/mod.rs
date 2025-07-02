@@ -62,6 +62,16 @@ use super::ast_specs::{
 pub trait AstVisitor {
     fn filter_by_node_type<N: Into<NodeType>>(&self, node_type: N) -> Vec<NodeTypeInternal>;
 
+    fn filter_by_node_types<const A: usize, N: Into<NodeType>>(
+        &self,
+        node_types: [N; A],
+    ) -> Vec<NodeTypeInternal> {
+        node_types
+            .into_iter()
+            .flat_map(|n| self.filter_by_node_type(n))
+            .collect()
+    }
+
     /// # Safety
     /// This function performs lifetime transmutation and is unsafe.
     /// It requires that:
@@ -75,6 +85,17 @@ pub trait AstVisitor {
         &'a self,
         node_type: N,
     ) -> Vec<NodeTypeInternalRef<'a>>;
+
+    unsafe fn filter_ref_by_node_types<'a, const A: usize, N: Into<NodeType>>(
+        &self,
+        node_types: [N; A],
+    ) -> Vec<NodeTypeInternalRef<'a>> {
+        node_types
+            .into_iter()
+            .flat_map(|n| self.filter_ref_by_node_type(n))
+            .map(|n| dark_magic(n))
+            .collect()
+    }
 
     fn filter_by_reference_id(&self, id: isize) -> Vec<NodeTypeInternal>;
 
@@ -158,6 +179,8 @@ macro_rules! ast_visitor {
                     }
                     result
                 }
+
+
 
                 unsafe fn filter_ref_by_node_type<'a, N: Into<NodeType>>(&'a self, node_type: N) -> Vec<NodeTypeInternalRef<'a>> {
                     let node_type: NodeType = node_type.into();

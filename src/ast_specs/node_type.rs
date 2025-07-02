@@ -167,6 +167,17 @@ macro_rules! global_nodes_logic {
                     }
                 }
 
+                pub fn src(&self) -> &str {
+                    match self {
+                        $(
+                            $(#[cfg(not($no_src))])?
+                            NodeTypeInternalRef::$variant(v) => &v.src(),
+                        )*
+                        _ => unreachable!("This Node type do not have an src"),
+                    }
+                }
+
+
                 #[allow(unused_doc_comments)]
                 pub fn reference_id(&self) -> Option<isize> {
                     match self {
