@@ -14,10 +14,9 @@ mod prelude;
 mod tuple_expression;
 mod unary_operation;
 
-use crate::ast_specs::TypeDescriptions;
-use serde::Deserialize;
-
+use crate::ast_specs::{node_type::IntoNTI, NodeTypeInternalRef, TypeDescriptions};
 pub use prelude::*;
+use serde::Deserialize;
 
 crate::enum_refs! {
     #[derive_owned(Deserialize)]
@@ -61,12 +60,17 @@ macro_rules! ex_delegate_functions {
             ex_delegate_functions!(@inner Expression, id, isize; $($variant),*);
             ex_delegate_functions!(@inner Expression, src, &str; $($variant),*);
             ex_delegate_functions!(@inner Expression, type_descriptions, &TypeDescriptions; $($variant),*);
+            // ex_delegate_functions!(@inner Expression, into_nti, NodeTypeInternal; $($variant),*);
         }
 
         impl ExpressionRef<'_> {
             ex_delegate_functions!(@inner ExpressionRef, id, isize; $($variant),*);
             ex_delegate_functions!(@inner ExpressionRef, src, &str; $($variant),*);
             ex_delegate_functions!(@inner ExpressionRef, type_descriptions, &TypeDescriptions; $($variant),*);
+        }
+
+        impl<'a> ExpressionRef<'a> {
+            ex_delegate_functions!(@inner ExpressionRef, into_nti_ref, NodeTypeInternalRef<'a>; $($variant),*);
         }
     };
 }
