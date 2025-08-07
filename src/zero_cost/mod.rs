@@ -1,6 +1,10 @@
+use std::{fs::File, path::Path};
+
+use memmap2::{MmapMut, MmapOptions};
 use simd_json::{
     BorrowedValue, StaticNode,
     base::{ValueAsObject, ValueAsScalar},
+    to_borrowed_value,
 };
 
 pub trait BorrowedValueVisitor<'a> {
@@ -126,5 +130,46 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         }
 
         acc
+    }
+}
+
+pub struct SourceUnitBuilder {
+    map: MmapMut,
+    root: Option<BorrowedValue<'static>>,
+}
+
+impl SourceUnitBuilder {
+    pub fn new<P>(path: P) -> Self
+    where
+        P: AsRef<Path>,
+    {
+        let file = File::options().read(true).open(path).unwrap();
+        let mmap = unsafe { MmapOptions::new().map_copy(&file).unwrap() };
+
+        Self {
+            map: mmap,
+            root: None,
+        }
+    }
+
+    pub fn get_root(&mut self) {
+        let slice: &mut [u8] = &mut self.map;
+
+        // SAFETY: BorrowedValue only borrows from map, which lives as long as self.
+        let root: BorrowedValue<'static> = unsafe {
+            std::mem::transmute::<BorrowedValue<'_>, BorrowedValue<'static>>(
+                to_borrowed_value(slice).expect("invalid JSON"),
+            )
+        };
+
+        self.root = Some(root);
+    }
+
+    pub fn source_unit(&self) -> &BorrowedValue<'_> {
+        self.root
+            .as_ref()
+            .expect("get_root() must be called first")
+            .get_key("ast")
+            .unwrap()
     }
 }
