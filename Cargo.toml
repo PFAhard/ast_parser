@@ -1,13 +1,18 @@
 [package]
 name = "ast_parser"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+simd-json = { version = "0.15.1", optional = true }
+memmap2 = { version = "0.9.7", optional = true }
 paste = "1.0.15"
 serde = { version = "1.0.205", features = ["derive"] }
 serde_json = { version = "1.0.122", features = ["preserve_order"] }
-getters = {git = "https://github.com/PFAhard/getters.git", branch = "master"}
+getters = { git = "https://github.com/PFAhard/getters.git", branch = "master" }
 heck = "0.5.0"
+
+[features]
+zero-cost = ["dep:memmap2", "dep:simd-json"]

@@ -6,6 +6,8 @@ pub mod ast_specs;
 pub mod ast_visitor;
 pub mod error;
 pub mod utils;
+#[cfg(feature = "zero-cost")]
+pub mod zero_cost;
 // pub mod ast_descriptor; TODO:
 
 use std::fmt::Debug;
