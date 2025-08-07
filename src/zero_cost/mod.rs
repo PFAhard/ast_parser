@@ -1,4 +1,7 @@
-use simd_json::{BorrowedValue, StaticNode, base::ValueAsObject};
+use simd_json::{
+    BorrowedValue, StaticNode,
+    base::{ValueAsObject, ValueAsScalar},
+};
 
 pub trait BorrowedValueVisitor<'a> {
     fn filter_by_id(&'a self, id: isize) -> Option<&'a BorrowedValue<'a>>;
@@ -6,6 +9,8 @@ pub trait BorrowedValueVisitor<'a> {
     fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a BorrowedValue<'a>>;
 
     fn filter_by_node_type(&self, node_type: &str) -> Vec<BorrowedValue<'a>>;
+
+    fn children_ids(&self) -> Vec<isize>;
 
     fn is_string(&self, value: &str) -> bool;
 
@@ -99,5 +104,27 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
 
     fn get_key(&'a self, key: &str) -> Option<&'a BorrowedValue<'a>> {
         self.as_object().map(|x| x.get(key)).flatten()
+    }
+
+    fn children_ids(&self) -> Vec<isize> {
+        let mut acc = vec![];
+        match self {
+            BorrowedValue::Array(values) => {
+                acc.extend(values.iter().flat_map(BorrowedValueVisitor::children_ids))
+            }
+            BorrowedValue::Object(sized_hash_map) => {
+                if let Some(id) = sized_hash_map.get("id") {
+                    acc.push(id.as_i64().unwrap() as isize);
+                }
+                acc.extend(
+                    sized_hash_map
+                        .values()
+                        .flat_map(BorrowedValueVisitor::children_ids),
+                )
+            }
+            _ => {}
+        }
+
+        acc
     }
 }
