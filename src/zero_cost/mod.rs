@@ -1,3 +1,6 @@
+pub mod types;
+pub mod debug_macros;
+
 use std::{fs::File, path::Path};
 
 use memmap2::{MmapMut, MmapOptions};
@@ -20,7 +23,17 @@ pub trait BorrowedValueVisitor<'a> {
 
     fn is_number(&self, value: isize) -> bool;
 
+    fn check_key<T>(&self, key: &str, check: T) -> bool
+    where
+        T: FnOnce(&BorrowedValue<'_>) -> bool;
+
+    fn check_chain<const N: usize, T>(&self, chain: [&str; N], check: T) -> bool
+    where
+        T: FnOnce(&BorrowedValue<'_>) -> bool;
+
     fn get_key(&'a self, key: &str) -> Option<&'a BorrowedValue<'a>>;
+
+    fn get_chain<const N: usize>(&'a self, chain: [&str; N]) -> Option<&'a BorrowedValue<'a>>;
 }
 
 impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
@@ -110,6 +123,15 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         self.as_object().map(|x| x.get(key)).flatten()
     }
 
+    fn get_chain<const N: usize>(&'a self, chain: [&str; N]) -> Option<&'a BorrowedValue<'a>> {
+        let mut s = self;
+        for key in chain {
+            s = s.get_key(key)?;
+        }
+
+        Some(s)
+    }
+
     fn children_ids(&self) -> Vec<isize> {
         let mut acc = vec![];
         match self {
@@ -130,6 +152,20 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         }
 
         acc
+    }
+
+    fn check_key<T>(&self, key: &str, check: T) -> bool
+    where
+        T: FnOnce(&BorrowedValue<'_>) -> bool,
+    {
+        self.get_key(key).is_some_and(check)
+    }
+
+    fn check_chain<const N: usize, T>(&self, chain: [&str; N], check: T) -> bool
+    where
+        T: FnOnce(&BorrowedValue<'_>) -> bool,
+    {
+        self.get_chain(chain).is_some_and(check)
     }
 }
 

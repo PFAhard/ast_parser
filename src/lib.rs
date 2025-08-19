@@ -1,3 +1,4 @@
+#![feature(macro_metavar_expr)]
 #![allow(dead_code, unused_variables)]
 #![allow(clippy::too_many_arguments)]
 pub mod ast_framework;
