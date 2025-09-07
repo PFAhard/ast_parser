@@ -1,5 +1,4 @@
 pub mod types;
-pub mod debug_macros;
 
 use std::{fs::File, path::Path};
 
@@ -10,12 +9,14 @@ use simd_json::{
     to_borrowed_value,
 };
 
+use crate::zero_cost::types::abstraction::ZcSourceUnit;
+
 pub trait BorrowedValueVisitor<'a> {
     fn filter_by_id(&'a self, id: isize) -> Option<&'a BorrowedValue<'a>>;
 
     fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a BorrowedValue<'a>>;
 
-    fn filter_by_node_type(&self, node_type: &str) -> Vec<BorrowedValue<'a>>;
+    fn filter_by_node_type(&'a self, node_type: &str) -> Vec<&'a BorrowedValue<'a>>;
 
     fn children_ids(&self) -> Vec<isize>;
 
@@ -37,7 +38,7 @@ pub trait BorrowedValueVisitor<'a> {
 }
 
 impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
-    fn filter_by_node_type(&self, node_type: &str) -> Vec<BorrowedValue<'a>> {
+    fn filter_by_node_type(&'a self, node_type: &str) -> Vec<&'a BorrowedValue<'a>> {
         let mut acc = vec![];
         match self {
             BorrowedValue::Array(values) => {
@@ -49,7 +50,7 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
                 if let Some(object_type) = sized_hash_map.get("nodeType")
                     && object_type.is_string(node_type)
                 {
-                    acc.push(self.clone());
+                    acc.push(self);
                 }
 
                 sized_hash_map
@@ -201,11 +202,14 @@ impl SourceUnitBuilder {
         self.root = Some(root);
     }
 
-    pub fn source_unit(&self) -> &BorrowedValue<'_> {
-        self.root
-            .as_ref()
-            .expect("get_root() must be called first")
-            .get_key("ast")
-            .unwrap()
+    pub fn source_unit(&'_ self) -> ZcSourceUnit<'_> {
+        ZcSourceUnit {
+            inner: self
+                .root
+                .as_ref()
+                .expect("get_root() must be called first")
+                .get_key("ast")
+                .unwrap(),
+        }
     }
 }

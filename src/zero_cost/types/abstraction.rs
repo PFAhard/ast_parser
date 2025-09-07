@@ -2,6 +2,7 @@ use crate::{
     zc_abstract,
     zero_cost::{BorrowedValueVisitor, types::wrappers::*},
 };
+use simd_json::prelude::{ValueAsObject, ValueAsScalar};
 
 zc_abstract! {
     pub struct SourceUnit {
@@ -218,12 +219,12 @@ zc_abstract! {
         body: ZcBlock::<'_>,
         documentation: ZcOption::<'_, ZcStructuredDocumentation::<'_>>,
         id: ZcIsize::<'_>,
-        name: String,
-        name_location => ["nameLocation"]: ZcOption::<'_, String>,
+        name: ZcStr::<'_>,
+        name_location => ["nameLocation"]: ZcOption::<'_, ZcStr::<'_>>,
         overrides: ZcOption::<'_, ZcOverrideSpecifier::<'_>>,
         parameters: ZcParameterList::<'_>,
-        src: String,
-        _virtual => ["virtual"]: ZcOption::<'_, bool>,
+        src: ZcStr::<'_>,
+        _virtual => ["virtual"]: ZcOption::<'_, ZcBool::<'_>>,
         visibility: ZcVisibility,
     }
 
@@ -294,14 +295,14 @@ zc_abstract! {
         base_type => ["baseType"]: ZcTypeName::<'_>,
         id: ZcIsize::<'_>,
         length: ZcOption::<'_, ZcExpression::<'_>>,
-        src: String,
+        src: ZcStr::<'_>,
         type_descriptions => ["typeDescriptions"]: ZcTypeDescriptions::<'_>,
     }
 
     pub struct ElementaryTypeName {
         id: ZcIsize::<'_>,
-        name: String,
-        src: String,
+        name: ZcStr::<'_>,
+        src: ZcStr::<'_>,
         state_mutability => ["stateMutability"]: ZcOption::<'_, ZcStateMutability>,
         type_descriptions => ["typeDescriptions"]: ZcTypeDescriptions::<'_>,
     }
@@ -310,7 +311,7 @@ zc_abstract! {
         id: ZcIsize::<'_>,
         parameter_types => ["parameterTypes"]: ZcParameterList::<'_>,
         return_parameter_types => ["returnParameterTypes"]: ZcParameterList::<'_>,
-        src: String,
+        src: ZcStr::<'_>,
         state_mutability => ["stateMutability"]: ZcStateMutability,
         type_descriptions => ["typeDescriptions"]: ZcTypeDescriptions::<'_>,
         visibility: ZcVisibility,
@@ -318,22 +319,22 @@ zc_abstract! {
 
     pub struct Mapping {
         id: ZcIsize::<'_>,
-        key_name => ["keyName"]: ZcOption::<'_, String>,
-        key_name_location => ["keyNameLocation"]: ZcOption::<'_, String>,
+        key_name => ["keyName"]: ZcOption::<'_, ZcStr::<'_>>,
+        key_name_location => ["keyNameLocation"]: ZcOption::<'_, ZcStr::<'_>>,
         key_type => ["keyType"]: ZcTypeName::<'_>,
-        src: String,
+        src: ZcStr::<'_>,
         type_descriptions => ["typeDescriptions"]: ZcTypeDescriptions::<'_>,
-        value_name => ["valueName"]: ZcOption::<'_, String>,
-        value_name_location => ["valueNameLocation"]: ZcOption::<'_, String>,
+        value_name => ["valueName"]: ZcOption::<'_, ZcStr::<'_>>,
+        value_name_location => ["valueNameLocation"]: ZcOption::<'_, ZcStr::<'_>>,
         value_type => ["valueType"]: ZcTypeName::<'_>,
     }
 
     pub struct UserDefinedTypeName {
         id: ZcIsize::<'_>,
-        name: ZcOption::<'_, String>,
+        name: ZcOption::<'_, ZcStr::<'_>>,
         path_node => ["pathNode"]: ZcOption::<'_, ZcIdentifierPath::<'_>>,
         referenced_declaration => ["referencedDeclaration"]: ZcIsize::<'_>,
-        src: String,
+        src: ZcStr::<'_>,
         type_descriptions => ["typeDescriptions"]: ZcTypeDescriptions::<'_>,
     }
 
@@ -345,10 +346,10 @@ zc_abstract! {
 
     pub struct IdentifierPath {
         id: ZcIsize::<'_>,
-        name: String,
-        name_locations => ["nameLocations"]: ZcOption::<'_, ZcVec::<'_, String>>,
+        name: ZcStr::<'_>,
+        name_locations => ["nameLocations"]: ZcOption::<'_, ZcVec::<'_, ZcStr::<'_>>>,
         referenced_declaration => ["referencedDeclaration"]: ZcIsize::<'_>,
-        src: String,
+        src: ZcStr::<'_>,
     }
 
     pub enum Mutability {
@@ -552,11 +553,11 @@ zc_abstract! {
 
     pub struct ExternalReference {
         declaration: ZcIsize::<'_>,
-        is_offset => ["isOffset"]: bool,
-        is_slot => ["isSlot"]: bool,
-        src: String,
+        is_offset => ["isOffset"]: ZcBool::<'_>,
+        is_slot => ["isSlot"]: ZcBool::<'_>,
+        src: ZcStr::<'_>,
         suffix: ZcOption::<'_, ZcSuffix>,
-        value_size => ["valueSize"]: i32,
+        value_size => ["valueSize"]: ZcI32::<'_>,
     }
 
     pub enum Suffix {

@@ -6,12 +6,17 @@ Std wrappers
 
 use std::collections::HashMap;
 
-use simd_json::{BorrowedValue, base::ValueAsScalar};
+use simd_json::{
+    BorrowedValue,
+    base::{ValueAsArray, ValueAsObject, ValueAsScalar},
+    derived::TypedScalarValue,
+};
 
-use crate::{zc_wrap, zc_wrapper, zero_cost::types::abstraction::*};
+use crate::{zc_wrap, zc_wrapper};
 
 zc_wrapper! {
     ZcBool,
+    ZcI32,
     ZcIsize,
     ZcStr,
     ZcOption<T>,
@@ -35,23 +40,12 @@ pub trait FromBorrowedValue<'a>: Sized {
 zc_wrap! {
     // Std
     ZcBool,
+    ZcI32,
     ZcIsize,
     ZcStr,
     ZcOption<T>,
     ZcVec<T>,
-    ZcHashMap<T>,
-    // Non-std
-    ZcParameterList,
-    ZcContractKind,
-    ZcFunctionKind,
-    ZcStateMutability,
-    ZcVisibility,
-    ZcTypeName,
-    ZcStorageLocation,
-    ZcTypeDescriptions,
-    ZcBaseName,
-    ZcModifierName,
-    ZcIdentifier
+    ZcHashMap<T>
 }
 
 /*
