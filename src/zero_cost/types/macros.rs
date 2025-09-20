@@ -53,6 +53,22 @@ macro_rules! zc_abstract {
                     self.inner.filter_by_node_type(node_type)
                 }
 
+                fn step_back(
+                    &'a self,
+                    root: &'a simd_json::BorrowedValue<'a>,
+                    node_type: &str,
+                ) -> Option<&'a simd_json::BorrowedValue<'a>> {
+                    self.inner.step_back(root, node_type)
+                }
+
+                fn is_node_id(&self, id: isize) -> Option<bool> {
+                    self.inner.is_node_id(id)
+                }
+
+                fn is_any_node_id(&self, id: isize) -> Option<bool> {
+                    self.inner.is_any_node_id(id)
+                }
+
                 fn children_ids(&self) -> Vec<isize> {
                     self.inner.children_ids()
                 }

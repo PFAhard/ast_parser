@@ -3,10 +3,10 @@ pub mod types;
 use std::{fs::File, path::Path};
 
 use memmap2::{MmapMut, MmapOptions};
-use simd_json::{
-    BorrowedValue, StaticNode,
-    base::{ValueAsObject, ValueAsScalar},
-    to_borrowed_value,
+use simd_json::{BorrowedValue, StaticNode, to_borrowed_value};
+
+pub use simd_json::base::{
+    ValueAsArray, ValueAsMutArray, ValueAsMutObject, ValueAsObject, ValueAsScalar,
 };
 
 use crate::zero_cost::types::abstraction::ZcSourceUnit;
@@ -17,6 +17,16 @@ pub trait BorrowedValueVisitor<'a> {
     fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a BorrowedValue<'a>>;
 
     fn filter_by_node_type(&'a self, node_type: &str) -> Vec<&'a BorrowedValue<'a>>;
+
+    fn step_back(
+        &'a self,
+        root: &'a BorrowedValue<'a>,
+        node_type: &str,
+    ) -> Option<&'a BorrowedValue<'a>>;
+
+    fn is_node_id(&self, id: isize) -> Option<bool>;
+
+    fn is_any_node_id(&self, id: isize) -> Option<bool>;
 
     fn children_ids(&self) -> Vec<isize>;
 
@@ -61,6 +71,56 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         };
 
         acc
+    }
+
+    fn step_back(
+        &'a self,
+        root: &'a BorrowedValue<'a>,
+        node_type: &str,
+    ) -> Option<&'a BorrowedValue<'a>> {
+        let self_id: isize = self.get_key("id")?.as_i64()?.try_into().ok()?;
+
+        match root {
+            Self::Array(values) => unreachable!(
+                "Does to the anonymous nature of the arrays, they must be handled as a long child of the object"
+            ),
+            Self::Object(sized_hash_map) => {
+                let found = sized_hash_map
+                    .values()
+                    .find(|value| value.is_any_node_id(self_id).is_some_and(|x| x));
+
+                if found.is_some() {
+                    return Some(root);
+                } else {
+                    return sized_hash_map
+                        .values()
+                        .find_map(|value| self.step_back(value, node_type));
+                }
+            }
+            _ => {}
+        }
+
+        None
+    }
+
+    fn is_node_id(&self, id: isize) -> Option<bool> {
+        let self_id: isize = self.get_key("id")?.as_i64()?.try_into().ok()?;
+        Some(self_id == id)
+    }
+
+    fn is_any_node_id(&self, id: isize) -> Option<bool> {
+        match self {
+            Self::Static(static_node) => None,
+            Self::String(cow) => None,
+            Self::Array(values) => Some(
+                values
+                    .iter()
+                    .any(|value| value.is_any_node_id(id).is_some_and(|x| x)),
+            ),
+            Self::Object(sized_hash_map) => {
+                return self.is_node_id(id);
+            }
+        }
     }
 
     fn is_string(&self, value: &str) -> bool {
@@ -211,5 +271,11 @@ impl SourceUnitBuilder {
                 .get_key("ast")
                 .unwrap(),
         }
+    }
+
+    /// Technically safe, since file always persist in the system if not modified, which is UBs
+    pub fn source_unit_const(&self) -> ZcSourceUnit<'static> {
+        let su = self.source_unit();
+        unsafe { std::mem::transmute(su) }
     }
 }
