@@ -1,8 +1,7 @@
 use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::common::{StructuredDocumentation, ParameterList};
-
+use crate::ast_specs::common::{ParameterList, StructuredDocumentation};
 
 #[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct ErrorDefinition {
@@ -18,5 +17,3 @@ pub struct ErrorDefinition {
     parameters: ParameterList,
     src: String,
 }
-
- 

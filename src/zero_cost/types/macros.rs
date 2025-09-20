@@ -38,6 +38,14 @@ macro_rules! zc_abstract {
                 pub fn filter_by_node_type_strong<T: FromBorrowedValue<'a>>(&'a self, node_type: &str) -> Vec<T> {
                     self.inner.filter_by_node_type(node_type).into_iter().map(T::from_borrowed_value).collect()
                 }
+
+                pub fn step_back_to_node_type_strong<T: FromBorrowedValue<'a>>(
+                    &'a self,
+                    anchor: &'a simd_json::BorrowedValue<'a>,
+                    node_type: &str,
+                ) -> Option<T> {
+                    self.inner.step_back_to_node_type(anchor, node_type).map(T::from_borrowed_value)
+                }
             }
 
             impl<'a> BorrowedValueVisitor<'a> for [< Zc $name >]<'a> {
@@ -53,19 +61,30 @@ macro_rules! zc_abstract {
                     self.inner.filter_by_node_type(node_type)
                 }
 
-                fn step_back(
+                fn step_back_to_node_type(
                     &'a self,
-                    root: &'a simd_json::BorrowedValue<'a>,
+                    anchor: &'a simd_json::BorrowedValue<'a>,
                     node_type: &str,
                 ) -> Option<&'a simd_json::BorrowedValue<'a>> {
-                    self.inner.step_back(root, node_type)
+                    self.inner.step_back_to_node_type(anchor, node_type)
+                }
+
+                fn step_back(
+                    &'a self,
+                    anchor: &'a simd_json::BorrowedValue<'a>
+                ) -> Option<&'a simd_json::BorrowedValue<'a>> {
+                    self.inner.step_back(anchor)
+                }
+
+                fn direct_children(&'a self) -> Vec<&'a simd_json::BorrowedValue<'a>> {
+                    self.inner.direct_children()
                 }
 
                 fn is_node_id(&self, id: isize) -> Option<bool> {
                     self.inner.is_node_id(id)
                 }
 
-                fn is_any_node_id(&self, id: isize) -> Option<bool> {
+                fn is_any_node_id(&'a self, id: isize) -> Option<&'a simd_json::BorrowedValue<'a>> {
                     self.inner.is_any_node_id(id)
                 }
 

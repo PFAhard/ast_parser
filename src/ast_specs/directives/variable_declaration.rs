@@ -2,11 +2,11 @@ use getters::Getters;
 use serde::Deserialize;
 
 use crate::ast_specs::{
+    Expression,
     common::{
         Mutability, OverrideSpecifier, StorageLocation, StructuredDocumentation, TypeDescriptions,
         TypeName, Visibility,
     },
-    Expression,
 };
 
 #[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]

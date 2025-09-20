@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::{directives::VariableDeclaration, Expression};
+use crate::ast_specs::{Expression, directives::VariableDeclaration};
 
 #[derive(Deserialize, Debug, Clone, Getters, PartialEq, Eq)]
 pub struct VariableDeclarationStatement {

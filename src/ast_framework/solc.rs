@@ -4,7 +4,6 @@ use serde::Deserialize;
 
 use crate::ast_specs::SourceUnit;
 
-
 #[derive(Deserialize, Debug)]
 pub struct SolcOutput {
     // contracts: HashMap<String, serde_json::Value>,

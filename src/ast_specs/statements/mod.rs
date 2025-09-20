@@ -104,7 +104,7 @@ macro_rules! combo_st {
         external_to_st!($($variant),*);
     };
 }
- 
+
 combo_st!(
     Block,
     Break,

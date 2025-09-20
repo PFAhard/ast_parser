@@ -1,6 +1,8 @@
 use serde::Deserialize;
 
 use super::{
+    BaseNode, Body, Directive, Expression, FalseBody, InitializationExpression, LibraryName,
+    ModifierName, Overrides, SourceUnit, Statement, SymbolAliases, TypeName,
     base_nodes::{EventDefinition, ModifierDefinition},
     common::{
         ArrayTypeName, Block, ElementaryTypeName, FunctionTypeName, IdentifierPath,
@@ -18,15 +20,17 @@ use super::{
         NewExpression, TupleExpression, UnaryOperation,
     },
     inline_assembly::{
+        ExternalReference,
         yul_expression::{
             yul_function_call::YulFunctionCall,
             yul_identifier::YulIdentifier,
             yul_literal::{
-                yul_literal_hex_value::YulLiteralHexValue, yul_literal_value::YulLiteralValue,
-                YulLiteral,
+                YulLiteral, yul_literal_hex_value::YulLiteralHexValue,
+                yul_literal_value::YulLiteralValue,
             },
         },
         yul_statements::{
+            YulStatement,
             yul_assignment::YulAssignment,
             yul_block::YulBlock,
             yul_break::YulBreak,
@@ -38,22 +42,18 @@ use super::{
             yul_leave::YulLeave,
             yul_switch::{YulCase, YulSwitch},
             yul_variable_declaration::YulVariableDeclaration,
-            YulStatement,
         },
         yul_typed_name::YulTypedName,
-        ExternalReference,
     },
     statements::{
         Break, Continue, DoWhileStatement, EmitStatement, ExpressionStatement, ForStatement,
         IfStatement, PlaceholderStatement, Return, RevertStatement, TryCatchClause, TryStatement,
         UncheckedBlock, VariableDeclarationStatement, WhileStatement,
     },
-    BaseNode, Body, Directive, Expression, FalseBody, InitializationExpression, LibraryName,
-    ModifierName, Overrides, SourceUnit, Statement, SymbolAliases, TypeName,
 };
 use crate::{ast_specs::inline_assembly::InlineAssembly, check_node_type};
 
-use crate::{unwrap_node_type, AstParserError};
+use crate::{AstParserError, unwrap_node_type};
 
 impl From<&NodeType> for NodeType {
     fn from(value: &NodeType) -> Self {

@@ -14,7 +14,7 @@ mod prelude;
 mod tuple_expression;
 mod unary_operation;
 
-use crate::ast_specs::{node_type::IntoNTI, NodeTypeInternalRef, TypeDescriptions};
+use crate::ast_specs::{NodeTypeInternalRef, TypeDescriptions, node_type::IntoNTI};
 pub use prelude::*;
 use serde::Deserialize;
 

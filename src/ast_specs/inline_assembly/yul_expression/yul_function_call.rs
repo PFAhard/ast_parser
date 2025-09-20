@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use super::{yul_identifier::YulIdentifier, YulExpression};
+use super::{YulExpression, yul_identifier::YulIdentifier};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulFunctionCall {

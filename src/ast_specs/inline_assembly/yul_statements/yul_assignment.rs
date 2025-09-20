@@ -1,7 +1,9 @@
 use getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::ast_specs::inline_assembly::yul_expression::{yul_identifier::YulIdentifier, YulExpression};
+use crate::ast_specs::inline_assembly::yul_expression::{
+    YulExpression, yul_identifier::YulIdentifier,
+};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulAssignment {

@@ -23,7 +23,6 @@ pub struct InlineAssembly {
     pub src: String,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum EvmVersion {
     #[serde(rename = "homestead")]

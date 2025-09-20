@@ -1,28 +1,23 @@
 use crate::ast_specs::{
-    inline_assembly::InlineAssembly, ArrayTypeName, Assignment, BaseName, BaseNode,
-    BinaryOperation, Block, Body, Break, CompatabilityTypeName, Conditional, Continue,
-    ContractDefinition, ContractKind, Directive, DoWhileStatement, ElementaryTypeName,
-    ElementaryTypeNameExpression, EmitStatement, EnumDefinition, EnumValue, ErrorDefinition,
-    EventDefinition, Expression, ExpressionStatement, FalseBody, ForStatement, FunctionCall,
-    FunctionCallOptions, FunctionDefinition, FunctionKind, FunctionTypeName, Identifier,
-    IdentifierPath, IfStatement, ImportDirective, IndexAccess, IndexRangeAccess,
-    InheritanceSpecifier, InitializationExpression, LibraryName, Literal, Mapping, MemberAccess,
-    ModifierDefinition, ModifierInvocation, ModifierName, Mutability, NewExpression,
-    OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement, PragmaDirective, Return,
-    RevertStatement, SourceUnit, StateMutability, Statement, StorageLocation, StructDefinition,
-    StructuredDocumentation, SymbolAliases, TryCatchClause, TryStatement, TupleExpression,
-    TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName, UserDefinedValueTypeDefinition,
-    UsingForDirective, VariableDeclaration, VariableDeclarationStatement, Visibility,
-    WhileStatement,
+    ArrayTypeName, Assignment, BaseName, BaseNode, BinaryOperation, Block, Body, Break,
+    CompatabilityTypeName, Conditional, Continue, ContractDefinition, ContractKind, Directive,
+    DoWhileStatement, ElementaryTypeName, ElementaryTypeNameExpression, EmitStatement,
+    EnumDefinition, EnumValue, ErrorDefinition, EventDefinition, Expression, ExpressionStatement,
+    FalseBody, ForStatement, FunctionCall, FunctionCallOptions, FunctionDefinition, FunctionKind,
+    FunctionTypeName, Identifier, IdentifierPath, IfStatement, ImportDirective, IndexAccess,
+    IndexRangeAccess, InheritanceSpecifier, InitializationExpression, LibraryName, Literal,
+    Mapping, MemberAccess, ModifierDefinition, ModifierInvocation, ModifierName, Mutability,
+    NewExpression, OverrideSpecifier, Overrides, ParameterList, PlaceholderStatement,
+    PragmaDirective, Return, RevertStatement, SourceUnit, StateMutability, Statement,
+    StorageLocation, StructDefinition, StructuredDocumentation, SymbolAliases, TryCatchClause,
+    TryStatement, TupleExpression, TypeName, UnaryOperation, UncheckedBlock, UserDefinedTypeName,
+    UserDefinedValueTypeDefinition, UsingForDirective, VariableDeclaration,
+    VariableDeclarationStatement, Visibility, WhileStatement, inline_assembly::InlineAssembly,
 };
 
 macro_rules! ternary {
     ($cond:expr => $true_expr:expr ; $false_expr:expr) => {
-        if $cond {
-            $true_expr
-        } else {
-            $false_expr
-        }
+        if $cond { $true_expr } else { $false_expr }
     };
 }
 
@@ -34,8 +29,7 @@ pub const EVENT_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const EVENT_NAME_KEY: &str = "<EVENT_NAME>";
 pub const EVENT_ARGS_KEY: &str = "<EVENT_ARGS>";
 
-pub const VARIABLE: &str =
-    "<DOCUMENTATION><TYPE><INDEXED><VISIBILITY><MUTABILITY><STORAGE_LOCATION><NAME><ASSIGNMENT><INITIAL_VALUE><TERMINATOR>";
+pub const VARIABLE: &str = "<DOCUMENTATION><TYPE><INDEXED><VISIBILITY><MUTABILITY><STORAGE_LOCATION><NAME><ASSIGNMENT><INITIAL_VALUE><TERMINATOR>";
 pub const VARIABLE_DOCUMENTATION_KEY: &str = "<DOCUMENTATION>";
 pub const VARIABLE_TYPE_KEY: &str = "<TYPE>";
 pub const VARIABLE_INDEXED_KEY: &str = "<INDEXED>";

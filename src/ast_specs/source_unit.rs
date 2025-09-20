@@ -4,8 +4,8 @@ use getters::Getters;
 use serde::Deserialize;
 
 use super::{
-    directives::{ContractDefinition, Directives},
     Directive,
+    directives::{ContractDefinition, Directives},
 };
 
 #[derive(Deserialize, Debug, Clone, Default, Getters, PartialEq, Eq)]
@@ -55,5 +55,3 @@ impl SourceUnit {
         &self.nodes
     }
 }
-
-

@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::{Deserialize, Serialize};
 
-use crate::ast_specs::inline_assembly::yul_expression::{yul_literal::YulLiteral, YulExpression};
+use crate::ast_specs::inline_assembly::yul_expression::{YulExpression, yul_literal::YulLiteral};
 
 use super::yul_block::YulBlock;
 

@@ -47,5 +47,3 @@ impl ElementaryTypeNameExpression {
         self.type_name().name().to_owned()
     }
 }
-
-

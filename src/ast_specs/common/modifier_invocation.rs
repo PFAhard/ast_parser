@@ -3,7 +3,7 @@ use std::fmt::Display;
 use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::{expressions::Identifier, Expression};
+use crate::ast_specs::{Expression, expressions::Identifier};
 
 use super::identifier_path::IdentifierPath;
 

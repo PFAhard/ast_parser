@@ -4,8 +4,8 @@ use getters::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::ast_specs::{
-    common::{InheritanceSpecifier, StructuredDocumentation},
     BaseNode,
+    common::{InheritanceSpecifier, StructuredDocumentation},
 };
 
 #[derive(Deserialize, Debug, Clone, Getters, Default, PartialEq, Eq)]

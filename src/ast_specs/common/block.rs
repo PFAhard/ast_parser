@@ -14,4 +14,3 @@ pub struct Block {
     #[return_type = "Option<&[Statement]>"]
     statements: Option<Vec<Statement>>,
 }
-

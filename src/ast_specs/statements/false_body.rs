@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::ast_specs::common::Block;
 
-use super::{prelude::*, Statement};
+use super::{Statement, prelude::*};
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(tag = "nodeType")]

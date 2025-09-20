@@ -1,7 +1,7 @@
 use getters::Getters;
 use serde::Deserialize;
 
-use crate::ast_specs::{common::Visibility, StructuredDocumentation};
+use crate::ast_specs::{StructuredDocumentation, common::Visibility};
 
 use super::prelude::VariableDeclaration;
 

@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use super::YulStatement;
 
-
 #[derive(Debug, Serialize, Deserialize, Clone, Getters, PartialEq, Eq)]
 pub struct YulBlock {
     #[serde(rename = "nativeSrc")]

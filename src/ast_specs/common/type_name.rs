@@ -4,8 +4,8 @@ use serde::Deserialize;
 use crate::ast_specs::Expression;
 
 use super::{
-    identifier_path::IdentifierPath, parameter_list::ParameterList,
-    type_descriptions::TypeDescriptions, StateMutability, Visibility,
+    StateMutability, Visibility, identifier_path::IdentifierPath, parameter_list::ParameterList,
+    type_descriptions::TypeDescriptions,
 };
 
 macro_rules! impl_type_conversion {

@@ -32,9 +32,7 @@ macro_rules! unwrap_node_type {
 
 #[macro_export]
 macro_rules! check_node_type {
-    ($target: expr, $pat: path) => {{
-        matches!($target, $pat(_))
-    }};
+    ($target: expr, $pat: path) => {{ matches!($target, $pat(_)) }};
 }
 
 #[macro_export]
