@@ -8,6 +8,7 @@ macro_rules! zc_abstract {
         }
     ) => {
         paste::paste! {
+            #[derive(Debug)]
             $v struct [< Zc $name >]<'a> {
                 $v inner: &'a simd_json::BorrowedValue<'a>,
             }
@@ -21,9 +22,23 @@ macro_rules! zc_abstract {
                             key_handle = $key;
                         )?
 
-                        $member_type::from_borrowed_value(self.inner.get_key(
+
+                        let inner = match self.inner.get_key(
                             key_handle
-                        ).expect(stringify!([< Zc $name _ $member _ Broken_AST >])))
+                        ) {
+                            Some(v) => v,
+                            None => {
+                                // Not the best, not the worst handling
+                                if stringify!($member_type).starts_with("ZcOption::") {
+                                    &$crate::zero_cost::types::NULL
+                                } else {
+                                    dbg!(key_handle, stringify!($member), &self.inner, stringify!($member_type));
+                                    panic!(stringify!([< Zc $name _ $member _ Broken_AST >]))
+                                }
+                            }
+                        };
+
+                        $member_type::from_borrowed_value(inner)
                     }
                 )*
 
@@ -61,6 +76,10 @@ macro_rules! zc_abstract {
                     self.inner.filter_by_node_type(node_type)
                 }
 
+                fn iter_by_node_type(&'a self, node_type: &str) -> impl Iterator<Item = &'a simd_json::BorrowedValue<'a>> /* + std::fmt::Debug */  {
+                    self.inner.iter_by_node_type(node_type)
+                }
+
                 fn step_back_to_node_type(
                     &'a self,
                     anchor: &'a simd_json::BorrowedValue<'a>,
@@ -90,6 +109,10 @@ macro_rules! zc_abstract {
 
                 fn children_ids(&self) -> Vec<isize> {
                     self.inner.children_ids()
+                }
+
+                fn children(&self) -> Vec<&'a simd_json::BorrowedValue<'a>> {
+                    self.inner.children()
                 }
 
                 fn is_string(&self, value: &str) -> bool {
@@ -141,6 +164,7 @@ macro_rules! zc_abstract {
         }
     ) => {
         paste::paste! {
+            #[derive(Debug, Clone)]
             $v enum [< Zc $name >] {
                 $(
                     [< Zc $variant >],

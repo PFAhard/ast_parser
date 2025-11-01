@@ -1,5 +1,6 @@
 pub mod types;
 
+use core::cell::Cell;
 use std::{fs::File, path::Path};
 
 use memmap2::{MmapMut, MmapOptions};
@@ -13,7 +14,7 @@ pub use simd_json::base::{
     ValueAsArray, ValueAsMutArray, ValueAsMutObject, ValueAsObject, ValueAsScalar,
 };
 
-use crate::zero_cost::types::abstraction::ZcSourceUnit;
+use crate::zero_cost::types::{abstraction::ZcSourceUnit, wrappers::FromBorrowedValue};
 
 pub trait BorrowedValueVisitor<'a> {
     fn filter_by_id(&'a self, id: isize) -> Option<&'a BorrowedValue<'a>>;
@@ -21,6 +22,8 @@ pub trait BorrowedValueVisitor<'a> {
     fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a BorrowedValue<'a>>;
 
     fn filter_by_node_type(&'a self, node_type: &str) -> Vec<&'a BorrowedValue<'a>>;
+
+    fn iter_by_node_type(&'a self, node_type: &str) -> impl Iterator<Item = &'a BorrowedValue<'a>> /*  + Debug */;
 
     fn step_back_to_node_type(
         &'a self,
@@ -37,6 +40,8 @@ pub trait BorrowedValueVisitor<'a> {
     fn is_any_node_id(&'a self, id: isize) -> Option<&'a BorrowedValue<'a>>;
 
     fn children_ids(&self) -> Vec<isize>;
+
+    fn children(&'a self) -> Vec<&'a BorrowedValue<'a>>;
 
     fn is_string(&self, value: &str) -> bool;
 
@@ -79,6 +84,146 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         };
 
         acc
+    }
+
+    /// Still allocates vector, but shorter, normal one allocate pointer for each node, this one allocate only n (depth) elements (+ x2 amortized etc. as always in vector)
+    fn iter_by_node_type(&'a self, node_type: &str) -> impl Iterator<Item = &'a BorrowedValue<'a>> /* + Debug */
+    {
+        struct InnerIter<'iter> {
+            node: &'iter BorrowedValue<'iter>,
+            relative_pos: Cell<usize>,
+        }
+
+        // TODO: Hide behind feature
+        // impl core::fmt::Debug for InnerIter<'_> {
+        //     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        //         let statical = match &self.node {
+        //             BorrowedValue::Static(static_node) => Some(static_node.to_string()),
+        //             BorrowedValue::String(cow) => Some(cow.to_string()),
+        //             _ => None,
+        //         }
+        //         .unwrap_or_default();
+
+        //         let node_type = self
+        //             .node
+        //             .get_key("nodeType")
+        //             .map(|v| v.as_str())
+        //             .flatten()
+        //             .unwrap_or("not defined");
+        //         let id = self
+        //             .node
+        //             .get_key("id")
+        //             .map(|v| v.as_i64())
+        //             .flatten()
+        //             .unwrap_or_default();
+        //         let name = self
+        //             .node
+        //             .get_key("name")
+        //             .map(|v| v.as_str())
+        //             .flatten()
+        //             .unwrap_or("not defined");
+
+        //         match self {
+        //             InnerIter { node, relative_pos } => f
+        //                 .debug_struct("InnerIter")
+        //                 .field(
+        //                     "node",
+        //                     &format!(
+        //                         "Node: id: `{}`; name: `{}`; node type: `{}`. Static: `{}`;",
+        //                         id, name, node_type, statical
+        //                     ),
+        //                 )
+        //                 .field("relative_pos", &relative_pos)
+        //                 .finish(),
+        //         }
+        //     }
+        // }
+
+        // #[derive(Debug)]
+        struct NodeTypeIter<'a, 'iter> {
+            stack: Vec<InnerIter<'iter>>,
+            node_type: &'a str,
+        }
+
+        impl<'a, 'iter> Iterator for NodeTypeIter<'a, 'iter> {
+            type Item = &'iter BorrowedValue<'iter>;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                loop {
+                    dbg!(self.stack.capacity());
+                    // dbg!(&self);
+                    if self.stack.is_empty() {
+                        return None;
+                    }
+
+                    let last = self.stack.last()?;
+                    let rel_pos = last.relative_pos.get();
+
+                    let mut has_return = None;
+
+                    match &last.node {
+                        BorrowedValue::Array(values) => {
+                            let length = values.len();
+                            if rel_pos >= length {
+                                self.stack.pop();
+                                continue;
+                            } else {
+                                last.relative_pos.set(rel_pos + 1);
+                                self.stack.push(InnerIter {
+                                    node: &values[rel_pos],
+                                    relative_pos: Cell::new(0),
+                                });
+                                continue;
+                            }
+                        }
+                        BorrowedValue::Object(map) => {
+                            if let Some(object_type) = map.get("nodeType")
+                                && object_type.is_string(self.node_type)
+                            {
+                                has_return = Some(last.node);
+                            }
+
+                            let mut values = map.values();
+                            let nth = values.nth(rel_pos);
+                            if let Some(nth) = nth {
+                                last.relative_pos.set(rel_pos + 1);
+                                if has_return.is_some() {
+                                    self.stack.pop();
+                                }
+                                self.stack.push(InnerIter {
+                                    node: nth,
+                                    relative_pos: Cell::new(0),
+                                });
+                                if has_return.is_some() {
+                                    return has_return;
+                                } else {
+                                    continue;
+                                }
+                            } else {
+                                self.stack.pop();
+                                if has_return.is_some() {
+                                    return has_return;
+                                } else {
+                                    continue;
+                                }
+                            }
+                        }
+                        _ => {
+                            self.stack.pop();
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        NodeTypeIter {
+            stack: vec![InnerIter {
+                node: &self,
+                relative_pos: Cell::new(0),
+            }],
+            node_type,
+        }
     }
 
     fn step_back_to_node_type(
@@ -300,6 +445,26 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         acc
     }
 
+    fn children(&'a self) -> Vec<&'a BorrowedValue<'a>> {
+        let mut acc = vec![];
+        match self {
+            BorrowedValue::Array(values) => {
+                acc.extend(values.iter().flat_map(BorrowedValueVisitor::children))
+            }
+            BorrowedValue::Object(sized_hash_map) => {
+                acc.push(self);
+                acc.extend(
+                    sized_hash_map
+                        .values()
+                        .flat_map(BorrowedValueVisitor::children),
+                )
+            }
+            _ => {}
+        }
+
+        acc
+    }
+
     fn check_key<T>(&self, key: &str, check: T) -> bool
     where
         T: FnOnce(&BorrowedValue<'_>) -> bool,
@@ -328,20 +493,27 @@ impl SourceUnitBuilder {
         let file = File::options().read(true).open(path).unwrap();
         let mmap = unsafe { MmapOptions::new().map_copy(&file).unwrap() };
 
-        Self {
+        let mut this = Self {
             map: mmap,
             root: None,
-        }
+        };
+
+        this.get_root();
+
+        this
     }
 
     pub fn get_root(&mut self) {
         let slice: &mut [u8] = &mut self.map;
 
         // SAFETY: BorrowedValue only borrows from map, which lives as long as self.
-        let root: BorrowedValue<'static> = unsafe {
-            std::mem::transmute::<BorrowedValue<'_>, BorrowedValue<'static>>(
-                to_borrowed_value(slice).expect("invalid JSON"),
-            )
+        let root: BorrowedValue<'static> = match to_borrowed_value(slice) {
+            Ok(root) => unsafe {
+                std::mem::transmute::<BorrowedValue<'_>, BorrowedValue<'static>>(root)
+            },
+            Err(err) => {
+                unimplemented!("Unhandled error occurs: {}", err)
+            }
         };
 
         self.root = Some(root);
@@ -362,5 +534,57 @@ impl SourceUnitBuilder {
     pub fn source_unit_const(&self) -> ZcSourceUnit<'static> {
         let su = self.source_unit();
         unsafe { std::mem::transmute(su) }
+    }
+}
+
+pub struct NodeBuilder {
+    map: MmapMut,
+    node: Option<BorrowedValue<'static>>,
+}
+
+impl NodeBuilder {
+    pub fn new<P>(path: P, start: u32, length: u32) -> Self
+    where
+        P: AsRef<Path>,
+    {
+        let file = File::options().read(true).open(path).unwrap();
+        let mmap = unsafe {
+            MmapOptions::new()
+                .offset(start as u64)
+                .len(length as usize)
+                .map_copy(&file)
+                .unwrap()
+        };
+
+        let mut this = Self {
+            map: mmap,
+            node: None,
+        };
+
+        this.get_node();
+
+        this
+    }
+
+    pub fn get_node(&mut self) {
+        let slice: &mut [u8] = &mut self.map;
+
+        // SAFETY: BorrowedValue only borrows from map, which lives as long as self.
+        let root: BorrowedValue<'static> = unsafe {
+            std::mem::transmute::<BorrowedValue<'_>, BorrowedValue<'static>>(
+                to_borrowed_value(slice).expect("invalid JSON"),
+            )
+        };
+
+        self.node = Some(root);
+    }
+
+    pub fn strong_node<T>(&self) -> T
+    where
+        T: FromBorrowedValue<'static>,
+    {
+        let node = self.node.as_ref().expect("must call `get_node` first");
+        let node: &'static BorrowedValue<'static> = unsafe { std::mem::transmute(node) };
+        T::from_borrowed_value(node)
     }
 }

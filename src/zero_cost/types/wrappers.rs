@@ -97,6 +97,58 @@ where
     }
 }
 
+pub struct ZcIter<'a, T> {
+    inner: ZcVec<'a, T>,
+    position: usize,
+}
+
+impl<T> ZcVec<'_, T> {
+    pub fn len(&self) -> Option<usize> {
+        match &self.inner {
+            BorrowedValue::Array(values) => Some(values.len()),
+            _ => None,
+        }
+    }
+}
+
+impl<'a, T> IntoIterator for ZcVec<'a, T>
+where
+    T: FromBorrowedValue<'a>,
+{
+    type Item = T;
+
+    type IntoIter = ZcIter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            inner: self,
+            position: 0,
+        }
+    }
+}
+
+impl<'a, T> Iterator for ZcIter<'a, T>
+where
+    T: FromBorrowedValue<'a>,
+{
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.position < self.inner.len()? {
+            let cache = self.position;
+            self.position += 1;
+            match &self.inner.inner {
+                BorrowedValue::Array(values) => {
+                    values.get(cache).map(|v| T::from_borrowed_value(v))
+                }
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+}
+
 impl<'a, T> ZcType<Option<T>> for ZcOption<'a, T>
 where
     T: FromBorrowedValue<'a>,
