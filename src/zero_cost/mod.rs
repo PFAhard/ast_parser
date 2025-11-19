@@ -1,4 +1,5 @@
 pub mod types;
+pub mod convers;
 
 use core::cell::Cell;
 use std::{fs::File, path::Path};
@@ -19,7 +20,7 @@ use crate::zero_cost::types::{abstraction::ZcSourceUnit, wrappers::FromBorrowedV
 pub trait BorrowedValueVisitor<'a> {
     fn filter_by_id(&'a self, id: isize) -> Option<&'a BorrowedValue<'a>>;
 
-    fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a BorrowedValue<'a>>;
+    fn filter_by_ref_id(&'a self, ref_id: isize) -> Vec<&'a BorrowedValue<'a>>;
 
     fn filter_by_node_type(&'a self, node_type: &str) -> Vec<&'a BorrowedValue<'a>>;
 
@@ -378,23 +379,26 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
         }
     }
 
-    fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a BorrowedValue<'a>> {
+    fn filter_by_ref_id(&'a self, ref_id: isize) -> Vec<&'a BorrowedValue<'a>> {
         match self {
             BorrowedValue::Array(values) => values
                 .iter()
-                .find_map(|inner| inner.filter_by_ref_id(ref_id)),
+                .flat_map(|inner| inner.filter_by_ref_id(ref_id))
+                .collect(),
             BorrowedValue::Object(sized_hash_map) => {
+                let map = sized_hash_map
+                    .values()
+                    .flat_map(|inner| inner.filter_by_ref_id(ref_id));
+
                 if let Some(object_type) = sized_hash_map.get("referencedDeclaration")
                     && object_type.is_number(ref_id)
                 {
-                    return Some(self);
+                    std::iter::once(self).chain(map).collect()
+                } else {
+                    map.collect()
                 }
-
-                sized_hash_map
-                    .values()
-                    .find_map(|inner| inner.filter_by_ref_id(ref_id))
             }
-            _ => None,
+            _ => vec![],
         }
     }
 
@@ -480,12 +484,12 @@ impl<'a> BorrowedValueVisitor<'a> for BorrowedValue<'a> {
     }
 }
 
-pub struct SourceUnitBuilder {
+pub struct SourceUnitBuilder<'a> {
     map: MmapMut,
-    root: Option<BorrowedValue<'static>>,
+    root: Option<BorrowedValue<'a>>,
 }
 
-impl SourceUnitBuilder {
+impl SourceUnitBuilder<'static> {
     pub fn new<P>(path: P) -> Self
     where
         P: AsRef<Path>,
@@ -519,21 +523,44 @@ impl SourceUnitBuilder {
         self.root = Some(root);
     }
 
-    pub fn source_unit(&'_ self) -> ZcSourceUnit<'_> {
+    pub fn source_unit<const N: usize>(&'_ self, key: Option<[&str; N]>) -> ZcSourceUnit<'_> {
         ZcSourceUnit {
-            inner: self
-                .root
-                .as_ref()
-                .expect("get_root() must be called first")
-                .get_key("ast")
-                .unwrap(),
+            inner: match key {
+                Some(key) => self
+                    .root
+                    .as_ref()
+                    .expect("get_root() must be called first")
+                    .get_chain(key)
+                    .unwrap(),
+                None => self.root.as_ref().unwrap(),
+            },
         }
     }
 
     /// Technically safe, since file always persist in the system if not modified, which is UBs
-    pub fn source_unit_const(&self) -> ZcSourceUnit<'static> {
-        let su = self.source_unit();
+    pub fn source_unit_const<const N: usize>(
+        &self,
+        key: Option<[&str; N]>,
+    ) -> ZcSourceUnit<'static> {
+        let su = self.source_unit(key);
         unsafe { std::mem::transmute(su) }
+    }
+
+    /// # Safety:
+    /// Only use if you know what are you doing
+    pub unsafe fn arbitrary_access<const N: usize>(
+        &'_ self,
+        key: Option<[&str; N]>,
+    ) -> &BorrowedValue<'_> {
+        match key {
+            Some(key) => self
+                .root
+                .as_ref()
+                .expect("get_root() must be called first")
+                .get_chain(key)
+                .unwrap(),
+            None => self.root.as_ref().expect("get_root() must be called first"),
+        }
     }
 }
 

@@ -46,10 +46,6 @@ macro_rules! zc_abstract {
                     self.inner.filter_by_id(id).map(T::from_borrowed_value)
                 }
 
-                pub fn filter_by_ref_id_strong<T: FromBorrowedValue<'a>>(&'a self, ref_id: isize) -> Option<T> {
-                    self.inner.filter_by_ref_id(ref_id).map(T::from_borrowed_value)
-                }
-
                 pub fn filter_by_node_type_strong<T: FromBorrowedValue<'a>>(&'a self, node_type: &str) -> Vec<T> {
                     self.inner.filter_by_node_type(node_type).into_iter().map(T::from_borrowed_value).collect()
                 }
@@ -68,7 +64,7 @@ macro_rules! zc_abstract {
                     self.inner.filter_by_id(id)
                 }
 
-                fn filter_by_ref_id(&'a self, ref_id: isize) -> Option<&'a simd_json::BorrowedValue<'a>> {
+                fn filter_by_ref_id(&'a self, ref_id: isize) -> Vec<&'a simd_json::BorrowedValue<'a>> {
                     self.inner.filter_by_ref_id(ref_id)
                 }
 
@@ -111,7 +107,7 @@ macro_rules! zc_abstract {
                     self.inner.children_ids()
                 }
 
-                fn children(&self) -> Vec<&'a simd_json::BorrowedValue<'a>> {
+                fn children(&'a self) -> Vec<&'a simd_json::BorrowedValue<'a>> {
                     self.inner.children()
                 }
 
